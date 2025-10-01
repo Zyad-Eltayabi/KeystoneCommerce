@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeystoneCommerce.WebUI", "KeystoneCommerce.WebUI\KeystoneCommerce.WebUI.csproj", "{69A791B2-573C-44EA-8124-79D470FBC731}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeystoneCommerce.Infrastructure", "KeystoneCommerce.Infrastructure\KeystoneCommerce.Infrastructure.csproj", "{48C38ED2-4A87-436E-A6D3-FA9A35D047CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeystoneCommerce.Application", "KeystoneCommerce.Application\KeystoneCommerce.Application.csproj", "{FDD88D33-B9C1-4F7F-BA15-6CA6B556D5B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeystoneCommerce.Domain", "KeystoneCommerce.Domain\KeystoneCommerce.Domain.csproj", "{D81CD73C-81DE-4BD1-A19B-A69D9AB0034C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{69A791B2-573C-44EA-8124-79D470FBC731}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69A791B2-573C-44EA-8124-79D470FBC731}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69A791B2-573C-44EA-8124-79D470FBC731}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69A791B2-573C-44EA-8124-79D470FBC731}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48C38ED2-4A87-436E-A6D3-FA9A35D047CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48C38ED2-4A87-436E-A6D3-FA9A35D047CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48C38ED2-4A87-436E-A6D3-FA9A35D047CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48C38ED2-4A87-436E-A6D3-FA9A35D047CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDD88D33-B9C1-4F7F-BA15-6CA6B556D5B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDD88D33-B9C1-4F7F-BA15-6CA6B556D5B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDD88D33-B9C1-4F7F-BA15-6CA6B556D5B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDD88D33-B9C1-4F7F-BA15-6CA6B556D5B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D81CD73C-81DE-4BD1-A19B-A69D9AB0034C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D81CD73C-81DE-4BD1-A19B-A69D9AB0034C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D81CD73C-81DE-4BD1-A19B-A69D9AB0034C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D81CD73C-81DE-4BD1-A19B-A69D9AB0034C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
