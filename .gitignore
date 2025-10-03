@@ -52,5 +52,10 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# another folders
 /.idea/.idea.KeystoneCommerce/.idea
 /.vs/KeystoneCommerce
+.vs/
+Notes/
+KeystoneCommerce.WebUI/wwwroot/assets/
