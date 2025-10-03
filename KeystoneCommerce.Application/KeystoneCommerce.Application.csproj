@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\KeystoneCommerce.Domain\KeystoneCommerce.Domain.csproj" />
+    </ItemGroup>
+
 </Project>

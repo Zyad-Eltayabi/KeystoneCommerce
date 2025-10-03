@@ -25,4 +25,9 @@
       <_ContentIncludedByDefault Remove="wwwroot\js\site.js" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\KeystoneCommerce.Application\KeystoneCommerce.Application.csproj" />
+      <ProjectReference Include="..\KeystoneCommerce.Infrastructure\KeystoneCommerce.Infrastructure.csproj" />
+    </ItemGroup>
+
 </Project>
