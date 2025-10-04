@@ -23,6 +23,7 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\dist\jquery.slim.min.map" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\LICENSE.txt" />
       <_ContentIncludedByDefault Remove="wwwroot\js\site.js" />
+      <_ContentIncludedByDefault Remove="Views\Admin\Banner\Index.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
@@ -35,6 +36,11 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="Views\Banner\Index.cshtml" />
     </ItemGroup>
 
 </Project>
