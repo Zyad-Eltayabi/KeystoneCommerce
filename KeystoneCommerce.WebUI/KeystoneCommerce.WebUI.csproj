@@ -23,6 +23,7 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\dist\jquery.slim.min.map" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\LICENSE.txt" />
       <_ContentIncludedByDefault Remove="wwwroot\js\site.js" />
+      <_ContentIncludedByDefault Remove="Views\Admin\Banner\Index.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
@@ -38,7 +39,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Views\Admin\" />
+      <AdditionalFiles Include="Views\Banner\Index.cshtml" />
     </ItemGroup>
 
 </Project>
