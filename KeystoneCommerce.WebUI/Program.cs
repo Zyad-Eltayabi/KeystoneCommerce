@@ -1,4 +1,6 @@
 using KeystoneCommerce.Application.Interfaces.Repositories;
+using KeystoneCommerce.Application.Interfaces.Services;
+using KeystoneCommerce.Application.Services;
 using KeystoneCommerce.Infrastructure.Persistence.Data;
 using KeystoneCommerce.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -14,8 +16,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-// Register Generic Repository
+// Register Generic Repository and Specific Repositories
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IBannerRepository, BannerRepository>();
+
+// Register Application Services
+builder.Services.AddScoped<IBannerService, BannerService>();
 
 
 var app = builder.Build();

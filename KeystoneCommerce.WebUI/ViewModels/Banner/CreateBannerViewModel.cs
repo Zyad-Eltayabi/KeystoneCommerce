@@ -4,7 +4,7 @@ using KeystoneCommerce.WebUI.Constants;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
-namespace KeystoneCommerce.WebUI.ViewModels;
+namespace KeystoneCommerce.WebUI.ViewModels.Banner;
 
 public class CreateBannerViewModel
 {
@@ -35,6 +35,6 @@ public class CreateBannerViewModel
     [Required(ErrorMessage = "Image is required")]
     [DataType(DataType.Upload)]
     [AllowedExtensions(FileExtensions.ImageExtensions, ErrorMessage = $"Please upload a valid image file ({FileExtensions.ImageExtensions})")]
-    [MaxFileSizeAttribute(FileSizes.MaxImageSizeInByte)]
+    [MaxFileSize(FileSizes.MaxImageSizeInByte)]
     public IFormFile Image { get; set; } = null!;
 }

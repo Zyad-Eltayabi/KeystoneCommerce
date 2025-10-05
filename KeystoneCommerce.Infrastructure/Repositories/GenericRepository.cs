@@ -7,8 +7,8 @@ namespace KeystoneCommerce.Infrastructure.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        protected readonly ApplicationDbContext _context;
-        private readonly DbSet<T> _entity;
+        private readonly ApplicationDbContext _context;
+        protected readonly DbSet<T> _entity;
 
         public GenericRepository(ApplicationDbContext applicationDbContext)
         {

@@ -10,9 +10,4 @@
       <ProjectReference Include="..\KeystoneCommerce.Domain\KeystoneCommerce.Domain.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Interfaces\Services\" />
-      <Folder Include="Services\" />
-    </ItemGroup>
-
 </Project>
