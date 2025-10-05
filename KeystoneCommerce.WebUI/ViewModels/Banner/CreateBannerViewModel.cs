@@ -26,7 +26,6 @@ public class CreateBannerViewModel
 
     [Required(ErrorMessage = "Banner Type is required")]
     [Range(1, int.MaxValue, ErrorMessage = "Please select a valid banner type.")]
-    [ValidBannerType]
     public int BannerType { get; set; }
 
 
