@@ -1,6 +1,7 @@
 ﻿using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.Infrastructure.Repositories;
+using KeystoneCommerce.Infrastructure.Services;
 using KeystoneCommerce.Infrastructure.Validation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,6 +21,9 @@ namespace KeystoneCommerce.Infrastructure
             // Register Generic Repository and Specific Repositories
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IBannerRepository, BannerRepository>();
+
+            // Register other infrastructure services
+            services.AddScoped<IImageService, ImageService>();
 
             return services;
         }
