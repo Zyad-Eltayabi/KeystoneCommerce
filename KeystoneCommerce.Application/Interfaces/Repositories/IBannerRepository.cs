@@ -1,6 +1,8 @@
-﻿namespace KeystoneCommerce.Application.Interfaces.Repositories
+﻿using KeystoneCommerce.Domain.Entities;
+
+namespace KeystoneCommerce.Application.Interfaces.Repositories
 {
-    public interface IBannerRepository
+    public interface IBannerRepository : IGenericRepository<Banner>
     {
     }
 }

@@ -10,8 +10,4 @@
       <ProjectReference Include="..\KeystoneCommerce.Domain\KeystoneCommerce.Domain.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="DTOs\" />
-    </ItemGroup>
-
 </Project>
