@@ -1,4 +1,4 @@
-namespace KeystoneCommerce.WebUI.Models;
+namespace KeystoneCommerce.WebUI.ViewModels;
 
 public class ErrorViewModel
 {
