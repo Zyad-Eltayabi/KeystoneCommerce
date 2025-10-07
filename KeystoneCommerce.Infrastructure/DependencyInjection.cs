@@ -1,5 +1,6 @@
 ﻿using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
+using KeystoneCommerce.Infrastructure.Profiles;
 using KeystoneCommerce.Infrastructure.Repositories;
 using KeystoneCommerce.Infrastructure.Services;
 using KeystoneCommerce.Infrastructure.Validation;
@@ -24,6 +25,10 @@ namespace KeystoneCommerce.Infrastructure
 
             // Register other infrastructure services
             services.AddScoped<IImageService, ImageService>();
+            services.AddScoped<IMappingService, MappingService>();
+
+            // Register AutoMapper with the InfrastructureMappings profile
+            services.AddAutoMapper(e => e.AddProfile<InfrastructureMappings>());
 
             return services;
         }
