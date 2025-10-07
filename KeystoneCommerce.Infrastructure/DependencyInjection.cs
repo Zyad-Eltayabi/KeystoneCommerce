@@ -1,9 +1,11 @@
-﻿using KeystoneCommerce.Application.Interfaces.Repositories;
+﻿using FluentValidation;
+using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.Infrastructure.Profiles;
 using KeystoneCommerce.Infrastructure.Repositories;
 using KeystoneCommerce.Infrastructure.Services;
 using KeystoneCommerce.Infrastructure.Validation;
+using KeystoneCommerce.Infrastructure.Validation.Validators;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeystoneCommerce.Infrastructure
@@ -14,7 +16,7 @@ namespace KeystoneCommerce.Infrastructure
         {
             // Register FluentValidation validators
             // it will be register all validators in the assembly where CreateUserDtoValidator is located
-            //services.AddValidatorsFromAssemblyContaining<CreateUserDtoValidator>();
+            services.AddValidatorsFromAssemblyContaining<CreateBannerDtoValidator>();
 
             // Register the FluentValidationAdapter as the implementation for IApplicationValidator<T>
             services.AddScoped(typeof(IApplicationValidator<>), typeof(FluentValidationAdapter<>));
