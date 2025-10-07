@@ -34,19 +34,14 @@ namespace KeystoneCommerce.Infrastructure.Validation.Validators
                 .GreaterThan(0)
                 .WithMessage("Priority must be a positive integer.");
 
-            RuleFor(b => b.Image)
-                .NotNull()
-                .WithMessage("Image is required.")
-                .Must(image => image != null && image.Length > 0)
-                .WithMessage("Image must not be empty.");
-
-            RuleFor(b => b.ImageType)
-                .NotEmpty()
-                .WithMessage("Image type is required.");
-
-            RuleFor(b => b.ImageUrl)
-                .NotEmpty()
-                .WithMessage("Image URL is required.");
+            RuleFor(x => x)
+                .Cascade(CascadeMode.Stop)
+                .Must(x => x.Image != null && x.Image.Length > 0)
+                .WithMessage("Image is required and must not be empty.")
+                .Must(x => !string.IsNullOrEmpty(x.ImageType))
+                .WithMessage("Invalid image type.")
+                .Must(x => !string.IsNullOrEmpty(x.ImageUrl))
+                .WithMessage("Invalid image.");
         }
     }
 }
