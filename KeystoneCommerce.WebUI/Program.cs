@@ -1,8 +1,7 @@
-using KeystoneCommerce.Application.Interfaces.Services;
-using KeystoneCommerce.Application.Services;
 using KeystoneCommerce.Infrastructure;
 using KeystoneCommerce.Infrastructure.Persistence.Data;
 using KeystoneCommerce.WebUI.Extensions;
+using KeystoneCommerce.WebUI.Profiles;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +20,13 @@ builder.Services.AddApplicationServices();
 
 // Register Infrastructure Services
 builder.Services.AddInfrastructure();
+
+// Register AutoMapper
+builder.Services.AddAutoMapper(a =>
+{
+    a.AddProfile<WebMappings>();
+});
+
 
 var app = builder.Build();
 
@@ -43,6 +49,5 @@ app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();
