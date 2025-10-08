@@ -12,6 +12,10 @@ namespace KeystoneCommerce.Infrastructure.Profiles
             CreateMap<CreateBannerDto, Banner>()
                 .ForMember(e => e.BannerType, e => e.MapFrom(src => (BannerType)src.BannerType))
                 .ReverseMap();
+            
+            CreateMap<UpdateBannerDto, Banner>()
+                .ForMember(e => e.BannerType, e => e.MapFrom(src => (BannerType)src.BannerType))
+                .ReverseMap();
 
             CreateMap<Banner, BannerDto>()
                 .ForMember(e => e.BannerType, e => e.MapFrom(src => Enum.GetName(typeof(BannerType), src.BannerType)));

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,5 +19,8 @@ namespace KeystoneCommerce.Application.Common.Result_Pattern
 
         public static Result<T> Success(T? data = default) => new Result<T> { Data = data };
         public static Result<T> Failure(List<string> errors) => new Result<T> { Errors = errors };
+
+        public static Result<T> Failure(string error) => new Result<T>() { Errors = new List<string>() { error } };
+        
     }
 }

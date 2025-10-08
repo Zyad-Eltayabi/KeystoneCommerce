@@ -5,6 +5,8 @@ using KeystoneCommerce.WebUI.Constants;
 using KeystoneCommerce.WebUI.ViewModels.Banner;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Threading.Tasks;
+using KeystoneCommerce.Application.DTOs.Banner;
 
 namespace KeystoneCommerce.WebUI.Controllers;
 
@@ -64,6 +66,7 @@ public class BannerController : Controller
                 return RedirectToAction("Index");
             result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
         }
+
         model.BannerTypeNames = GetBannerTypeSelectList();
         return View("Create", model);
     }
@@ -85,14 +88,55 @@ public class BannerController : Controller
             return memoryStream.ToArray();
         }
     }
-    
+
     [HttpGet]
-    public async Task<IActionResult> GetById([FromRoute]int id)
+    public async Task<IActionResult> GetById([FromRoute] int id)
     {
         var bannerDto = await _bannerService.GetById(id);
         if (bannerDto is null)
             return NotFound();
         var bannerViewModel = _mapper.Map<BannerViewModel>(bannerDto);
         return View("Details", bannerViewModel);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Update(int id)
+    {
+        var bannerDto = await _bannerService.GetById(id);
+        if (bannerDto is null)
+            return NotFound();
+        var updateBannerViewModel = _mapper.Map<UpdateBannerViewModel>(bannerDto);
+        updateBannerViewModel.BannerTypeNames = GetBannerTypeSelectList();
+        return View("Update", updateBannerViewModel);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Update(UpdateBannerViewModel model)
+    {
+        if (ModelState.IsValid)
+        {
+            var updateBannerDto = PrepareUpdateBannerDto(model);
+            var result = await _bannerService.UpdateBannerAsync(updateBannerDto);
+            if (result.IsSuccess)
+                return RedirectToAction("Index");
+            result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
+           
+        }
+
+        model.BannerTypeNames = GetBannerTypeSelectList();
+        return View("Update", model);
+    }
+    
+    private UpdateBannerDto PrepareUpdateBannerDto(UpdateBannerViewModel model)
+    {
+        var updateBannerDto = _mapper.Map<UpdateBannerDto>(model);
+        if (model.HasNewImage)
+        {
+            updateBannerDto.Image = ConvertIFormFileToByteArray(model.Image);
+            updateBannerDto.ImageUrl = FilePaths.BannerPath;
+            updateBannerDto.ImageType = Path.GetExtension(model.Image.FileName);
+        }
+        return updateBannerDto;
     }
 }
