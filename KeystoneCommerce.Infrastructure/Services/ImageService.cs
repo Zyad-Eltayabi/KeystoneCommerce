@@ -15,14 +15,11 @@ namespace KeystoneCommerce.Infrastructure.Services
             return newFileName;
         }
 
-        public Task DeleteImageAsync(string imageUrl)
+        public Task DeleteImageAsync(string path,string imageName)
         {
-            var fileName = Path.GetFileName(imageUrl);
-            var filePath = Path.Combine("wwwroot/images", fileName);
-
+            var filePath = Path.Combine(path, imageName);
             if (File.Exists(filePath))
                 File.Delete(filePath);
-
             return Task.CompletedTask;
         }
     }
