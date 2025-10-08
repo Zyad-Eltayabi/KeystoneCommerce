@@ -1,5 +1,6 @@
 ﻿using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs;
+using KeystoneCommerce.Application.DTOs.Banner;
 using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.Domain.Entities;
@@ -47,6 +48,12 @@ namespace KeystoneCommerce.Application.Services
             foreach (BannerType bannerEnumValue in bannerEnumValues)
                 result.Add((int)bannerEnumValue, bannerEnumValue.ToString());
             return result;
+        }
+        
+        public async Task<List<BannerDto>> GetBanners()
+        {
+            var banners = await _bannerRepository.GetAllAsync();
+            return _mappingService.Map<List<BannerDto>>(banners);
         }
     }
 }

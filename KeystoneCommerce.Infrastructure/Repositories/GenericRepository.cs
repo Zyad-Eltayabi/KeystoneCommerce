@@ -8,59 +8,59 @@ namespace KeystoneCommerce.Infrastructure.Repositories
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         private readonly ApplicationDbContext _context;
-        protected readonly DbSet<T> _entity;
+        protected readonly DbSet<T> Entity;
 
         public GenericRepository(ApplicationDbContext applicationDbContext)
         {
             _context = applicationDbContext;
-            _entity = _context.Set<T>();
+            Entity = _context.Set<T>();
         }
 
 
         public async Task AddAsync(T entity)
         {
-            await _entity.AddAsync(entity);
+            await Entity.AddAsync(entity);
         }
 
         public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _entity.AnyAsync(predicate);
+            return await Entity.AnyAsync(predicate);
         }
 
         public void Delete(T entity)
         {
-            _entity.Remove(entity);
+            Entity.Remove(entity);
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _entity.AsNoTracking().ToListAsync();
+            return await Entity.AsNoTracking().ToListAsync();
         }
 
         public async Task<T?> GetByIdAsync(int id)
         {
-            return await _entity.FindAsync(id);
+            return await Entity.FindAsync(id);
         }
 
         public void Update(T entity)
         {
-            _entity.Update(entity);
+            Entity.Update(entity);
         }
 
         public async Task<bool> DeleteAsync(Expression<Func<T, bool>> predicate)
         {
-            var rowsAffected = await _entity.Where(predicate).ExecuteDeleteAsync();
+            var rowsAffected = await Entity.Where(predicate).ExecuteDeleteAsync();
             return rowsAffected > 0;
         }
 
         public async Task<T?> FindAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _entity.FirstOrDefaultAsync(predicate);
+            return await Entity.FirstOrDefaultAsync(predicate);
         }
 
         public async Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _entity.Where(predicate).ToListAsync();
+            return await Entity.Where(predicate).ToListAsync();
         }
 
         public async Task SaveChangesAsync()
@@ -70,12 +70,12 @@ namespace KeystoneCommerce.Infrastructure.Repositories
 
         public async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _entity.CountAsync(predicate);
+            return await Entity.CountAsync(predicate);
         }
 
         public async Task<int> CountAsync()
         {
-            return await _entity.CountAsync();
+            return await Entity.CountAsync();
         }
     }
 }

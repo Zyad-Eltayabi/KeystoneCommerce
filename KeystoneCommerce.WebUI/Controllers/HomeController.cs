@@ -1,6 +1,6 @@
 using System.Diagnostics;
+using KeystoneCommerce.WebUI.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using KeystoneCommerce.WebUI.Models;
 
 namespace KeystoneCommerce.WebUI.Controllers;
 

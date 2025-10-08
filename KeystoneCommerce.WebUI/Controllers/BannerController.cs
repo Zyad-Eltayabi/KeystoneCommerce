@@ -20,9 +20,11 @@ public class BannerController : Controller
     }
 
     // GET
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View("Index");
+        var bannersDto = await _bannerService.GetBanners();
+        var bannersViewModel = _mapper.Map<List<BannerViewModel>>(bannersDto);
+        return View("index", bannersViewModel);
     }
 
     private List<SelectListItem> GetBannerTypeSelectList()
@@ -70,7 +72,7 @@ public class BannerController : Controller
     {
         var createBannerDto = _mapper.Map<CreateBannerDto>(model);
         createBannerDto.Image = ConvertIFormFileToByteArray(model.Image);
-        createBannerDto.ImageUrl = FilePaths.bannerPath;
+        createBannerDto.ImageUrl = FilePaths.BannerPath;
         createBannerDto.ImageType = Path.GetExtension(model.Image.FileName);
         return createBannerDto;
     }
