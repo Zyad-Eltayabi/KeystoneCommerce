@@ -14,5 +14,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
         Dictionary<int,string> GetBannerTypes();
        Task<Result<bool>> Create(CreateBannerDto createBannerDto);
        Task<List<BannerDto>> GetBanners();
+       Task<BannerDto?> GetById(int id);
     }
 }

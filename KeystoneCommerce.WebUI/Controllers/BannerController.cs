@@ -85,4 +85,14 @@ public class BannerController : Controller
             return memoryStream.ToArray();
         }
     }
+    
+    [HttpGet]
+    public async Task<IActionResult> GetById([FromRoute]int id)
+    {
+        var bannerDto = await _bannerService.GetById(id);
+        if (bannerDto is null)
+            return NotFound();
+        var bannerViewModel = _mapper.Map<BannerViewModel>(bannerDto);
+        return View("Details", bannerViewModel);
+    }
 }

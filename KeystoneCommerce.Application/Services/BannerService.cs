@@ -55,5 +55,11 @@ namespace KeystoneCommerce.Application.Services
             var banners = await _bannerRepository.GetAllAsync();
             return _mappingService.Map<List<BannerDto>>(banners);
         }
+        
+        public async Task<BannerDto?> GetById(int id)
+        {
+            var banner = await _bannerRepository.GetByIdAsync(id);
+            return banner is null ? null : _mappingService.Map<BannerDto>(banner);
+        }
     }
 }
