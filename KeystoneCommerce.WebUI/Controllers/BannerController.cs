@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Threading.Tasks;
 using KeystoneCommerce.Application.DTOs.Banner;
+using NuGet.Protocol;
 
 namespace KeystoneCommerce.WebUI.Controllers;
 
@@ -121,13 +122,12 @@ public class BannerController : Controller
             if (result.IsSuccess)
                 return RedirectToAction("Index");
             result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
-           
         }
 
         model.BannerTypeNames = GetBannerTypeSelectList();
         return View("Update", model);
     }
-    
+
     private UpdateBannerDto PrepareUpdateBannerDto(UpdateBannerViewModel model)
     {
         var updateBannerDto = _mapper.Map<UpdateBannerDto>(model);
@@ -137,6 +137,16 @@ public class BannerController : Controller
             updateBannerDto.ImageUrl = FilePaths.BannerPath;
             updateBannerDto.ImageType = Path.GetExtension(model.Image.FileName);
         }
+
         return updateBannerDto;
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> Delete([FromRoute] int id)
+    {
+        var result = await _bannerService.DeleteBannerAsync(id);
+        if (!result.IsSuccess)
+            return NotFound(result.Errors);
+        return Ok("Banner was deleted successfully");
     }
 }

@@ -16,5 +16,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
        Task<List<BannerDto>> GetBanners();
        Task<BannerDto?> GetById(int id);
        Task<Result<bool>> UpdateBannerAsync(UpdateBannerDto updateBannerDto);
+       Task<Result<bool>> DeleteBannerAsync(int id);
     }
 }

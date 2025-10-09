@@ -73,9 +73,9 @@ namespace KeystoneCommerce.Application.Services
         public async Task<Result<bool>> UpdateBannerAsync(UpdateBannerDto updateBannerDto)
         {
             var validation = _updateValidator.Validate(updateBannerDto);
-            if (!validation.IsValid) 
+            if (!validation.IsValid)
                 return Result<bool>.Failure(validation.Errors);
-            
+
             var banner = await _bannerRepository.GetByIdAsync(updateBannerDto.Id);
             if (banner is null)
                 return Result<bool>.Failure("Banner not found!");
@@ -93,7 +93,7 @@ namespace KeystoneCommerce.Application.Services
             // this means that the user has changed the image, so we need to delete the old one
             if (oldImageName != banner.ImageName)
                 await _imageService.DeleteImageAsync(updateBannerDto.ImageUrl, oldImageName);
-            
+
             return Result<bool>.Success();
         }
 
@@ -102,6 +102,16 @@ namespace KeystoneCommerce.Application.Services
             _mappingService.Map(updateBannerDto, banner);
             _bannerRepository.Update(banner);
             await _bannerRepository.SaveChangesAsync();
+        }
+
+        public async Task<Result<bool>> DeleteBannerAsync(int id)
+        {
+            var banner = await _bannerRepository.GetByIdAsync(id);
+            if (banner is null)
+                return Result<bool>.Failure("Banner not found!");
+            _bannerRepository.Delete(banner);
+            await _bannerRepository.SaveChangesAsync();
+            return Result<bool>.Success();
         }
     }
 }
