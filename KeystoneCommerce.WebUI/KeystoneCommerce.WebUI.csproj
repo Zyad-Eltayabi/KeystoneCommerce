@@ -24,6 +24,22 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\LICENSE.txt" />
       <_ContentIncludedByDefault Remove="wwwroot\js\site.js" />
       <_ContentIncludedByDefault Remove="Views\Admin\Banner\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_banner.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_blog-details.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_blog.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_cart-page.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_checkout.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_footer.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_header.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_other.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_product-details.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_product.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_quick-view.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_shop.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_slider.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\style.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\_common.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\assets\scss\_variabls.scss" />
     </ItemGroup>
 
     <ItemGroup>
