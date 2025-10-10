@@ -58,4 +58,4 @@ nunit-*.xml
 /.vs/KeystoneCommerce
 .vs/
 Notes/
-KeystoneCommerce.WebUI/wwwroot/assets/
+KeystoneCommerce.WebUI/wwwroot/assets/img/
