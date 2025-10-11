@@ -104,13 +104,17 @@ namespace KeystoneCommerce.Application.Services
             await _bannerRepository.SaveChangesAsync();
         }
 
-        public async Task<Result<bool>> DeleteBannerAsync(int id)
+        public async Task<Result<bool>> DeleteBannerAsync(int id, string imageUrl)
         {
             var banner = await _bannerRepository.GetByIdAsync(id);
             if (banner is null)
                 return Result<bool>.Failure("Banner not found!");
             _bannerRepository.Delete(banner);
-            await _bannerRepository.SaveChangesAsync();
+            int rowsAffected = await _bannerRepository.SaveChangesAsync();
+            if (rowsAffected == 0)
+                return Result<bool>.Failure("failed to delete banner");
+            // delete image from disk
+            await _imageService.DeleteImageAsync(imageUrl, banner.ImageName);
             return Result<bool>.Success();
         }
     }
