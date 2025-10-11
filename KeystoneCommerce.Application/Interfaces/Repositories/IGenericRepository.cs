@@ -15,7 +15,7 @@ namespace KeystoneCommerce.Application.Interfaces.Repositories
         Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>> predicate);
         Task<int> CountAsync(Expression<Func<T, bool>> predicate);
         Task<int> CountAsync();
-        Task SaveChangesAsync();
+        Task<int> SaveChangesAsync();
 
     }
 }

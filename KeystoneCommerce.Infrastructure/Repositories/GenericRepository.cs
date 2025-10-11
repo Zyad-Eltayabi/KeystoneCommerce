@@ -63,9 +63,9 @@ namespace KeystoneCommerce.Infrastructure.Repositories
             return await Entity.Where(predicate).ToListAsync();
         }
 
-        public async Task SaveChangesAsync()
+        public async Task<int> SaveChangesAsync()
         {
-            await _context.SaveChangesAsync();
+           return await _context.SaveChangesAsync();
         }
 
         public async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
