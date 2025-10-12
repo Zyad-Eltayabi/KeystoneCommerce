@@ -117,5 +117,21 @@ namespace KeystoneCommerce.Application.Services
             await _imageService.DeleteImageAsync(imageUrl, banner.ImageName);
             return Result<bool>.Success();
         }
+
+        public async Task<HomeBannersDto> PrepareBannersForHomePage()
+        {
+            var homeBanners = new HomeBannersDto
+            {
+                HomePage = _mappingService.Map<List<BannerDto>>(
+                    await _bannerRepository.FindAllAsync(b => b.BannerType == BannerType.HomePage)
+                    ).OrderBy(b => b.Priority).ToList(),
+                Featured = _mappingService.Map<List<BannerDto>>(
+                    await _bannerRepository.FindAllAsync(b => b.BannerType == BannerType.Featured)).OrderBy(b => b.Priority).ToList(),
+                TopProducts = _mappingService.Map<List<BannerDto>>(
+                    await _bannerRepository.FindAllAsync(b =>
+                        b.BannerType == BannerType.TopProducts)).OrderBy(b => b.Priority).ToList()
+            };
+            return homeBanners;
+        }
     }
 }

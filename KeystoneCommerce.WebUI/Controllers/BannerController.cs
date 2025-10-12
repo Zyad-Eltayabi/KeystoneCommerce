@@ -144,7 +144,7 @@ public class BannerController : Controller
     [HttpDelete]
     public async Task<IActionResult> Delete([FromRoute] int id)
     {
-        var result = await _bannerService.DeleteBannerAsync(id);
+        var result = await _bannerService.DeleteBannerAsync(id,FilePaths.BannerPath);
         if (!result.IsSuccess)
             return NotFound(result.Errors);
         return Ok("Banner was deleted successfully");

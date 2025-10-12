@@ -15,5 +15,5 @@ public class UpdateBannerViewModel : BaseBannerViewModel
     [DataType(DataType.Upload)]
     [AllowedExtensions(FileExtensions.ImageExtensions, ErrorMessage = $"Please upload a valid image file ({FileExtensions.ImageExtensions})")]
     [MaxFileSize(FileSizes.MaxImageSizeInByte)]
-    public new IFormFile? Image { get; set; }
+    public  IFormFile? Image { get; set; }
 }

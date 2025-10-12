@@ -1,4 +1,166 @@
-﻿@{
+﻿@model HomeBannersDto
+@{
     ViewData["Title"] = "Home Page";
 }
 
+<!--slider area start-->
+<section class="slider_section mb-63">
+    <div class="slider_area slick_slider_activation" data-slick='{
+            "slidesToShow": 1,
+            "slidesToScroll": 1,
+            "arrows": true,
+            "dots": true,
+            "autoplay": false,
+            "speed": 300,
+            "infinite": true
+        }'>
+        @foreach (var homePage in @Model.HomePage)
+        {
+            <div class="single_slider d-flex align-items-center"
+                 data-bgimg="@FilePaths.WebBannerPath/@homePage.ImageName">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-7">
+                            <div class="slider_text">
+                                <span>Lookbook</span>
+                                <h1>@homePage.Title</h1>
+                                <p>@homePage.SubTitle</p>
+                                <a class="btn btn-primary" href="@homePage.Link">Explore Now</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+<!--slider area end-->
+
+<!--shipping section start-->
+<section class="shipping_section mb-102">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="shipping_inner d-flex justify-content-between">
+                    <div class="single_shipping d-flex align-items-center">
+                        <div class="shipping_icon">
+                            <i class="icon-cursor icons"></i>
+                        </div>
+                        <div class="shipping_text">
+                            <h3>Free Shipping</h3>
+                            <p>Orders over $100</p>
+                        </div>
+                    </div>
+                    <div class="single_shipping d-flex align-items-center">
+                        <div class="shipping_icon">
+                            <i class="icon-reload icons"></i>
+                        </div>
+                        <div class="shipping_text">
+                            <h3>Free Returns</h3>
+                            <p>Within 30 days</p>
+                        </div>
+                    </div>
+                    <div class="single_shipping d-flex align-items-center">
+                        <div class="shipping_icon">
+                            <i class="icon-lock icons"></i>
+                        </div>
+                        <div class="shipping_text">
+                            <h3>100% Payment Secure</h3>
+                            <p>Payment Online</p>
+                        </div>
+                    </div>
+                    <div class="single_shipping d-flex align-items-center">
+                        <div class="shipping_icon">
+                            <i class="icon-tag icons"></i>
+                        </div>
+                        <div class="shipping_text">
+                            <h3>Affordable Price</h3>
+                            <p>Guaranteed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--shipping section end-->
+
+  <!-- banner section start -->
+<section class="banner_section mb-109">
+    <div class="container">
+        <div class="section_title mb-60">
+            <h2>featured collections</h2>
+        </div>
+        <div class="banner_container row" style="gap: 25px;">
+            @foreach (var item in Model.Featured)
+            {
+                <figure class="single_banner position-relative @(item.Priority == 1 ? "col col-md-7" : "col-md-4")">
+                    <img src="@FilePaths.WebBannerPath/@item.ImageName" alt="" class="w-100 object-fit-fill h-100">
+                <figcaption class="banner_text position-absolute p-3">
+                    <h3>@item.Title</h3>
+                    <p>@item.SubTitle</p>
+                    @if(item.Priority == 1)
+                    {
+                        <a class="btn btn-primary" href="@item.Link">Shop Now</a>
+                    }
+                </figcaption>
+            </figure>
+            }
+        </div>
+    </div>
+</section>
+    <!-- banner section end -->
+
+<!-- product section start -->
+@* To DO *@
+<!-- product section end -->
+
+<!-- banner section start -->
+<section class="banner_section banner_style2 mb-109">
+    <div class="container-fluid">
+        <div class="row">
+            @foreach (var item in Model.TopProducts)
+            {
+                <div class="col-lg-6 col-md-6 col-sm-6 top-product">
+                    <figure class="single_banner position-relative">
+                        <img src="@FilePaths.WebBannerPath/@item.ImageName" alt="">
+                        <div class="banner_text position-absolute">
+                            <h3 class="sale-title">@item.Title</h3>
+                            <p>@item.SubTitle</p>
+                            <a class="btn btn-primary" href="shop.html">Shop Now</a>
+                        </div>
+                    </figure>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+<!-- banner section end -->
+
+<!-- product section start -->
+@* TO DO *@
+<!-- product section end -->
+
+@section Scripts {
+    <script>
+           window.addEventListener("DOMContentLoaded", () => {
+          const topProducts = document.querySelectorAll(".top-product");
+          const discountRegex = /(100|[1-9][0-9]?)\s*%/g;
+
+          for (let i = 0; i < topProducts.length; i++) {
+            const titleElement = topProducts[i].querySelector(".sale-title");
+            if (!titleElement) continue;
+
+            const title = titleElement.textContent.trim();
+
+            if (discountRegex.test(title)) {
+                titleElement.innerHTML = title.replace(discountRegex,'<strong style="color: #ff2f2f;">$&</strong> <br>');
+            }
+          }
+        });
+
+
+
+
+    </script>
+}
