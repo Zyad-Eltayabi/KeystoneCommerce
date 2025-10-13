@@ -3,6 +3,7 @@ using KeystoneCommerce.Infrastructure.Persistence.Data;
 using KeystoneCommerce.WebUI.Extensions;
 using KeystoneCommerce.WebUI.Profiles;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,13 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+// Configure the HostBuilder to use Serilog as the logging provider.
+builder.Host.UseSerilog((context, services, configuration) =>
+{
+    // Reads Serilog settings from appsettings.json (or other configuration sources)
+    configuration.ReadFrom.Configuration(context.Configuration);
 });
 
 // Register Application Services
