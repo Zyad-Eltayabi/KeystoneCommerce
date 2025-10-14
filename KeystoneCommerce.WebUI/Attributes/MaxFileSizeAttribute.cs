@@ -18,6 +18,16 @@ namespace KeystoneCommerce.WebUI.Attributes
                     return new ValidationResult(ErrorMessage ?? $"The file size exceeds the maximum allowed size of {ConvertBytesToReadableSize(_maxFileSizeInBytes)}.");
                 }
             }
+            else if (value is IFormFile[] files)
+            {
+                foreach (var f in files)
+                {
+                    if (f.Length > _maxFileSizeInBytes)
+                    {
+                        return new ValidationResult(ErrorMessage ?? $"One or more files exceed the maximum allowed size of {ConvertBytesToReadableSize(_maxFileSizeInBytes)}.");
+                    }
+                }
+            }
             return ValidationResult.Success;
         }
 
