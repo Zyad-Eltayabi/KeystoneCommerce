@@ -15,7 +15,7 @@ namespace KeystoneCommerce.WebUI.ViewModels.Products
         [DataType(DataType.Upload)]
         [AllowedExtensions(FileExtensions.ImageExtensions, ErrorMessage = $"Please upload valid image files ({FileExtensions.ImageExtensions})")]
         [MaxFileSize(FileSizes.MaxImageSizeInByte)]
-        [MaxLength(FileSizes.MaxNumberOfGalleryImages,ErrorMessage = "The number of images exceed the limit")]
+        [MaxUploadImagesCount(FileSizes.MaxNumberOfGalleryImages, ErrorMessage = "The number of images exceed the limit")]
         public IFormFile[] Gallaries { get; set; } = null!;
     }
 }
