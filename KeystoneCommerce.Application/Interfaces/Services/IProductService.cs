@@ -6,5 +6,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
     public interface IProductService
     {
         Task<Result<bool>> CreateProduct(CreateProductDto createProductDto);
+        Task<List<ProductDto>> GetAllProducts();
     }
 }

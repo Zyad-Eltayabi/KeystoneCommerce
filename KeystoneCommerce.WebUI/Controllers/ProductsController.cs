@@ -21,11 +21,14 @@ namespace KeystoneCommerce.WebUI.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var productsDto = await _productService.GetAllProducts();
+            List<ProductViewModel> productsViewModel = _mapper.Map<List<ProductViewModel>>(productsDto);
+            return View(productsViewModel);
         }
 
+        #region Create Product
         [HttpGet]
         [Route("Create")]
         public IActionResult Create()
@@ -66,5 +69,6 @@ namespace KeystoneCommerce.WebUI.Controllers
             }
             return RedirectToAction("Index");
         }
+        #endregion
     }
 }

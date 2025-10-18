@@ -38,6 +38,9 @@ namespace KeystoneCommerce.WebUI.Profiles
                 .ForMember(e => e.MainImage, e => e.Ignore())
                 .ForMember(e => e.Gallaries, e => e.Ignore())
                 .ReverseMap();
+
+            CreateMap<ProductDto, ProductViewModel>()
+                .ReverseMap();
         }
     }
 }

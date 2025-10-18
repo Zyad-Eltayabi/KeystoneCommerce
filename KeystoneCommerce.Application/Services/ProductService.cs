@@ -22,6 +22,7 @@ namespace KeystoneCommerce.Application.Services
             _mappingService = mappingService;
         }
 
+        #region Create New Product
         public async Task<Result<bool>> CreateProduct(CreateProductDto createProductDto)
         {
             var validationResult = _validationService.Validate(createProductDto);
@@ -52,6 +53,18 @@ namespace KeystoneCommerce.Application.Services
                 ImageName = galleryImageNameTask.Result
             }).ToList();
             return product;
+        }
+
+        #endregion
+
+        public async Task<List<ProductDto>> GetAllProducts()
+        {
+            var products = await _productRepository.GetAllAsync();
+
+            if (products == null || !products.Any())
+                return new List<ProductDto>();
+
+            return _mappingService.Map<List<ProductDto>>(products);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿
+﻿@model List<ProductViewModel>
 @{
     Layout = "_AdminLayout";
     ViewData["Title"] = "Products";
@@ -12,3 +12,59 @@
         New Product
     </a>
 </div>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                @* <th>Id</th> *@
+                <th>Title</th>
+                <th>Summary</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Discount</th>
+                <th>QTY</th>
+                <th>Tags</th>
+                <th>Image</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    @* <td>@product.Id</td> *@
+                    <td>@product.Title</td>
+                    <td>@product.Summary</td>
+                    <td>@product.Description</td>
+                    <td>@product.Price</td>
+                    <td>@product.Discount</td>
+                    <td>@product.QTY</td>
+                    <td>@product.Tags</td>
+                    <td>
+                        <img src="@FilePaths.WebProductPath/@product.ImageName" alt="@product.Title"
+                             style="max-width: 100px; object-fit: cover" />
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a asp-action="Update" asp-route-id="@product.Id"
+                               class="btn btn-primary btn-sm">Edit</a>
+                            <a asp-action="GetById" asp-route-id="@product.Id"
+                               class="btn btn-info btn-sm">View</a>
+                            <a data-banner-id="@product.Id"
+                               class="btn btn-danger btn-sm delete-btn" data-bs-toggle="modal"
+                               data-bs-target="#confirmModal">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@* <link rel="stylesheet" href="/assets/css/styles/banner.css"> *@
+
+@section Scripts {
+    @{
+        <script src="/assets/js/axios/axios.min.js"></script>
+    }
+}

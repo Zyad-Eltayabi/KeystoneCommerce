@@ -25,7 +25,9 @@ namespace KeystoneCommerce.Infrastructure.Profiles
                 .ForMember(e => e.UpdatedAt, e => e.Ignore())
                 .ForMember(e => e.ImageName, e => e.Ignore())
                 .ForMember(e => e.Galleries, e => e.Ignore());
-                
+
+            CreateMap<Product, ProductDto>()
+                .ForMember(e => e.GalleryImageNames, e => e.Ignore());
 
         }
     }
