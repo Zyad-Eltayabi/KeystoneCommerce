@@ -1,7 +1,6 @@
 using AutoMapper;
 using KeystoneCommerce.Application.DTOs;
 using KeystoneCommerce.Application.Interfaces.Services;
-using KeystoneCommerce.WebUI.Constants;
 using KeystoneCommerce.WebUI.ViewModels.Banner;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -9,6 +8,7 @@ using System.Threading.Tasks;
 using KeystoneCommerce.Application.DTOs.Banner;
 using NuGet.Protocol;
 using KeystoneCommerce.WebUI.Helpers;
+using KeystoneCommerce.Shared.Constants;
 
 namespace KeystoneCommerce.WebUI.Controllers;
 

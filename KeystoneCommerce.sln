@@ -1,5 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36301.6 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeystoneCommerce.WebUI", "KeystoneCommerce.WebUI\KeystoneCommerce.WebUI.csproj", "{69A791B2-573C-44EA-8124-79D470FBC731}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeystoneCommerce.Infrastructure", "KeystoneCommerce.Infrastructure\KeystoneCommerce.Infrastructure.csproj", "{48C38ED2-4A87-436E-A6D3-FA9A35D047CC}"
@@ -7,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeystoneCommerce.Application", "KeystoneCommerce.Application\KeystoneCommerce.Application.csproj", "{FDD88D33-B9C1-4F7F-BA15-6CA6B556D5B6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeystoneCommerce.Domain", "KeystoneCommerce.Domain\KeystoneCommerce.Domain.csproj", "{D81CD73C-81DE-4BD1-A19B-A69D9AB0034C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeystoneCommerce.Shared", "KeystoneCommerce.Shared\KeystoneCommerce.Shared.csproj", "{7CA1C3CB-2CD4-4560-887F-7AA551D3D4BF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,5 +35,15 @@ Global
 		{D81CD73C-81DE-4BD1-A19B-A69D9AB0034C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D81CD73C-81DE-4BD1-A19B-A69D9AB0034C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D81CD73C-81DE-4BD1-A19B-A69D9AB0034C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CA1C3CB-2CD4-4560-887F-7AA551D3D4BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CA1C3CB-2CD4-4560-887F-7AA551D3D4BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CA1C3CB-2CD4-4560-887F-7AA551D3D4BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CA1C3CB-2CD4-4560-887F-7AA551D3D4BF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {45CFF7D4-4226-4B3E-96D2-BDEBCBA7DBE3}
 	EndGlobalSection
 EndGlobal

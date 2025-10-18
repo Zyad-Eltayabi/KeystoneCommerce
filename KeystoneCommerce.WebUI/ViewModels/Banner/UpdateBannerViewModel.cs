@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using KeystoneCommerce.Shared.Constants;
 using KeystoneCommerce.WebUI.Attributes;
 using KeystoneCommerce.WebUI.Constants;
 using Microsoft.AspNetCore.Mvc;

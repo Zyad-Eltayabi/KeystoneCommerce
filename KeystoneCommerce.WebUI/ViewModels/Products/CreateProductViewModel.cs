@@ -1,4 +1,5 @@
-﻿using KeystoneCommerce.WebUI.Attributes;
+﻿using KeystoneCommerce.Shared.Constants;
+using KeystoneCommerce.WebUI.Attributes;
 using KeystoneCommerce.WebUI.Constants;
 using System.ComponentModel.DataAnnotations;
 

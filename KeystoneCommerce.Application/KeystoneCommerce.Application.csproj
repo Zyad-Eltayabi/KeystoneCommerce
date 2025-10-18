@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\KeystoneCommerce.Domain\KeystoneCommerce.Domain.csproj" />
+      <ProjectReference Include="..\KeystoneCommerce.Shared\KeystoneCommerce.Shared.csproj" />
     </ItemGroup>
 
 </Project>
