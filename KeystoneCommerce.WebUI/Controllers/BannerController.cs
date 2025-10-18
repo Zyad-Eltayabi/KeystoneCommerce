@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Threading.Tasks;
 using KeystoneCommerce.Application.DTOs.Banner;
 using NuGet.Protocol;
+using KeystoneCommerce.WebUI.Helpers;
 
 namespace KeystoneCommerce.WebUI.Controllers;
 
@@ -75,19 +76,10 @@ public class BannerController : Controller
     private CreateBannerDto PrepareCreateBannerDto(CreateBannerViewModel model)
     {
         var createBannerDto = _mapper.Map<CreateBannerDto>(model);
-        createBannerDto.Image = ConvertIFormFileToByteArray(model.Image);
+        createBannerDto.Image = FileHelper.ConvertIFormFileToByteArray(model.Image);
         createBannerDto.ImageUrl = FilePaths.BannerPath;
-        createBannerDto.ImageType = Path.GetExtension(model.Image.FileName);
+        createBannerDto.ImageType = FileHelper.GetImageFileExtension(model.Image);
         return createBannerDto;
-    }
-
-    private byte[] ConvertIFormFileToByteArray(IFormFile file)
-    {
-        using (var memoryStream = new MemoryStream())
-        {
-            file.CopyTo(memoryStream);
-            return memoryStream.ToArray();
-        }
     }
 
     [HttpGet]
@@ -133,9 +125,9 @@ public class BannerController : Controller
         var updateBannerDto = _mapper.Map<UpdateBannerDto>(model);
         if (model.HasNewImage)
         {
-            updateBannerDto.Image = ConvertIFormFileToByteArray(model.Image);
+            updateBannerDto.Image = FileHelper.ConvertIFormFileToByteArray(model.Image);
             updateBannerDto.ImageUrl = FilePaths.BannerPath;
-            updateBannerDto.ImageType = Path.GetExtension(model.Image.FileName);
+            updateBannerDto.ImageType = FileHelper.GetImageFileExtension(model.Image);
         }
 
         return updateBannerDto;
