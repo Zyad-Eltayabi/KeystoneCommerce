@@ -4,7 +4,6 @@ using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.WebUI.Helpers;
 using KeystoneCommerce.WebUI.ViewModels.Products;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace KeystoneCommerce.WebUI.Controllers
 {
@@ -13,6 +12,8 @@ namespace KeystoneCommerce.WebUI.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IProductService _productService;
+
+
 
         public ProductsController(IMapper mapper, IProductService productService)
         {

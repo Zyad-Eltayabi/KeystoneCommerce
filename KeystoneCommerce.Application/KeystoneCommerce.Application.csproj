@@ -7,6 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.Build.Framework" Version="17.10.4" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\KeystoneCommerce.Domain\KeystoneCommerce.Domain.csproj" />
       <ProjectReference Include="..\KeystoneCommerce.Shared\KeystoneCommerce.Shared.csproj" />
     </ItemGroup>
