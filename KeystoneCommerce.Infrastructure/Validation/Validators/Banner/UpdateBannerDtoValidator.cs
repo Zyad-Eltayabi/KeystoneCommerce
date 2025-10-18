@@ -3,7 +3,7 @@ using KeystoneCommerce.Application.DTOs;
 using KeystoneCommerce.Application.DTOs.Banner;
 using KeystoneCommerce.Domain.Enums;
 
-namespace KeystoneCommerce.Infrastructure.Validation.Validators;
+namespace KeystoneCommerce.Infrastructure.Validation.Validators.Banner;
 
 public class UpdateBannerDtoValidator : AbstractValidator<UpdateBannerDto>
 {

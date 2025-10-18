@@ -5,7 +5,7 @@ using KeystoneCommerce.Infrastructure.Profiles;
 using KeystoneCommerce.Infrastructure.Repositories;
 using KeystoneCommerce.Infrastructure.Services;
 using KeystoneCommerce.Infrastructure.Validation;
-using KeystoneCommerce.Infrastructure.Validation.Validators;
+using KeystoneCommerce.Infrastructure.Validation.Validators.Banner;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeystoneCommerce.Infrastructure
