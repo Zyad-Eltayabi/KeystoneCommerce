@@ -41,6 +41,21 @@ namespace KeystoneCommerce.WebUI.Profiles
 
             CreateMap<ProductDto, ProductViewModel>()
                 .ReverseMap();
+
+            CreateMap<ProductDto, EditProductViewModel>()
+                .ForMember(p => p.ImageName, p => p.MapFrom(src => src.ImageName))
+                .ForMember(p => p.GallaryImageNames, p => p.MapFrom(src => src.GalleryImageNames))
+                .ForMember(p => p.MainImage, p => p.Ignore())
+                .ForMember(p => p.Galleries, p => p.Ignore())
+                .ForMember(p => p.HasNewMainImage, p => p.Ignore())
+                .ForMember(p => p.HasNewGallaries, p => p.Ignore())
+                .ForMember(p => p.DeletedImagesJson, p => p.Ignore());
+
+            CreateMap<EditProductViewModel, UpdateProductDto>()
+                .ForMember(e => e.MainImage, e => e.Ignore())
+                .ForMember(e => e.NewGalleries, e => e.Ignore())
+                .ForMember(e => e.HasNewGalleries, e => e.Ignore())
+                .ForMember(e => e.HasDeletedImages, e => e.Ignore());
         }
     }
 }

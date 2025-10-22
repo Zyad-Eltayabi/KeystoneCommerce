@@ -7,5 +7,7 @@ namespace KeystoneCommerce.Application.Interfaces.Services
     {
         Task<Result<bool>> CreateProduct(CreateProductDto createProductDto);
         Task<List<ProductDto>> GetAllProducts();
+        Task<ProductDto?> GetProductByIdAsync(int productId);
+        Task<Result<UpdateProductDto>> UpdateProduct(UpdateProductDto editProductDto);
     }
 }

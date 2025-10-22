@@ -4,6 +4,7 @@ using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.WebUI.Helpers;
 using KeystoneCommerce.WebUI.ViewModels.Products;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace KeystoneCommerce.WebUI.Controllers
 {
@@ -70,6 +71,61 @@ namespace KeystoneCommerce.WebUI.Controllers
             }
             return RedirectToAction("Index");
         }
+        #endregion
+
+        #region Edit Product
+        [HttpGet]
+        [Route("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var productDto = await _productService.GetProductByIdAsync(id);
+            if (productDto == null)
+            {
+                return NotFound();
+            }
+            var editProductViewModel = _mapper.Map<EditProductViewModel>(productDto);
+            return View(editProductViewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("Edit/{id}")]
+        public async Task<IActionResult> Edit(EditProductViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var editProductDto = PrepareEditProductDto(model);
+                var result = await _productService.UpdateProduct(editProductDto);
+                if (result.IsSuccess)
+                    return RedirectToAction("Index");
+                result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
+            }
+            model.GallaryImageNames = (await _productService.GetProductByIdAsync(model.Id))?.GalleryImageNames;
+            return View(model);
+        }
+
+        private UpdateProductDto PrepareEditProductDto(EditProductViewModel model)
+        {
+            var editProductDto = _mapper.Map<UpdateProductDto>(model);
+            if (model.HasNewMainImage)
+            {
+                editProductDto.MainImage = new Application.DTOs.Common.ImageDto
+                {
+                    Data = FileHelper.ConvertIFormFileToByteArray(model.MainImage!),
+                    Type = FileHelper.GetImageFileExtension(model.MainImage!)
+                };
+            }
+            if (model.HasNewGallaries)
+            {
+                editProductDto.NewGalleries = model.Galleries?.Select(file => new Application.DTOs.Common.ImageDto
+                {
+                    Data = FileHelper.ConvertIFormFileToByteArray(file),
+                    Type = FileHelper.GetImageFileExtension(file)
+                }).ToList() ?? new List<Application.DTOs.Common.ImageDto>();
+            }
+            return editProductDto;
+        }
+
         #endregion
     }
 }

@@ -1,6 +1,7 @@
 ﻿using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Domain.Entities;
 using KeystoneCommerce.Infrastructure.Persistence.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace KeystoneCommerce.Infrastructure.Repositories
 {
@@ -11,6 +12,13 @@ namespace KeystoneCommerce.Infrastructure.Repositories
         public ProductRepository(ApplicationDbContext context) : base(context)
         {
             _context = context;
+        }
+
+        public async Task<Product?> GetProductByIdAsync(int productId)
+        {
+           return await _context.Products
+                .Include(p => p.Galleries)
+                .FirstOrDefaultAsync(p => p.Id == productId);
         }
     }
 }
