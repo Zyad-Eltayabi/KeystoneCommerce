@@ -4,7 +4,6 @@ using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.WebUI.Helpers;
 using KeystoneCommerce.WebUI.ViewModels.Products;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace KeystoneCommerce.WebUI.Controllers
 {
@@ -40,18 +39,18 @@ namespace KeystoneCommerce.WebUI.Controllers
 
         private CreateProductDto PrepareCreateProductDto(CreateProductViewModel model)
         {
-            var CreateProductDto = _mapper.Map<CreateProductDto>(model);
-            CreateProductDto.MainImage = new Application.DTOs.Common.ImageDto
+            var createProductDto = _mapper.Map<CreateProductDto>(model);
+            createProductDto.MainImage = new Application.DTOs.Common.ImageDto
             {
                 Data = FileHelper.ConvertIFormFileToByteArray(model.MainImage),
                 Type = FileHelper.GetImageFileExtension(model.MainImage)
             };
-            CreateProductDto.Gallaries = model.Gallaries?.Select(file => new Application.DTOs.Common.ImageDto
+            createProductDto.Gallaries = model.Gallaries.Select(file => new Application.DTOs.Common.ImageDto
             {
                 Data = FileHelper.ConvertIFormFileToByteArray(file),
                 Type = FileHelper.GetImageFileExtension(file)
-            }).ToList() ?? new List<Application.DTOs.Common.ImageDto>();
-            return CreateProductDto;
+            }).ToList();
+            return createProductDto;
         }
 
         [HttpPost]
@@ -62,8 +61,8 @@ namespace KeystoneCommerce.WebUI.Controllers
             {
                 return View("Create", model);
             }
-            var CreateProductDto = PrepareCreateProductDto(model);
-            var result = await _productService.CreateProduct(CreateProductDto);
+            var createProductDto = PrepareCreateProductDto(model);
+            var result = await _productService.CreateProduct(createProductDto);
             if (!result.IsSuccess)
             {
                 result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
