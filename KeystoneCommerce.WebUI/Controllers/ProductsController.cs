@@ -14,7 +14,6 @@ namespace KeystoneCommerce.WebUI.Controllers
         private readonly IProductService _productService;
 
 
-
         public ProductsController(IMapper mapper, IProductService productService)
         {
             _mapper = mapper;
@@ -25,11 +24,13 @@ namespace KeystoneCommerce.WebUI.Controllers
         public async Task<IActionResult> Index()
         {
             var productsDto = await _productService.GetAllProducts();
-            List<ProductViewModel> productsViewModel = _mapper.Map<List<ProductViewModel>>(productsDto);
+            List<ProductViewModel> productsViewModel =
+                _mapper.Map<List<ProductViewModel>>(productsDto);
             return View(productsViewModel);
         }
 
         #region Create Product
+
         [HttpGet]
         [Route("Create")]
         public IActionResult Create()
@@ -45,11 +46,12 @@ namespace KeystoneCommerce.WebUI.Controllers
                 Data = FileHelper.ConvertIFormFileToByteArray(model.MainImage),
                 Type = FileHelper.GetImageFileExtension(model.MainImage)
             };
-            createProductDto.Gallaries = model.Gallaries.Select(file => new Application.DTOs.Common.ImageDto
-            {
-                Data = FileHelper.ConvertIFormFileToByteArray(file),
-                Type = FileHelper.GetImageFileExtension(file)
-            }).ToList();
+            createProductDto.Gallaries = model.Gallaries.Select(file =>
+                new Application.DTOs.Common.ImageDto
+                {
+                    Data = FileHelper.ConvertIFormFileToByteArray(file),
+                    Type = FileHelper.GetImageFileExtension(file)
+                }).ToList();
             return createProductDto;
         }
 
@@ -61,6 +63,7 @@ namespace KeystoneCommerce.WebUI.Controllers
             {
                 return View("Create", model);
             }
+
             var createProductDto = PrepareCreateProductDto(model);
             var result = await _productService.CreateProduct(createProductDto);
             if (!result.IsSuccess)
@@ -68,11 +71,14 @@ namespace KeystoneCommerce.WebUI.Controllers
                 result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
                 return View("Create", model);
             }
+
             return RedirectToAction("Index");
         }
+
         #endregion
 
         #region Edit Product
+
         [HttpGet]
         [Route("Edit/{id}")]
         public async Task<IActionResult> Edit(int id)
@@ -82,6 +88,7 @@ namespace KeystoneCommerce.WebUI.Controllers
             {
                 return NotFound();
             }
+
             var editProductViewModel = _mapper.Map<EditProductViewModel>(productDto);
             return View(editProductViewModel);
         }
@@ -99,7 +106,9 @@ namespace KeystoneCommerce.WebUI.Controllers
                     return RedirectToAction("Index");
                 result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
             }
-            model.GallaryImageNames = (await _productService.GetProductByIdAsync(model.Id))?.GalleryImageNames;
+
+            model.GallaryImageNames = (await _productService.GetProductByIdAsync(model.Id))
+                ?.GalleryImageNames;
             return View(model);
         }
 
@@ -114,17 +123,32 @@ namespace KeystoneCommerce.WebUI.Controllers
                     Type = FileHelper.GetImageFileExtension(model.MainImage!)
                 };
             }
+
             if (model.HasNewGallaries)
             {
-                editProductDto.NewGalleries = model.Galleries?.Select(file => new Application.DTOs.Common.ImageDto
-                {
-                    Data = FileHelper.ConvertIFormFileToByteArray(file),
-                    Type = FileHelper.GetImageFileExtension(file)
-                }).ToList() ?? new List<Application.DTOs.Common.ImageDto>();
+                editProductDto.NewGalleries = model.Galleries?.Select(file =>
+                    new Application.DTOs.Common.ImageDto
+                    {
+                        Data = FileHelper.ConvertIFormFileToByteArray(file),
+                        Type = FileHelper.GetImageFileExtension(file)
+                    }).ToList() ?? new List<Application.DTOs.Common.ImageDto>();
             }
+
             return editProductDto;
         }
 
         #endregion
+
+        
+        [HttpGet]
+        [Route("Details/{id}")]
+        public async Task<IActionResult> Details([FromRoute] int id)
+        {
+            var productDto = await _productService.GetProductByIdAsync(id);
+            if (productDto is null)
+                return NotFound();
+            var productViewModel = _mapper.Map<ProductViewModel>(productDto);
+            return View("Details",productViewModel);
+        }
     }
 }
