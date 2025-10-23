@@ -150,5 +150,12 @@ namespace KeystoneCommerce.WebUI.Controllers
             var productViewModel = _mapper.Map<ProductViewModel>(productDto);
             return View("Details",productViewModel);
         }
+
+        [HttpGet]
+        [Route("Delete/{id:int}")]
+        public IActionResult Delete([FromRoute]int id)
+        {
+            return Content(id.ToString());
+        }
     }
 }

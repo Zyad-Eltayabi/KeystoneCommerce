@@ -50,9 +50,11 @@
                                class="btn btn-primary btn-sm">Edit</a>
                             <a asp-action="Details" asp-route-id="@product.Id"
                                class="btn btn-info btn-sm">View</a>
-                            <a data-banner-id="@product.Id"
+                            @*<a data-banner-id="@product.Id" asp-action="Delete" asp-route-id="@product.Id"
                                class="btn btn-danger btn-sm delete-btn" data-bs-toggle="modal"
-                               data-bs-target="#confirmModal">Delete</a>
+                               data-bs-target="#confirmModal">Delete</a>*@
+                            <a  asp-action="Delete" asp-route-id="@product.Id"
+                               class="btn btn-danger btn-sm delete-btn">Delete</a>
                         </div>
                     </td>
                 </tr>
@@ -61,7 +63,7 @@
     </table>
 </div>
 
-@* <link rel="stylesheet" href="/assets/css/styles/banner.css"> *@
+@* <link rel="stylesheet" href="/assets/css/styles/modal.css"> *@
 
 @section Scripts {
     @{

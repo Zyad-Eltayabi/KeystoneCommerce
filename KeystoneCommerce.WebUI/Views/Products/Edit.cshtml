@@ -184,7 +184,7 @@
                         <div id="galleryPreview" class="row g-2 g-md-3">
                             @foreach (var img in Model.GallaryImageNames)
                             {
-                                <div class="col-6 col-sm-4 col-md-6 col-lg-6">
+                                <div class="col-6 col-sm-4 col-md-6 col-lg-6 gallery-image-container">
                                     <div class="card h-100 border-0 shadow-sm">
                                         <div class="ratio ratio-1x1">
                                             <img src="@FilePaths.WebProductPath/@img"
@@ -220,7 +220,7 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script src="/assets/js/Scripts/product-edit.js"></script>
+    <script src="/assets/js/Scripts/edit-product.js"></script>
     <script src="/assets/js/Scripts/file-upload.js"></script>
 }
 

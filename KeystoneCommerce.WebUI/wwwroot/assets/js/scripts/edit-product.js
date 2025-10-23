@@ -1,6 +1,6 @@
 const DeletedImages = [];
 function removeGallary(element, imageName) {
-    element.closest(".col").remove();
+    element.closest(".gallery-image-container").remove();
     DeletedImages.push(imageName);
 }
 
