@@ -1,4 +1,4 @@
-﻿using KeystoneCommerce.Application.Common.Result_Pattern;
+﻿﻿using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Product;
 using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
@@ -255,5 +255,41 @@ namespace KeystoneCommerce.Application.Services
             return Result<UpdateProductDto>.Success();
         }
         #endregion
+
+        public async Task<Result<bool>> DeleteProduct(int id)
+        {
+            _logger.LogInformation("Deleting product with ID: {ProductId}", id);
+        
+            var product = await _productRepository.GetProductByIdAsync(id);
+            if (product is null)
+            {
+                _logger.LogWarning("Product not found for deletion. ID: {ProductId}", id);
+                return Result<bool>.Failure("Product not found.");
+            }
+        
+            _productRepository.Delete(product);
+            var result = await _productRepository.SaveChangesAsync();
+        
+            if (result == 0)
+            {
+                _logger.LogError("Failed to delete product from database. Product ID: {ProductId}", id);
+                return Result<bool>.Failure("Failed to delete product.");
+            }
+        
+            // Delete main image
+            await DeleteImage(FilePaths.ProductPath, product.ImageName);
+        
+            // Delete gallery images
+            if (product.Galleries is not null && product.Galleries.Any())
+            {
+                var galleryImageNames = product.Galleries.Select(g => g.ImageName).ToList();
+                await DeleteImages(FilePaths.ProductPath, galleryImageNames);
+            }
+        
+            _logger.LogInformation("Product deleted successfully: ID {ProductId}, Title: {ProductTitle}, Gallery Images Count: {GalleryCount}",
+                id, product.Title, product.Galleries?.Count ?? 0);
+        
+            return Result<bool>.Success();
+        }
     }
 }

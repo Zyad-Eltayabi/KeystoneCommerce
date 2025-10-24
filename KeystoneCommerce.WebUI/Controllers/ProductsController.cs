@@ -4,6 +4,7 @@ using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.WebUI.Helpers;
 using KeystoneCommerce.WebUI.ViewModels.Products;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Build.Framework;
 
 namespace KeystoneCommerce.WebUI.Controllers
 {
@@ -139,7 +140,7 @@ namespace KeystoneCommerce.WebUI.Controllers
 
         #endregion
 
-        
+
         [HttpGet]
         [Route("Details/{id}")]
         public async Task<IActionResult> Details([FromRoute] int id)
@@ -148,14 +149,17 @@ namespace KeystoneCommerce.WebUI.Controllers
             if (productDto is null)
                 return NotFound();
             var productViewModel = _mapper.Map<ProductViewModel>(productDto);
-            return View("Details",productViewModel);
+            return View("Details", productViewModel);
         }
 
-        [HttpGet]
+        [HttpDelete]
         [Route("Delete/{id:int}")]
-        public IActionResult Delete([FromRoute]int id)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            return Content(id.ToString());
+            var result = await _productService.DeleteProduct(id);
+            if (!result.IsSuccess)
+                return BadRequest(result.Errors);
+            return Ok("The product was deleted successfully");
         }
     }
 }

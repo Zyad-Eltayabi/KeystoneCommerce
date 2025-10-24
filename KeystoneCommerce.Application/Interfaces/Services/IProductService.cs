@@ -9,5 +9,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
         Task<List<ProductDto>> GetAllProducts();
         Task<ProductDto?> GetProductByIdAsync(int productId);
         Task<Result<UpdateProductDto>> UpdateProduct(UpdateProductDto editProductDto);
+        Task<Result<bool>> DeleteProduct(int id);
     }
 }

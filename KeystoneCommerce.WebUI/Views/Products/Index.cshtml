@@ -4,6 +4,8 @@
     ViewData["Title"] = "Products";
 }
 
+<partial name="_ConfirmModalPartial"/>
+
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="mb-4">Products</h1>
     <a class="btn btn-success text-decoration-none"
@@ -50,11 +52,9 @@
                                class="btn btn-primary btn-sm">Edit</a>
                             <a asp-action="Details" asp-route-id="@product.Id"
                                class="btn btn-info btn-sm">View</a>
-                            @*<a data-banner-id="@product.Id" asp-action="Delete" asp-route-id="@product.Id"
+                            <a data-product-id="@product.Id"
                                class="btn btn-danger btn-sm delete-btn" data-bs-toggle="modal"
-                               data-bs-target="#confirmModal">Delete</a>*@
-                            <a  asp-action="Delete" asp-route-id="@product.Id"
-                               class="btn btn-danger btn-sm delete-btn">Delete</a>
+                               data-bs-target="#confirmModal">Delete</a>
                         </div>
                     </td>
                 </tr>
@@ -63,10 +63,14 @@
     </table>
 </div>
 
-@* <link rel="stylesheet" href="/assets/css/styles/modal.css"> *@
+
+@section Styles {
+    <link rel="stylesheet" href="/assets/css/styles/modal.css">
+}
 
 @section Scripts {
     @{
-        <script src="/assets/js/axios/axios.min.js"></script>
+        <script defer src="/assets/js/axios/axios.min.js"></script>
+        <script defer src="/assets/js/scripts/product-index.js"></script>        
     }
 }
