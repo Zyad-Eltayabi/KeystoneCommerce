@@ -5,5 +5,6 @@ namespace KeystoneCommerce.Application.Interfaces.Repositories
     public interface IProductRepository : IGenericRepository<Product>
     {
         Task<Product?> GetProductByIdAsync(int productId);
+        
     }
 }

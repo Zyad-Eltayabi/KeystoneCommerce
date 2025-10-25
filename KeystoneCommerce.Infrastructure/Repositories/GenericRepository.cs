@@ -77,5 +77,11 @@ namespace KeystoneCommerce.Infrastructure.Repositories
         {
             return await Entity.CountAsync();
         }
+        
+        public async Task<List<T>> GetPagedAsync(int pageNumber, int pageSize)
+            => await Entity
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
     }
 }
