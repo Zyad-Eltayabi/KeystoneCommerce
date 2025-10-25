@@ -22,6 +22,7 @@ namespace KeystoneCommerce.WebUI.Controllers
             _productService = productService;
         }
 
+        /*
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -29,7 +30,7 @@ namespace KeystoneCommerce.WebUI.Controllers
             List<ProductViewModel> productsViewModel =
                 _mapper.Map<List<ProductViewModel>>(productsDto);
             return View(productsViewModel);
-        }
+        }*/
 
         #region Create Product
 
@@ -163,8 +164,7 @@ namespace KeystoneCommerce.WebUI.Controllers
             return Ok("The product was deleted successfully");
         }
 
-        [HttpGet("Test")]
-        public async Task<IActionResult> Test([FromQuery] int pageNumber = 1,
+        public async Task<IActionResult> Index([FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
             var parameters = new PaginationParameters
@@ -184,7 +184,7 @@ namespace KeystoneCommerce.WebUI.Controllers
                 TotalCount = paginatedProducts.TotalCount
             };
 
-            return View("Test",viewModel);
+            return View("Index",viewModel);
         }
     }
 }
