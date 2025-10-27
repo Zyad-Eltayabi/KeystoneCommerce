@@ -340,7 +340,9 @@ namespace KeystoneCommerce.Application.Services
         {
             var products = await _productRepository.GetPagedAsync(
                 parameters.PageNumber, 
-                parameters.PageSize);
+                parameters.PageSize,
+                parameters.SortBy!,
+                parameters.SortOrder!);
             
             var productDto = _mappingService.Map<List<ProductDto>>(products);
             
@@ -349,7 +351,9 @@ namespace KeystoneCommerce.Application.Services
                 Items = productDto,
                 PageNumber = parameters.PageNumber,
                 PageSize = parameters.PageSize,
-                TotalCount = await _productRepository.CountAsync()
+                TotalCount = await _productRepository.CountAsync(),
+                SortBy = parameters.SortBy,
+                SortOrder = parameters.SortOrder,
             };
         }
         

@@ -1,4 +1,4 @@
-﻿@model PaginatedViewModel<ProductViewModel>
+﻿@model PaginatedResult<ProductDto>
 @{
     Layout = "_AdminLayout";
     ViewData["Title"] = "Products";
@@ -19,7 +19,15 @@
     <table class="table table-bordered table-hover">
         <thead class="table-light">
             <tr>
-                 <th>Id</th> 
+                <th>
+                    <a asp-route-pageNumber="@Model.PageNumber"
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-sortBy="Id"
+                       asp-route-SortOrder="@((Model.SortOrder == "Asc" || Model.SortOrder == "") ? "desc" : "Asc")"
+                       asp-action="Index"
+                       class="link-underline text-decoration-none">ID
+                        </a>
+                </th> 
                 <th>Title</th>
                 <th>Summary</th>
                 <th>Description</th>

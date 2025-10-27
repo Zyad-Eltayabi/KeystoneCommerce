@@ -164,27 +164,10 @@ namespace KeystoneCommerce.WebUI.Controllers
             return Ok("The product was deleted successfully");
         }
 
-        public async Task<IActionResult> Index([FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> Index([FromQuery] PaginationParameters parameters)
         {
-            var parameters = new PaginationParameters
-            {
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            };
-
             var paginatedProducts = await _productService.GetAllProductsPaginatedAsync(parameters);
-
-            var viewModel = new PaginatedViewModel<ProductViewModel>
-            {
-                Items = _mapper.Map<List<ProductViewModel>>(paginatedProducts.Items),
-                PageNumber = paginatedProducts.PageNumber,
-                PageSize = paginatedProducts.PageSize,
-                TotalPages = paginatedProducts.TotalPages,
-                TotalCount = paginatedProducts.TotalCount
-            };
-
-            return View("Index",viewModel);
+            return View("Index", paginatedProducts);
         }
     }
 }

@@ -12,4 +12,7 @@ public class PaginationParameters
         get => _pageSize;
         set => _pageSize = value > MaxPageSize ? MaxPageSize : value;
     }
+    
+    public string? SortBy { get; set; } = string.Empty;
+    public string? SortOrder { get; set; } = string.Empty;
 }
