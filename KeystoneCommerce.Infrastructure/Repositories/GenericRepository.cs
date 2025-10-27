@@ -2,6 +2,7 @@
 using KeystoneCommerce.Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace KeystoneCommerce.Infrastructure.Repositories
 {
@@ -65,7 +66,7 @@ namespace KeystoneCommerce.Infrastructure.Repositories
 
         public async Task<int> SaveChangesAsync()
         {
-           return await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
@@ -77,11 +78,29 @@ namespace KeystoneCommerce.Infrastructure.Repositories
         {
             return await Entity.CountAsync();
         }
-        
-        public async Task<List<T>> GetPagedAsync(int pageNumber, int pageSize)
-            => await Entity
-                .Skip((pageNumber - 1) * pageSize)
+
+        public async Task<List<T>> GetPagedAsync(int pageNumber, int pageSize, string? sortBy,
+            string? sortOrder)
+        {
+            var query = Entity.AsQueryable();
+            
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                var property = typeof(T).GetProperty(sortBy, 
+                    BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                
+                if (property == null)
+                    sortBy = "Id";
+                
+                query = sortOrder?.ToLower() == "desc" 
+                    ? query.OrderByDescending(e => EF.Property<object>(e, sortBy)) 
+                    : query.OrderBy(e => EF.Property<object>(e, sortBy));
+            }
+           
+            return await 
+                query.Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+        }
     }
 }
