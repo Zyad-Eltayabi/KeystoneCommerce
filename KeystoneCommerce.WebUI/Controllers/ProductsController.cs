@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
+using KeystoneCommerce.Application.Common.Pagination;
 using KeystoneCommerce.Application.DTOs.Product;
 using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.WebUI.Helpers;
+using KeystoneCommerce.WebUI.ViewModels;
 using KeystoneCommerce.WebUI.ViewModels.Products;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Build.Framework;
 
 namespace KeystoneCommerce.WebUI.Controllers
 {
@@ -21,6 +22,7 @@ namespace KeystoneCommerce.WebUI.Controllers
             _productService = productService;
         }
 
+        /*
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -28,7 +30,7 @@ namespace KeystoneCommerce.WebUI.Controllers
             List<ProductViewModel> productsViewModel =
                 _mapper.Map<List<ProductViewModel>>(productsDto);
             return View(productsViewModel);
-        }
+        }*/
 
         #region Create Product
 
@@ -160,6 +162,29 @@ namespace KeystoneCommerce.WebUI.Controllers
             if (!result.IsSuccess)
                 return BadRequest(result.Errors);
             return Ok("The product was deleted successfully");
+        }
+
+        public async Task<IActionResult> Index([FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var parameters = new PaginationParameters
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            var paginatedProducts = await _productService.GetAllProductsPaginatedAsync(parameters);
+
+            var viewModel = new PaginatedViewModel<ProductViewModel>
+            {
+                Items = _mapper.Map<List<ProductViewModel>>(paginatedProducts.Items),
+                PageNumber = paginatedProducts.PageNumber,
+                PageSize = paginatedProducts.PageSize,
+                TotalPages = paginatedProducts.TotalPages,
+                TotalCount = paginatedProducts.TotalCount
+            };
+
+            return View("Index",viewModel);
         }
     }
 }

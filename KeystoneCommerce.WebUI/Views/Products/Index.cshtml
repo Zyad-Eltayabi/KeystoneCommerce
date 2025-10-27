@@ -1,4 +1,4 @@
-﻿@model List<ProductViewModel>
+﻿@model PaginatedViewModel<ProductViewModel>
 @{
     Layout = "_AdminLayout";
     ViewData["Title"] = "Products";
@@ -19,7 +19,7 @@
     <table class="table table-bordered table-hover">
         <thead class="table-light">
             <tr>
-                @* <th>Id</th> *@
+                 <th>Id</th> 
                 <th>Title</th>
                 <th>Summary</th>
                 <th>Description</th>
@@ -31,10 +31,10 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var product in Model)
+            @foreach (var product in Model.Items)
             {
                 <tr>
-                    @* <td>@product.Id</td> *@
+                     <td>@product.Id</td> 
                     <td>@product.Title</td>
                     <td>@product.Summary</td>
                     <td>@product.Description</td>
@@ -63,6 +63,7 @@
     </table>
 </div>
 
+@await Html.PartialAsync("_PageNavigatorPartial");
 
 @section Styles {
     <link rel="stylesheet" href="/assets/css/styles/modal.css">

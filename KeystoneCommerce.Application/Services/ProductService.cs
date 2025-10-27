@@ -1,4 +1,5 @@
-﻿﻿using KeystoneCommerce.Application.Common.Result_Pattern;
+﻿using KeystoneCommerce.Application.Common.Pagination;
+using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Product;
 using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
@@ -17,7 +18,10 @@ namespace KeystoneCommerce.Application.Services
         private readonly IMappingService _mappingService;
         private readonly ILogger<ProductService> _logger;
 
-        public ProductService(IApplicationValidator<CreateProductDto> validationService, IProductRepository productRepository, IImageService imageService, IMappingService mappingService, ILogger<ProductService> logger, IApplicationValidator<UpdateProductDto> updateValidationService)
+        public ProductService(IApplicationValidator<CreateProductDto> validationService,
+            IProductRepository productRepository, IImageService imageService,
+            IMappingService mappingService, ILogger<ProductService> logger,
+            IApplicationValidator<UpdateProductDto> updateValidationService)
         {
             _createValidationService = validationService;
             _productRepository = productRepository;
@@ -28,6 +32,7 @@ namespace KeystoneCommerce.Application.Services
         }
 
         #region Create New Product
+
         public async Task<Result<bool>> CreateProduct(CreateProductDto createProductDto)
         {
             _logger.LogInformation("Creating product: {@Product}", createProductDto);
@@ -35,7 +40,8 @@ namespace KeystoneCommerce.Application.Services
             var validationResult = _createValidationService.Validate(createProductDto);
             if (!validationResult.IsValid)
             {
-                _logger.LogWarning("Product validation failed for {ProductTitle}. Errors: {ValidationErrors}",
+                _logger.LogWarning(
+                    "Product validation failed for {ProductTitle}. Errors: {ValidationErrors}",
                     createProductDto.Title, string.Join(", ", validationResult.Errors));
                 return Result<bool>.Failure(validationResult.Errors);
             }
@@ -44,7 +50,9 @@ namespace KeystoneCommerce.Application.Services
             // Check if the product name is unique
             if (await _productRepository.ExistsAsync(x => x.Title == createProductDto.Title))
             {
-                _logger.LogWarning("Product creation failed - duplicate title found: {ProductTitle}", createProductDto.Title);
+                _logger.LogWarning(
+                    "Product creation failed - duplicate title found: {ProductTitle}",
+                    createProductDto.Title);
                 return Result<bool>.Failure("The product you try add it is already exist.");
             }
 
@@ -56,11 +64,14 @@ namespace KeystoneCommerce.Application.Services
 
             if (result > 0)
             {
-                _logger.LogInformation("Product created successfully: {ProductTitle} with {GalleryCount} gallery images",
+                _logger.LogInformation(
+                    "Product created successfully: {ProductTitle} with {GalleryCount} gallery images",
                     createProductDto.Title, createProductDto.Gallaries.Count);
                 return Result<bool>.Success();
             }
-            _logger.LogError("Failed to save product to database: {ProductTitle}", createProductDto.Title);
+
+            _logger.LogError("Failed to save product to database: {ProductTitle}",
+                createProductDto.Title);
             return Result<bool>.Failure("Failed to create product.");
         }
 
@@ -68,15 +79,17 @@ namespace KeystoneCommerce.Application.Services
         {
             Product product = _mappingService.Map<Product>(createProductDto);
 
-            product.ImageName = await _imageService.SaveImageAsync(createProductDto.MainImage.Data, createProductDto.MainImage.Type, FilePaths.ProductPath);
+            product.ImageName = await _imageService.SaveImageAsync(createProductDto.MainImage.Data,
+                createProductDto.MainImage.Type, FilePaths.ProductPath);
 
             var gallariesImagesName = createProductDto.Gallaries.Select(async g =>
-            await _imageService.SaveImageAsync(g.Data, g.Type, FilePaths.ProductPath));
+                await _imageService.SaveImageAsync(g.Data, g.Type, FilePaths.ProductPath));
 
-            product.Galleries = gallariesImagesName.Select(galleryImageNameTask => new ProductGallery
-            {
-                ImageName = galleryImageNameTask.Result
-            }).ToList();
+            product.Galleries = gallariesImagesName.Select(galleryImageNameTask =>
+                new ProductGallery
+                {
+                    ImageName = galleryImageNameTask.Result
+                }).ToList();
             return product;
         }
 
@@ -105,18 +118,22 @@ namespace KeystoneCommerce.Application.Services
                 _logger.LogWarning("Product not found with ID: {ProductId}", productId);
                 return null;
             }
+
             return _mappingService.Map<ProductDto>(product);
         }
 
         #region Update Product
+
         public async Task<Result<UpdateProductDto>> UpdateProduct(UpdateProductDto productDto)
         {
-            _logger.LogInformation("Updating product with ID: {ProductId}, Title: {ProductTitle}", productDto.Id, productDto.Title);
+            _logger.LogInformation("Updating product with ID: {ProductId}, Title: {ProductTitle}",
+                productDto.Id, productDto.Title);
 
             var validation = _updateValidationService.Validate(productDto);
             if (!validation.IsValid)
             {
-                _logger.LogWarning("Product update validation failed for ID: {ProductId}. Errors: {ValidationErrors}",
+                _logger.LogWarning(
+                    "Product update validation failed for ID: {ProductId}. Errors: {ValidationErrors}",
                     productDto.Id, string.Join(", ", validation.Errors));
                 return Result<UpdateProductDto>.Failure(validation.Errors);
             }
@@ -129,15 +146,19 @@ namespace KeystoneCommerce.Application.Services
             }
 
             // Check for title uniqueness
-            if (await _productRepository.ExistsAsync(p => p.Title == productDto.Title && p.Id != productDto.Id))
+            if (await _productRepository.ExistsAsync(p =>
+                    p.Title == productDto.Title && p.Id != productDto.Id))
             {
-                _logger.LogWarning("Product update failed - duplicate title found: {ProductTitle} for different product (ID: {ProductId})",
+                _logger.LogWarning(
+                    "Product update failed - duplicate title found: {ProductTitle} for different product (ID: {ProductId})",
                     productDto.Title, productDto.Id);
-                return Result<UpdateProductDto>.Failure("Another product with the same title already exists.");
+                return Result<UpdateProductDto>.Failure(
+                    "Another product with the same title already exists.");
             }
 
             // validate gallery images count
-            Result<UpdateProductDto> galleryValidationResult = ValidateGalleryImagesCount(productDto, product);
+            Result<UpdateProductDto> galleryValidationResult =
+                ValidateGalleryImagesCount(productDto, product);
             if (!galleryValidationResult.IsSuccess)
                 return galleryValidationResult;
 
@@ -148,7 +169,8 @@ namespace KeystoneCommerce.Application.Services
             var oldImageName = product.ImageName;
             if (productDto.MainImage != null && !string.IsNullOrEmpty(productDto.MainImage.Type))
             {
-                product.ImageName = await _imageService.SaveImageAsync(productDto.MainImage.Data, productDto.MainImage.Type, FilePaths.ProductPath);
+                product.ImageName = await _imageService.SaveImageAsync(productDto.MainImage.Data,
+                    productDto.MainImage.Type, FilePaths.ProductPath);
             }
 
             _mappingService.Map(productDto, product);
@@ -157,19 +179,24 @@ namespace KeystoneCommerce.Application.Services
 
             if (result == 0)
             {
-                _logger.LogError("Failed to save product update to database. Product ID: {ProductId}", productDto.Id);
+                _logger.LogError(
+                    "Failed to save product update to database. Product ID: {ProductId}",
+                    productDto.Id);
                 return Result<UpdateProductDto>.Failure("Failed to update product.");
             }
 
             await DeleteOldImages(product, productDto, oldImageName);
 
-            _logger.LogInformation("Product updated successfully: ID {ProductId}, Title: {ProductTitle}, Deleted Images: {DeletedCount}, New Images: {NewCount}",
-                productDto.Id, productDto.Title, productDto.DeletedImages?.Count ?? 0, productDto.NewGalleries?.Count ?? 0);
+            _logger.LogInformation(
+                "Product updated successfully: ID {ProductId}, Title: {ProductTitle}, Deleted Images: {DeletedCount}, New Images: {NewCount}",
+                productDto.Id, productDto.Title, productDto.DeletedImages?.Count ?? 0,
+                productDto.NewGalleries?.Count ?? 0);
 
             return Result<UpdateProductDto>.Success(productDto);
         }
 
-        private async Task DeleteOldImages(Product product, UpdateProductDto productDto, string oldImageName)
+        private async Task DeleteOldImages(Product product, UpdateProductDto productDto,
+            string oldImageName)
         {
             // Delete old main image if updated
             if (oldImageName != product.ImageName)
@@ -180,7 +207,8 @@ namespace KeystoneCommerce.Application.Services
                 await DeleteImages(FilePaths.ProductPath, productDto.DeletedImages!);
         }
 
-        private async Task DeleteImage(string path, string imageName) => await _imageService.DeleteImageAsync(path, imageName);
+        private async Task DeleteImage(string path, string imageName) =>
+            await _imageService.DeleteImageAsync(path, imageName);
 
         private async Task DeleteImages(string path, List<string> imageNames)
         {
@@ -190,16 +218,23 @@ namespace KeystoneCommerce.Application.Services
             foreach (var imageName in imageNames)
                 await DeleteImage(path, imageName);
         }
-        private async Task AddNewGalleriesToProductAsync(UpdateProductDto productDto, Product product)
+
+        private async Task AddNewGalleriesToProductAsync(UpdateProductDto productDto,
+            Product product)
         {
             if (!productDto.HasNewGalleries)
                 return;
 
             foreach (var newGallery in productDto.NewGalleries!)
-                product.Galleries.Add(new ProductGallery { ImageName = await _imageService.SaveImageAsync(newGallery.Data, newGallery.Type, FilePaths.ProductPath) });
+                product.Galleries.Add(new ProductGallery
+                {
+                    ImageName = await _imageService.SaveImageAsync(newGallery.Data, newGallery.Type,
+                        FilePaths.ProductPath)
+                });
         }
 
-        private static void RemoveDeletedGalleriesFromProduct(Product product, List<string> DeletedImages)
+        private static void RemoveDeletedGalleriesFromProduct(Product product,
+            List<string> DeletedImages)
         {
             if (DeletedImages is null || DeletedImages.Count == 0)
                 return;
@@ -207,16 +242,17 @@ namespace KeystoneCommerce.Application.Services
             DeletedImages?.ForEach(imageName =>
             {
                 var deletedGalary =
-                product.Galleries
-                .Where(g => g.ImageName == imageName)
-                .FirstOrDefault();
+                    product.Galleries
+                        .Where(g => g.ImageName == imageName)
+                        .FirstOrDefault();
 
                 if (deletedGalary != null)
                     product.Galleries.Remove(deletedGalary);
             });
         }
 
-        private Result<UpdateProductDto> ValidateGalleryImagesCount(UpdateProductDto productDto, Product product)
+        private Result<UpdateProductDto> ValidateGalleryImagesCount(UpdateProductDto productDto,
+            Product product)
         {
             // If nothing to change, it's valid
             if (!productDto.HasDeletedImages && !productDto.HasNewGalleries)
@@ -235,9 +271,11 @@ namespace KeystoneCommerce.Application.Services
             {
                 if (!(productDto.HasNewGalleries && newCount <= max))
                 {
-                    _logger.LogWarning("Product update failed for ID: {ProductId} - attempting to delete all gallery images without valid replacements",
-                            productDto.Id);
-                    return Result<UpdateProductDto>.Failure($"You cannot delete all gallery images without adding new ones. Maximum allowed gallery images are {FileSizes.MaxNumberOfGalleryImages}.");
+                    _logger.LogWarning(
+                        "Product update failed for ID: {ProductId} - attempting to delete all gallery images without valid replacements",
+                        productDto.Id);
+                    return Result<UpdateProductDto>.Failure(
+                        $"You cannot delete all gallery images without adding new ones. Maximum allowed gallery images are {FileSizes.MaxNumberOfGalleryImages}.");
                 }
 
                 // If newCount <= max then OK (replacement provided)
@@ -248,48 +286,72 @@ namespace KeystoneCommerce.Application.Services
             int finalCountAfterUpdate = (existingCount - deletedCount) + newCount;
             if (finalCountAfterUpdate > max)
             {
-                _logger.LogWarning("Product update failed for ID: {ProductId} - gallery count ({FinalCount}) exceeds limit ({MaxLimit})",
-                                productDto.Id, finalCountAfterUpdate, FileSizes.MaxNumberOfGalleryImages);
-                return Result<UpdateProductDto>.Failure($"The total number of gallery images exceeds the limit of {FileSizes.MaxNumberOfGalleryImages}.");
+                _logger.LogWarning(
+                    "Product update failed for ID: {ProductId} - gallery count ({FinalCount}) exceeds limit ({MaxLimit})",
+                    productDto.Id, finalCountAfterUpdate, FileSizes.MaxNumberOfGalleryImages);
+                return Result<UpdateProductDto>.Failure(
+                    $"The total number of gallery images exceeds the limit of {FileSizes.MaxNumberOfGalleryImages}.");
             }
+
             return Result<UpdateProductDto>.Success();
         }
+
         #endregion
 
         public async Task<Result<bool>> DeleteProduct(int id)
         {
             _logger.LogInformation("Deleting product with ID: {ProductId}", id);
-        
+
             var product = await _productRepository.GetProductByIdAsync(id);
             if (product is null)
             {
                 _logger.LogWarning("Product not found for deletion. ID: {ProductId}", id);
                 return Result<bool>.Failure("Product not found.");
             }
-        
+
             _productRepository.Delete(product);
             var result = await _productRepository.SaveChangesAsync();
-        
+
             if (result == 0)
             {
-                _logger.LogError("Failed to delete product from database. Product ID: {ProductId}", id);
+                _logger.LogError("Failed to delete product from database. Product ID: {ProductId}",
+                    id);
                 return Result<bool>.Failure("Failed to delete product.");
             }
-        
+
             // Delete main image
             await DeleteImage(FilePaths.ProductPath, product.ImageName);
-        
+
             // Delete gallery images
             if (product.Galleries is not null && product.Galleries.Any())
             {
                 var galleryImageNames = product.Galleries.Select(g => g.ImageName).ToList();
                 await DeleteImages(FilePaths.ProductPath, galleryImageNames);
             }
-        
-            _logger.LogInformation("Product deleted successfully: ID {ProductId}, Title: {ProductTitle}, Gallery Images Count: {GalleryCount}",
+
+            _logger.LogInformation(
+                "Product deleted successfully: ID {ProductId}, Title: {ProductTitle}, Gallery Images Count: {GalleryCount}",
                 id, product.Title, product.Galleries?.Count ?? 0);
-        
+
             return Result<bool>.Success();
         }
+
+        public async Task<PaginatedResult<ProductDto>> GetAllProductsPaginatedAsync(PaginationParameters parameters)
+        {
+            var products = await _productRepository.GetPagedAsync(
+                parameters.PageNumber, 
+                parameters.PageSize);
+            
+            var productDto = _mappingService.Map<List<ProductDto>>(products);
+            
+            return new PaginatedResult<ProductDto>
+            {
+                Items = productDto,
+                PageNumber = parameters.PageNumber,
+                PageSize = parameters.PageSize,
+                TotalCount = await _productRepository.CountAsync()
+            };
+        }
+        
     }
 }

@@ -16,6 +16,7 @@ namespace KeystoneCommerce.Application.Interfaces.Repositories
         Task<int> CountAsync(Expression<Func<T, bool>> predicate);
         Task<int> CountAsync();
         Task<int> SaveChangesAsync();
+        Task<List<T>> GetPagedAsync(int pageNumber, int pageSize);
 
     }
 }
