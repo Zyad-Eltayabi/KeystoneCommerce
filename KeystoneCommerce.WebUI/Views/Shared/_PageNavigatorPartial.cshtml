@@ -1,0 +1,76 @@
+<!-- Pagination controls -->
+<nav aria-label="Page navigation">
+    <ul class="pagination pagination-md justify-content-center flex-wrap">
+        @if (Model.HasPrevious)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index" asp-route-pageNumber="1" asp-route-pageSize="@Model.PageSize">
+                    <span class="d-none d-md-inline">First</span>
+                    <span class="d-inline d-md-none">««</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageNumber - 1)" asp-route-pageSize="@Model.PageSize">
+                    <span class="d-none d-md-inline"><i class="bi bi-caret-left-fill"></i></span>
+                    <span class="d-inline d-md-none">‹</span>
+                </a>
+            </li>
+        }
+
+        @{
+            int maxPagesToShow = 10;
+            int startPage = Math.Max(1, Model.PageNumber - maxPagesToShow / 2);
+            int endPage = Math.Min(Model.TotalPages, startPage + maxPagesToShow - 1);
+
+            if (endPage - startPage < maxPagesToShow - 1)
+            {
+                startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+            }
+
+            if (startPage > 1)
+            {
+                <li class="page-item disabled d-none d-sm-inline-block">
+                    <span class="page-link">...</span>
+                </li>
+            }
+
+            for (int i = startPage; i <= endPage; i++)
+            {
+                var isActive = i == Model.PageNumber;
+                var displayClass = isActive ? "" : "d-none d-sm-inline-block";
+                
+                <li class="page-item @(isActive ? "active" : "") @displayClass">
+                    <a class="page-link" asp-action="Index" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                </li>
+            }
+
+            if (endPage < Model.TotalPages)
+            {
+                <li class="page-item disabled d-none d-sm-inline-block">
+                    <span class="page-link">...</span>
+                </li>
+            }
+        }
+
+        @if (Model.HasNext)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageNumber + 1)" asp-route-pageSize="@Model.PageSize">
+                    <span class="d-none d-md-inline"><i class="bi bi-caret-right-fill"></i></span>
+                    <span class="d-inline d-md-none">›</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" asp-action="Index" asp-route-pageNumber="@Model.TotalPages" asp-route-pageSize="@Model.PageSize">
+                    <span class="d-none d-md-inline">Last</span>
+                    <span class="d-inline d-md-none">»»</span>
+                </a>
+            </li>
+        }
+    </ul>
+</nav>
+
+<!-- Page info -->
+<div class="text-center text-muted mt-2">
+    <small>Page @Model.PageNumber of @Model.TotalPages</small>
+</div>
