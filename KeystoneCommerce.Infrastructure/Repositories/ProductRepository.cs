@@ -21,9 +21,8 @@ namespace KeystoneCommerce.Infrastructure.Repositories
                 .FirstOrDefaultAsync(p => p.Id == productId);
         }
         
-        public async Task<List<Product>> GetPagedAsync(int pageNumber, int pageSize)
+        public new async Task<List<Product>> GetPagedAsync(int pageNumber, int pageSize)
             => await _context.Products
-               // .OrderBy(p => p.Id) 
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
