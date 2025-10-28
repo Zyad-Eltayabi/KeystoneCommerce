@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using KeystoneCommerce.Application.Common.Pagination;
 using System.Linq.Dynamic.Core;
+using KeystoneCommerce.Shared.Constants;
 
 namespace KeystoneCommerce.Infrastructure.Repositories
 {
@@ -83,6 +84,16 @@ namespace KeystoneCommerce.Infrastructure.Repositories
 
         public async Task<List<T>> GetPagedAsync(PaginationParameters parameters)
         {
+            var query = ConfigureQueryForPagination(parameters);
+            parameters.TotalCount = await query.CountAsync();
+            return await query.AsNoTracking()
+                    .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                    .Take(parameters.PageSize)
+                    .ToListAsync();
+        }
+
+        private IQueryable<T> ConfigureQueryForPagination(PaginationParameters parameters)
+        {
             var query = Entity.AsQueryable();
 
             if (!string.IsNullOrEmpty(parameters.SortBy))
@@ -93,7 +104,7 @@ namespace KeystoneCommerce.Infrastructure.Repositories
                 if (property == null)
                     parameters.SortBy = "Id";
 
-                query = parameters.SortOrder?.ToLower() == "desc"
+                query = parameters.SortOrder?.ToLower() == Sorting.Descending.ToLower()
                     ? query.OrderByDescending(e => EF.Property<object>(e, parameters.SortBy))
                     : query.OrderBy(e => EF.Property<object>(e, parameters.SortBy));
             }
@@ -121,14 +132,7 @@ namespace KeystoneCommerce.Infrastructure.Repositories
                 }
             }
 
-            parameters.TotalCount = await query.CountAsync();
-
-            return await
-                query
-                    .AsNoTracking()
-                    .Skip((parameters.PageNumber - 1) * parameters.PageSize)
-                    .Take(parameters.PageSize)
-                    .ToListAsync();
+            return query;
         }
     }
 }
