@@ -1,0 +1,31 @@
+@model int
+@{
+    List<SelectListItem> pageSizes = SelectListData.PageSizes;
+}
+
+<div class="input-group my-3" style="width: 160px">
+    <label class="input-group-text" for="pageSizeSelect">Page Size</label>
+    <select class="form-select" id="pageSizeSelect">
+        @foreach (var item in pageSizes)
+        {
+            if (item.Value == Model.ToString())
+            {
+                <option value="@item.Value" selected>@item.Text</option>
+            }
+            else
+            {
+                <option value="@item.Value">@item.Text</option>
+            }
+        }
+    </select>
+</div>
+
+<script>
+    document.getElementById("pageSizeSelect").addEventListener("change", function () {
+        const newSize = this.value;
+        const url = new URL(window.location.href);
+        url.searchParams.set("pageSize", newSize);
+        url.searchParams.set("pageNumber", 1);
+        window.location.href = url.toString();
+    });
+</script>
