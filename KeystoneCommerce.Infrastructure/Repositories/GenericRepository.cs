@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Reflection;
 using KeystoneCommerce.Application.Common.Pagination;
+using System.Linq.Dynamic.Core;
 
 namespace KeystoneCommerce.Infrastructure.Repositories
 {
@@ -83,24 +84,51 @@ namespace KeystoneCommerce.Infrastructure.Repositories
         public async Task<List<T>> GetPagedAsync(PaginationParameters parameters)
         {
             var query = Entity.AsQueryable();
-            
+
             if (!string.IsNullOrEmpty(parameters.SortBy))
             {
-                var property = typeof(T).GetProperty(parameters.SortBy,  
+                var property = typeof(T).GetProperty(parameters.SortBy,
                     BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                
+
                 if (property == null)
                     parameters.SortBy = "Id";
-                
-                query = parameters.SortOrder?.ToLower() == "desc" 
-                    ? query.OrderByDescending(e => EF.Property<object>(e, parameters.SortBy)) 
+
+                query = parameters.SortOrder?.ToLower() == "desc"
+                    ? query.OrderByDescending(e => EF.Property<object>(e, parameters.SortBy))
                     : query.OrderBy(e => EF.Property<object>(e, parameters.SortBy));
             }
-           
-            return await 
-                query.Skip((parameters.PageNumber - 1) * parameters.PageSize)
-                .Take(parameters.PageSize)
-                .ToListAsync();
+
+            if (!string.IsNullOrEmpty(parameters.SearchBy) &&
+                !string.IsNullOrEmpty(parameters.SearchValue))
+            {
+                var property = typeof(T).GetProperty(parameters.SearchBy,
+                    BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+
+                if (property is not null)
+                {
+                    var propertyType = property.PropertyType;
+                    string expression;
+
+                    if (propertyType == typeof(string))
+                        expression = $"{parameters.SearchBy}.Contains(@0)";
+                    else
+                        expression = $"{parameters.SearchBy} == @0";
+
+                    var lambda = DynamicExpressionParser.ParseLambda<T, bool>(
+                        new ParsingConfig(), true, expression, parameters.SearchValue);
+
+                    query = query.Where(lambda);
+                }
+            }
+
+            parameters.TotalCount = await query.CountAsync();
+
+            return await
+                query
+                    .AsNoTracking()
+                    .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                    .Take(parameters.PageSize)
+                    .ToListAsync();
         }
     }
 }

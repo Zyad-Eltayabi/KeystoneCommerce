@@ -17,7 +17,39 @@
 </div>
 
 @* Page Size Selector *@
-@await Html.PartialAsync("_PageSizeSelectorPartial", model: @Model.PageSize);
+@await Html.PartialAsync("_PageSizeSelectorPartial", model: @Model.PageSize)
+
+@* create search form *@
+<form method="get" asp-action="Index" 
+      class="d-flex justify-content-end align-items-center flex-wrap my-3">
+
+    <div class="input-group input-group-md" style="width: auto">
+        <select asp-for="SearchBy" class="form-select m-1" style="border-radius:20px; min-width: 150px;">>
+            <option value="Id">Id</option>
+            <option value="Title">Title</option>
+            <option value="Description">Description</option>
+            <option value="Tags">Tags</option>
+            <option value="Summary">Summary</option>
+            <option value="Price">Price</option>
+            <option value="Discount">Discount</option>
+            <option value="QTY">QTY</option>
+        </select>
+
+        <input asp-for="SearchValue" type="text" class="form-control me-1 rounded-pill m-1" 
+               placeholder="Search" style="min-width: 200px;">
+
+        <button type="submit" class="btn btn-outline-success rounded-pill m-1">
+            Search
+        </button>
+    </div>
+
+    <!-- hidden fields -->
+    <input type="hidden" name="pageNumber" value="1" />
+    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+    <input type="hidden" name="sortBy" value="@Model.SortBy" />
+    <input type="hidden" name="sortOrder" value="@Model.SortOrder" />
+</form>
+
 
 <div class="table-responsive">
     <table class="table table-bordered table-hover">
@@ -28,6 +60,8 @@
                    asp-route-pageSize="@Model.PageSize"
                    asp-route-sortBy="Id"
                    asp-route-sortOrder="@((Model.SortOrder == "Asc" || Model.SortOrder == "") ? "desc" : "Asc")"
+                   asp-route-searchBy="@Model.SearchBy"
+                   asp-route-searchValue="@Model.SearchValue"
                    asp-action="Index"
                    class="link-underline text-decoration-none">ID
                 </a>

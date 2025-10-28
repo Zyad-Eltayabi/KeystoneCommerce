@@ -11,4 +11,6 @@ public class PaginatedResult<T> where T : class
     public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
     public bool HasPrevious => PageNumber > 1;
     public bool HasNext => PageNumber < TotalPages;
+    public string? SearchBy { get; set; } = string.Empty;
+    public string? SearchValue { get; set; } = string.Empty;
 }

@@ -15,4 +15,9 @@ public class PaginationParameters
     
     public string? SortBy { get; set; } = string.Empty;
     public string? SortOrder { get; set; } = string.Empty;
+    
+    public string? SearchBy { get; set; } = string.Empty;
+    public string? SearchValue { get; set; } = string.Empty;
+    
+    public int TotalCount { get; set;  } = 0;
 }

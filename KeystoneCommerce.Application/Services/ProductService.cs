@@ -348,9 +348,11 @@ namespace KeystoneCommerce.Application.Services
                 Items = productDto,
                 PageNumber = parameters.PageNumber,
                 PageSize = parameters.PageSize,
-                TotalCount = await _productRepository.CountAsync(),
+                TotalCount = parameters.TotalCount,
                 SortBy = parameters.SortBy,
                 SortOrder = parameters.SortOrder,
+                SearchBy = parameters.SearchBy,
+                SearchValue = parameters.SearchValue
             };
         }
     }
