@@ -3,6 +3,7 @@ using KeystoneCommerce.Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Reflection;
+using KeystoneCommerce.Application.Common.Pagination;
 
 namespace KeystoneCommerce.Infrastructure.Repositories
 {
@@ -79,27 +80,26 @@ namespace KeystoneCommerce.Infrastructure.Repositories
             return await Entity.CountAsync();
         }
 
-        public async Task<List<T>> GetPagedAsync(int pageNumber, int pageSize, string? sortBy,
-            string? sortOrder)
+        public async Task<List<T>> GetPagedAsync(PaginationParameters parameters)
         {
             var query = Entity.AsQueryable();
             
-            if (!string.IsNullOrEmpty(sortBy))
+            if (!string.IsNullOrEmpty(parameters.SortBy))
             {
-                var property = typeof(T).GetProperty(sortBy, 
+                var property = typeof(T).GetProperty(parameters.SortBy,  
                     BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                 
                 if (property == null)
-                    sortBy = "Id";
+                    parameters.SortBy = "Id";
                 
-                query = sortOrder?.ToLower() == "desc" 
-                    ? query.OrderByDescending(e => EF.Property<object>(e, sortBy)) 
-                    : query.OrderBy(e => EF.Property<object>(e, sortBy));
+                query = parameters.SortOrder?.ToLower() == "desc" 
+                    ? query.OrderByDescending(e => EF.Property<object>(e, parameters.SortBy)) 
+                    : query.OrderBy(e => EF.Property<object>(e, parameters.SortBy));
             }
            
             return await 
-                query.Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
+                query.Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                .Take(parameters.PageSize)
                 .ToListAsync();
         }
     }

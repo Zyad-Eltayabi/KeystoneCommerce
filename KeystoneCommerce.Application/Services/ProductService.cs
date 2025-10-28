@@ -336,16 +336,13 @@ namespace KeystoneCommerce.Application.Services
             return Result<bool>.Success();
         }
 
-        public async Task<PaginatedResult<ProductDto>> GetAllProductsPaginatedAsync(PaginationParameters parameters)
+        public async Task<PaginatedResult<ProductDto>> GetAllProductsPaginatedAsync(
+            PaginationParameters parameters)
         {
-            var products = await _productRepository.GetPagedAsync(
-                parameters.PageNumber, 
-                parameters.PageSize,
-                parameters.SortBy!,
-                parameters.SortOrder!);
-            
+            var products = await _productRepository.GetPagedAsync(parameters);
+
             var productDto = _mappingService.Map<List<ProductDto>>(products);
-            
+
             return new PaginatedResult<ProductDto>
             {
                 Items = productDto,
@@ -356,6 +353,5 @@ namespace KeystoneCommerce.Application.Services
                 SortOrder = parameters.SortOrder,
             };
         }
-        
     }
 }
