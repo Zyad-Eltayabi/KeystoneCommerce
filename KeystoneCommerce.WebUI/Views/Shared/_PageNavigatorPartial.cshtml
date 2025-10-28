@@ -4,13 +4,24 @@
         @if (Model.HasPrevious)
         {
             <li class="page-item">
-                <a class="page-link" asp-action="Index" asp-route-pageNumber="1" asp-route-pageSize="@Model.PageSize">
+                <a class="page-link" asp-action="Index" asp-route-pageNumber="1"
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-sortBy="@Model.SortBy"
+                   asp-route-SortOrder="@Model.SortOrder"
+                   asp-route-searchBy="@Model.SearchBy"
+                   asp-route-searchValue="@Model.SearchValue">
                     <span class="d-none d-md-inline">First</span>
                     <span class="d-inline d-md-none">««</span>
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageNumber - 1)" asp-route-pageSize="@Model.PageSize">
+                <a class="page-link" asp-action="Index"
+                   asp-route-pageNumber="@(Model.PageNumber - 1)"
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-sortBy="@Model.SortBy"
+                   asp-route-SortOrder="@Model.SortOrder"
+                   asp-route-searchBy="@Model.SearchBy"
+                   asp-route-searchValue="@Model.SearchValue">
                     <span class="d-none d-md-inline"><i class="bi bi-caret-left-fill"></i></span>
                     <span class="d-inline d-md-none">‹</span>
                 </a>
@@ -38,9 +49,16 @@
             {
                 var isActive = i == Model.PageNumber;
                 var displayClass = isActive ? "" : "d-none d-sm-inline-block";
-                
+
                 <li class="page-item @(isActive ? "active" : "") @displayClass">
-                    <a class="page-link" asp-action="Index" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                    <a class="page-link" asp-action="Index" asp-route-pageNumber="@i"
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-SortOrder="@Model.SortOrder"
+                       asp-route-searchBy="@Model.SearchBy"
+                       asp-route-searchValue="@Model.SearchValue">
+                        @i
+                    </a>
                 </li>
             }
 
@@ -55,13 +73,25 @@
         @if (Model.HasNext)
         {
             <li class="page-item">
-                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageNumber + 1)" asp-route-pageSize="@Model.PageSize">
+                <a class="page-link" asp-action="Index"
+                   asp-route-pageNumber="@(Model.PageNumber + 1)"
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-sortBy="@Model.SortBy"
+                   asp-route-SortOrder="@Model.SortOrder"
+                   asp-route-searchBy="@Model.SearchBy"
+                   asp-route-searchValue="@Model.SearchValue">
                     <span class="d-none d-md-inline"><i class="bi bi-caret-right-fill"></i></span>
                     <span class="d-inline d-md-none">›</span>
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" asp-action="Index" asp-route-pageNumber="@Model.TotalPages" asp-route-pageSize="@Model.PageSize">
+                <a class="page-link" asp-action="Index" asp-route-pageNumber="@Model.TotalPages"
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-sortBy="@Model.SortBy"
+                   asp-route-SortOrder="@Model.SortOrder"
+                   asp-route-searchBy="@Model.SearchBy"
+                   asp-route-searchValue="@Model.SearchValue">
+                    
                     <span class="d-none d-md-inline">Last</span>
                     <span class="d-inline d-md-none">»»</span>
                 </a>

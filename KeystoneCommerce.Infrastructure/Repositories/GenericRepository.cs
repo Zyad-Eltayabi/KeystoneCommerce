@@ -2,6 +2,10 @@
 using KeystoneCommerce.Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Reflection;
+using KeystoneCommerce.Application.Common.Pagination;
+using System.Linq.Dynamic.Core;
+using KeystoneCommerce.Shared.Constants;
 
 namespace KeystoneCommerce.Infrastructure.Repositories
 {
@@ -65,7 +69,7 @@ namespace KeystoneCommerce.Infrastructure.Repositories
 
         public async Task<int> SaveChangesAsync()
         {
-           return await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
@@ -77,11 +81,58 @@ namespace KeystoneCommerce.Infrastructure.Repositories
         {
             return await Entity.CountAsync();
         }
-        
-        public async Task<List<T>> GetPagedAsync(int pageNumber, int pageSize)
-            => await Entity
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+
+        public async Task<List<T>> GetPagedAsync(PaginationParameters parameters)
+        {
+            var query = ConfigureQueryForPagination(parameters);
+            parameters.TotalCount = await query.CountAsync();
+            return await query.AsNoTracking()
+                    .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                    .Take(parameters.PageSize)
+                    .ToListAsync();
+        }
+
+        private IQueryable<T> ConfigureQueryForPagination(PaginationParameters parameters)
+        {
+            var query = Entity.AsQueryable();
+
+            if (!string.IsNullOrEmpty(parameters.SortBy))
+            {
+                var property = typeof(T).GetProperty(parameters.SortBy,
+                    BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+
+                if (property == null)
+                    parameters.SortBy = "Id";
+
+                query = parameters.SortOrder?.ToLower() == Sorting.Descending.ToLower()
+                    ? query.OrderByDescending(e => EF.Property<object>(e, parameters.SortBy))
+                    : query.OrderBy(e => EF.Property<object>(e, parameters.SortBy));
+            }
+
+            if (!string.IsNullOrEmpty(parameters.SearchBy) &&
+                !string.IsNullOrEmpty(parameters.SearchValue))
+            {
+                var property = typeof(T).GetProperty(parameters.SearchBy,
+                    BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+
+                if (property is not null)
+                {
+                    var propertyType = property.PropertyType;
+                    string expression;
+
+                    if (propertyType == typeof(string))
+                        expression = $"{parameters.SearchBy}.Contains(@0)";
+                    else
+                        expression = $"{parameters.SearchBy} == @0";
+
+                    var lambda = DynamicExpressionParser.ParseLambda<T, bool>(
+                        new ParsingConfig(), true, expression, parameters.SearchValue);
+
+                    query = query.Where(lambda);
+                }
+            }
+
+            return query;
+        }
     }
 }

@@ -1,12 +1,17 @@
-﻿@model PaginatedViewModel<ProductViewModel>
+﻿@model PaginatedResult<ProductDto>
 @{
     Layout = "_AdminLayout";
     ViewData["Title"] = "Products";
 }
 
+@functions {
+    private string GetOrdering()
+        => (Model.SortOrder == Sorting.Ascending|| Model.SortOrder == "") ? Sorting.Descending : Sorting.Ascending;
+}
 <partial name="_ConfirmModalPartial"/>
 
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+<div
+    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="mb-4">Products</h1>
     <a class="btn btn-success text-decoration-none"
        asp-controller="Products"
@@ -15,50 +20,183 @@
     </a>
 </div>
 
+@* Page Size Selector *@
+@await Html.PartialAsync("_PageSizeSelectorPartial", model: @Model.PageSize)
+
+@* create search form *@
+<form method="get" asp-action="Index"
+      class="d-flex justify-content-end align-items-center flex-wrap my-3">
+
+    <div class="input-group input-group-md" style="width: auto">
+        <select asp-for="SearchBy" class="form-select m-1"
+                style="border-radius:20px; min-width: 150px;">>
+            <option value="Id">Id</option>
+            <option value="Title">Title</option>
+            <option value="Description">Description</option>
+            <option value="Tags">Tags</option>
+            <option value="Summary">Summary</option>
+            <option value="Price">Price</option>
+            <option value="Discount">Discount</option>
+            <option value="QTY">QTY</option>
+        </select>
+
+        <input asp-for="SearchValue" type="text" class="form-control me-1 rounded-pill m-1"
+               placeholder="Search" style="min-width: 200px;">
+
+        <button type="submit" class="btn btn-outline-success rounded-pill m-1">
+            Search
+        </button>
+    </div>
+
+    <!-- hidden fields -->
+    <input type="hidden" name="pageNumber" value="1"/>
+    <input type="hidden" name="pageSize" value="@Model.PageSize"/>
+    <input type="hidden" name="sortBy" value="@Model.SortBy"/>
+    <input type="hidden" name="sortOrder" value="@Model.SortOrder"/>
+</form>
+
+
 <div class="table-responsive">
     <table class="table table-bordered table-hover">
         <thead class="table-light">
-            <tr>
-                 <th>Id</th> 
-                <th>Title</th>
-                <th>Summary</th>
-                <th>Description</th>
-                <th>Price</th>
-                <th>Discount</th>
-                <th>QTY</th>
-                <th>Tags</th>
-                <th>Image</th>
-            </tr>
+        <tr>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="Id"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> ID
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="Title"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Title
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="Summary"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Summary
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="Description"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Description
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="Price"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Price
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="Discount"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Discount
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="QTY"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> QTY
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="Tags"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Tags
+                </a>
+            </th>
+            <th></th>
+            <th></th>
+        </tr>
         </thead>
         <tbody>
-            @foreach (var product in Model.Items)
-            {
-                <tr>
-                     <td>@product.Id</td> 
-                    <td>@product.Title</td>
-                    <td>@product.Summary</td>
-                    <td>@product.Description</td>
-                    <td>@product.Price</td>
-                    <td>@product.Discount</td>
-                    <td>@product.QTY</td>
-                    <td>@product.Tags</td>
-                    <td>
-                        <img src="@FilePaths.WebProductPath/@product.ImageName" alt="@product.Title"
-                             style="max-width: 100px; object-fit: cover" />
-                    </td>
-                    <td>
-                        <div class="btn-group" role="group">
-                            <a asp-action="Edit" asp-route-id="@product.Id"
-                               class="btn btn-primary btn-sm">Edit</a>
-                            <a asp-action="Details" asp-route-id="@product.Id"
-                               class="btn btn-info btn-sm">View</a>
-                            <a data-product-id="@product.Id"
-                               class="btn btn-danger btn-sm delete-btn" data-bs-toggle="modal"
-                               data-bs-target="#confirmModal">Delete</a>
-                        </div>
-                    </td>
-                </tr>
-            }
+        @foreach (var product in Model.Items)
+        {
+            <tr>
+                <td>@product.Id</td>
+                <td>@product.Title</td>
+                <td>@product.Summary</td>
+                <td>@product.Description</td>
+                <td>@product.Price</td>
+                <td>@product.Discount</td>
+                <td>@product.QTY</td>
+                <td>@product.Tags</td>
+                <td>
+                    <img src="@FilePaths.WebProductPath/@product.ImageName" alt="@product.Title"
+                         style="max-width: 100px; object-fit: cover"/>
+                </td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a asp-action="Edit" asp-route-id="@product.Id"
+                           class="btn btn-primary btn-sm">Edit</a>
+                        <a asp-action="Details" asp-route-id="@product.Id"
+                           class="btn btn-info btn-sm">View</a>
+                        <a data-product-id="@product.Id"
+                           class="btn btn-danger btn-sm delete-btn" data-bs-toggle="modal"
+                           data-bs-target="#confirmModal">Delete</a>
+                    </div>
+                </td>
+            </tr>
+        }
         </tbody>
     </table>
 </div>
@@ -67,11 +205,20 @@
 
 @section Styles {
     <link rel="stylesheet" href="/assets/css/styles/modal.css">
+    <style>
+        .table-responsive .table th a {
+            color: black;
+            white-space: nowrap;
+        }
+        .table-responsive .table th a:hover {
+            color: #3939a9;
+        }
+    </style>
 }
 
 @section Scripts {
     @{
         <script defer src="/assets/js/axios/axios.min.js"></script>
-        <script defer src="/assets/js/scripts/product-index.js"></script>        
+        <script defer src="/assets/js/scripts/product-index.js"></script>
     }
 }
