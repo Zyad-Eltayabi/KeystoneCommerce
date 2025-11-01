@@ -46,6 +46,35 @@
                     </div>
                 </div>
                 <!--shop toolbar end-->
+                
+                @* create search form *@
+                <form method="get" asp-action="Index"
+                      class="d-flex justify-content-end align-items-center flex-wrap my-3">
+
+                    <div class="input-group input-group-md" style="width: auto">
+                        <select asp-for="SearchBy" class="form-select m-1"
+                                style="border-radius:20px; min-width: 150px;">>
+                            <option value="Title">Title</option>
+                            <option value="Description">Description</option>
+                            <option value="Tags">Tags</option>
+                            <option value="Price">Price</option>
+                        </select>
+
+                        <input asp-for="SearchValue" type="text" class="form-control me-1 rounded-pill m-1"
+                               placeholder="Search" style="min-width: 200px;">
+
+                        <button type="submit" class="btn btn-outline-success rounded-pill m-1">
+                            Search
+                        </button>
+                    </div>
+
+                    <!-- hidden fields -->
+                    <input type="hidden" name="pageNumber" value="1"/>
+                    <input type="hidden" name="pageSize" value="@Model.PageSize"/>
+                    <input type="hidden" name="sortBy" value="@Model.SortBy"/>
+                    <input type="hidden" name="sortOrder" value="@Model.SortOrder"/>
+                </form>
+                
                 <div class="row shop_wrapper">
                     @foreach (var product in Model.Items)
                     {
