@@ -92,7 +92,7 @@ namespace KeystoneCommerce.Infrastructure.Repositories
                     .ToListAsync();
         }
 
-        private IQueryable<T> ConfigureQueryForPagination(PaginationParameters parameters)
+        protected IQueryable<T> ConfigureQueryForPagination(PaginationParameters parameters)
         {
             var query = Entity.AsQueryable();
 

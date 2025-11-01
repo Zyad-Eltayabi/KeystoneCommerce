@@ -1,3 +1,4 @@
+using KeystoneCommerce.Application.Common.Pagination;
 using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Shop;
 using KeystoneCommerce.Application.Interfaces.Repositories;
@@ -7,9 +8,9 @@ namespace KeystoneCommerce.Application.Services;
 
 public class ShopService(IShopRepository shopRepository) : IShopService
 {
-    public async Task<List<ProductCardDto>> GetAvailableProducts()
+    public async Task<List<ProductCardDto>> GetAvailableProducts(PaginationParameters parameters)
     {
-        var products = await shopRepository.GetAvailableProducts();
+        var products = await shopRepository.GetAvailableProducts(parameters);
         return products;
     }
 }

@@ -1,4 +1,4 @@
-@model List<ProductCardViewModel>
+@model PaginatedResult<ProductCardViewModel>
 
 @{
     ViewBag.Title = "Shop";
@@ -26,7 +26,8 @@
                     </div>
                     <div class="toolbar_btn_wrapper d-flex align-items-center">
                         <div class="view_btn">
-                            <a class="view" href="#">VIEW</a>
+                            <a class="view" href="#">VIEW
+                            </a>
                         </div>
                         <div class="shop_toolbar_btn">
                             <ul class="d-flex align-items-center">
@@ -46,7 +47,7 @@
                 </div>
                 <!--shop toolbar end-->
                 <div class="row shop_wrapper">
-                    @foreach (var product in Model)
+                    @foreach (var product in Model.Items)
                     {
                         <div class="col-lg-4 col-md-4 col-sm-6 col-6 ">
                             <div class="single_product">
@@ -138,3 +139,5 @@
     </div>
 </div>
 <!--shop  area end-->
+
+@await Html.PartialAsync("_PageNavigatorPartial");
