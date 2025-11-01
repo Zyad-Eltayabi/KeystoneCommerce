@@ -1,11 +1,16 @@
+using KeystoneCommerce.Application.Interfaces.Services;
+using KeystoneCommerce.WebUI.ViewModels.Shop;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KeystoneCommerce.WebUI.Controllers;
 
-public class ShopController : Controller
+public class ShopController(IShopService shopService,IMappingService mappingService) : Controller
 {
-    public IActionResult Index()
+    
+    public async Task<IActionResult> Index()
     {
-        return View();
+        var productsDto = await shopService.GetAvailableProducts();
+        var productsCardsViewModel = mappingService.Map<List<ProductCardViewModel>>(productsDto);
+        return View(productsCardsViewModel);
     }
 }
