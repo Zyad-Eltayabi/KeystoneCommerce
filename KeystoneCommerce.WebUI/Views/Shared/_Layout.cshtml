@@ -17,10 +17,10 @@
     <link rel="stylesheet" href="assets/css/animate.css">
     <link rel="stylesheet" href="assets/css/jquery-ui.min.css">
     <link rel="stylesheet" href="assets/css/magnific-popup.css">
- 
+
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="/assets/css/bootstrap-icons/font/bootstrap-icons.min.css">
-    
+
     <!-- Main Style CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
 
@@ -249,8 +249,12 @@
                         </div>
                         <div class="header_account">
                             <ul class="d-flex">
-                                <li class="header_search"><a href="#"><i
-                                            class="icon-magnifier icons"></i></a></li>
+                                <li class="header_search">
+
+                                    <a href="#">
+                                        <i class="icon-magnifier icons"></i>
+                                    </a>
+                                </li>
                                 <li class="account_link"><a href="#"><i class="icon-user icons"></i></a>
                                     <ul class="dropdown_account_link">
                                         <li><a href="#">My Account</a></li>
@@ -275,12 +279,14 @@
         <div class="search_close">
             <i class="ion-close-round"></i>
         </div>
-        <form class="border-bottom" action="#">
-            <input class="border-0" placeholder="Search products..." type="text">
+        <form class="border-bottom" asp-action="Index" asp-controller="Shop" method="get">
+            <input name="searchValue" class="border-0" placeholder="Search products..." type="text">
             <button type="submit"><span class="icon-magnifier icons"></span></button>
+            <!-- hidden fields -->
+            <input type="hidden" name="pageNumber" value="1"/>
+            <input type="hidden" name="searchBy" value="Title"/>
         </form>
     </div>
-
 </header>
 <!--header area end-->
 
