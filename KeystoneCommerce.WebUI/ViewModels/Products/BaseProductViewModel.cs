@@ -20,7 +20,7 @@ namespace KeystoneCommerce.WebUI.ViewModels.Products
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
         public decimal Price { get; set; }
 
-        [Range(1, double.MaxValue, ErrorMessage = "Discount must be greater than or equal to 1")]
+        [Range(0, double.MaxValue, ErrorMessage = "Discount must be greater than or equal to 0")]
         public decimal? Discount { get; set; }
 
         [Required(ErrorMessage = "Quantity is required")]

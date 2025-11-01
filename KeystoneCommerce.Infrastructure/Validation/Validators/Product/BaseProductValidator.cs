@@ -23,7 +23,8 @@ namespace KeystoneCommerce.Infrastructure.Validation.Validators.Product
                 .GreaterThan(0).WithMessage("Price must be greater than 0.");
 
             RuleFor(x => x.Discount)
-                .InclusiveBetween(1, 100).WithMessage("Discount must be between 1 and 100.")
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("Discount cannot be negative.")
                 .When(x => x.Discount.HasValue);
 
             RuleFor(x => x.QTY)
