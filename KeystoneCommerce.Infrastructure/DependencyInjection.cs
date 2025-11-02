@@ -26,6 +26,7 @@ namespace KeystoneCommerce.Infrastructure
             services.AddScoped<IBannerRepository, BannerRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IShopRepository, ShopRepository>();
+            services.AddScoped<IProductDetailsRepository, ProductDetailsRepository>();
 
             // Register other infrastructure services
             services.AddScoped<IImageService, ImageService>();

@@ -11,6 +11,7 @@ namespace KeystoneCommerce.WebUI.Extensions
             services.AddScoped<IBannerService, BannerService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IShopService, ShopService>();
+            services.AddScoped<IProductDetailsService, ProductDetailsService>();
             return services;
         }
     }
