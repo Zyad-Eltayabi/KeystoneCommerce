@@ -1,6 +1,7 @@
 ﻿@model HomeBannersDto
 @{
     ViewData["Title"] = "Home Page";
+    Layout = "_Layout";
 }
 
 <!--slider area start-->
@@ -85,7 +86,7 @@
 </section>
 <!--shipping section end-->
 
-  <!-- banner section start -->
+<!-- banner section start -->
 <section class="banner_section mb-109">
     <div class="container">
         <div class="section_title mb-60">
@@ -94,22 +95,24 @@
         <div class="banner_container row" style="gap: 25px;">
             @foreach (var item in Model.Featured)
             {
-                <figure class="single_banner position-relative @(item.Priority == 1 ? "col col-md-7" : "col-md-4")">
-                    <img src="@FilePaths.WebBannerPath/@item.ImageName" alt="" class="w-100 object-fit-fill h-100">
-                <figcaption class="banner_text position-absolute p-3">
-                    <h3>@item.Title</h3>
-                    <p>@item.SubTitle</p>
-                    @if(item.Priority == 1)
-                    {
-                        <a class="btn btn-primary" href="@item.Link">Shop Now</a>
-                    }
-                </figcaption>
-            </figure>
+                <figure
+                    class="single_banner position-relative @(item.Priority == 1 ? "col col-md-7" : "col-md-4")">
+                    <img src="@FilePaths.WebBannerPath/@item.ImageName" alt=""
+                         class="w-100 object-fit-fill h-100">
+                    <figcaption class="banner_text position-absolute p-3">
+                        <h3>@item.Title</h3>
+                        <p>@item.SubTitle</p>
+                        @if (item.Priority == 1)
+                        {
+                            <a class="btn btn-primary" href="@item.Link">Shop Now</a>
+                        }
+                    </figcaption>
+                </figure>
             }
         </div>
     </div>
 </section>
-    <!-- banner section end -->
+<!-- banner section end -->
 
 <!-- product section start -->
 @* To DO *@
@@ -143,23 +146,21 @@
 
 @section Scripts {
     <script>
-           window.addEventListener("DOMContentLoaded", () => {
-          const topProducts = document.querySelectorAll(".top-product");
-          const discountRegex = /(100|[1-9][0-9]?)\s*%/g;
+        window.addEventListener("DOMContentLoaded", () => {
+            const topProducts = document.querySelectorAll(".top-product");
+            const discountRegex = /(100|[1-9][0-9]?)\s*%/g;
 
-          for (let i = 0; i < topProducts.length; i++) {
-            const titleElement = topProducts[i].querySelector(".sale-title");
-            if (!titleElement) continue;
+            for (let i = 0; i < topProducts.length; i++) {
+                const titleElement = topProducts[i].querySelector(".sale-title");
+                if (!titleElement) continue;
 
-            const title = titleElement.textContent.trim();
+                const title = titleElement.textContent.trim();
 
-            if (discountRegex.test(title)) {
-                titleElement.innerHTML = title.replace(discountRegex,'<strong style="color: #ff2f2f;">$&</strong> <br>');
+                if (discountRegex.test(title)) {
+                    titleElement.innerHTML = title.replace(discountRegex, '<strong style="color: #ff2f2f;">$&</strong> <br>');
+                }
             }
-          }
         });
-
-
 
 
     </script>
