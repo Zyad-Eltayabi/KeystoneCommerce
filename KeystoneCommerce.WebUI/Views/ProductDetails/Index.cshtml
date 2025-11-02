@@ -1,0 +1,305 @@
+@model ProductDetailsViewModel
+@{
+    ViewBag.Title = "Product Details";
+    Layout = "_Layout";
+}
+
+<!--breadcrumbs area start-->
+<div class="breadcrumbs_area breadcrumbs_product mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb_content">
+                    <ul>
+                        <li><a asp-action="Index" asp-controller="Home">home</a></li>
+                        <li><a asp-action="Index" asp-controller="Shop">shop</a></li>
+                        <li>Product Details</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--breadcrumbs area end-->
+
+<!--product details start-->
+<section class="product_details mb-135">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-md-6">
+                <img
+                    src="@FilePaths.WebProductPath/@Model.Product.ImageName" alt="Product"
+                    class="img-fluid rounded mb-3 product-image" id="mainImage">
+                <div class="d-flex justify-content-between flex-wrap">
+                    <img
+                        src="@FilePaths.WebProductPath/@Model.Product.ImageName"
+                        alt="Thumbnail 1" class="thumbnail rounded active">
+                    @if (Model.Product.GalleryImageNames is not null && Model.Product.GalleryImageNames.Any())
+                    {
+                        foreach (var photo in Model.Product.GalleryImageNames)
+                        {
+                            <img
+                                src="@FilePaths.WebProductPath/@photo"
+                                alt="Thumbnail" class="thumbnail rounded"/>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6">
+                <div class="product_d_right">
+                    <form action="#">
+                        <h1>@Model.Product.Title</h1>
+                        <div class="product_ratting_review d-flex align-items-center">
+                            <div class=" product_ratting">
+                                <ul class="d-flex">
+                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
+                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
+                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
+                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
+                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
+                                </ul>
+                            </div>
+                            <div class="product_review">
+                                <ul class="d-flex">
+                                    <li>4 reviews</li>
+                                    <li>Write your review</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="price_box">
+                            <span
+                                class="current_price">@(Model.Product.Price - Model.Product.Discount)</span>
+                        </div>
+                        <div class="product_availalbe">
+                            <ul class="d-flex">
+                                <li><i class="icon-layers icons"></i> Only
+                                    <span>@Model.Product.QTY</span> left
+                                </li>
+                                <li>Available:
+                                    @if (Model.Product.QTY > 0)
+                                    {
+                                        <span class="stock">In Stock</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-danger">No</span>
+                                    }
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="product_desc">
+                            <p>@Model.Product.Summary</p>
+                        </div>
+                        <div class="product_variant">
+                            <div class="variant_quantity_btn d-flex">
+                                @if (Model.Product.QTY > 0)
+                                {
+                                    <div class="pro-qty border">
+                                        <input min="1" max="100" type="text" value="1">
+                                    </div>
+                                    <button class="button btn btn-primary" type="submit">
+                                        <i
+                                            class="ion-android-add"></i> Add To Cart
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                        <div class="product_sku">
+                            <p><span>SKU: </span> PRI#@Model.Product.Id</p>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.Product.Tags))
+                        {
+                            var tags = Model.Product.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                            <div class="product_tags d-flex">
+                                <span>tags: </span>
+                                <ul class="d-flex ">
+                                    @foreach (var tag in tags)
+                                    {
+                                        <li class="mr-2">
+                                            <a asp-controller="Shop"
+                                               asp-action="Index"
+                                               asp-route-searchBy="tags"
+                                               asp-route-searchValue="@tag.Trim()"
+                                               class=""
+                                            >@tag.Trim()
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                        <div class="priduct_social d-flex">
+                            <span>SHARE: </span>
+                            <ul>
+                                <li><a href="#"><i class="ion-social-twitter"></i></a></li>
+                                <li><a href="#"><i class="ion-social-facebook"></i></a></li>
+                                <li><a href="#"><i class="ion-social-googleplus-outline"></i></a>
+                                </li>
+                                <li><a href="#"><i class="ion-social-pinterest"></i></a></li>
+                                <li><a href="#"><i class="ion-social-instagram-outline"></i></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--product details end-->
+
+<!--product info start-->
+<div class="product_d_info mb-118">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="product_d_inner">
+                    <div class="product_info_button border-bottom">
+                        <ul class="nav" role="tablist">
+                            <li>
+                                <a class="active" data-toggle="tab" href="#info" role="tab"
+                                   aria-controls="info" aria-selected="false">Product
+                                    Description</a>
+                            </li>
+                            <li>
+                                <a data-toggle="tab" href="#reviews" role="tab"
+                                   aria-controls="reviews" aria-selected="false">Reviews </a>
+                            </li>
+                            <li>
+                                <a data-toggle="tab" href="#tags" role="tab" aria-controls="tags"
+                                   aria-selected="false">Tags </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="info" role="tabpanel">
+                            <div class="product_info_content">
+                                <p>@Html.Raw(Model.Product.Description.Replace("\n", "<br>"))</p>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="reviews" role="tabpanel">
+                            <div class="reviews_wrapper">
+                                <h2>1 review for Donec eu furniture</h2>
+                                <div class="reviews_comment_box">
+                                    <div class="comment_thmb">
+                                        <img src="/assets/img/blog/comment2.jpg" alt="">
+                                    </div>
+                                    <div class="comment_text">
+                                        <div class="reviews_meta">
+                                            <div class="star_rating">
+                                                <ul class="d-flex">
+                                                    <li><a href="#"><i class="icon-star"></i></a>
+                                                    </li>
+                                                    <li><a href="#"><i class="icon-star"></i></a>
+                                                    </li>
+                                                    <li><a href="#"><i class="icon-star"></i></a>
+                                                    </li>
+                                                    <li><a href="#"><i class="icon-star"></i></a>
+                                                    </li>
+                                                    <li><a href="#"><i class="icon-star"></i></a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <p><strong>admin </strong>- September 12, 2018</p>
+                                            <span>roadthemes</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="comment_title">
+                                    <h2>Add a review </h2>
+                                    <p>Your email address will not be published. Required fields are
+                                        marked </p>
+                                </div>
+                                <div class="product_ratting mb-10">
+                                    <h3>Your rating</h3>
+                                    <ul class="d-flex">
+                                        <li><a href="#"><i class="icon-star"></i></a></li>
+                                        <li><a href="#"><i class="icon-star"></i></a></li>
+                                        <li><a href="#"><i class="icon-star"></i></a></li>
+                                        <li><a href="#"><i class="icon-star"></i></a></li>
+                                        <li><a href="#"><i class="icon-star"></i></a></li>
+                                    </ul>
+                                </div>
+                                <div class="product_review_form">
+                                    <form action="#">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <label for="review_comment">Your review </label>
+                                                <textarea name="comment"
+                                                          id="review_comment"></textarea>
+                                            </div>
+                                            <div class="col-lg-6 col-md-6">
+                                                <label for="author">Name</label>
+                                                <input id="author" type="text">
+
+                                            </div>
+                                            <div class="col-lg-6 col-md-6">
+                                                <label for="email">Email </label>
+                                                <input id="email" type="text">
+                                            </div>
+                                        </div>
+                                        <button type="submit">Submit</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="tags" role="tabpanel">
+                            <div class="product_info_content">
+                                @if (!string.IsNullOrEmpty(Model.Product.Tags))
+                                {
+                                    var tags = Model.Product.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                                    <ul class="">
+                                        @foreach (var tag in tags)
+                                        {
+                                            <li class="">
+                                                <a asp-controller="Shop"
+                                                   asp-action="Index"
+                                                   asp-route-searchBy="tags"
+                                                   asp-route-searchValue="@tag.Trim()"
+                                                   class=""
+                                                >@tag.Trim()
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--product info end-->
+
+
+
+@section Styles {
+    <style>
+        .product-image {
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        .thumbnail {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+            margin: 5px;
+        }
+
+        .thumbnail:hover, .thumbnail.active {
+            opacity: 1;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script defer src="/assets/js/scripts/product-details.js"></script>
+}
+
