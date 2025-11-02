@@ -24,6 +24,7 @@ public class ShopRepository(ApplicationDbContext applicationDbContext)
             .Take(parameters.PageSize)
             .Select(p => new ProductCardDto
             {
+                Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
                 Price = p.Price,
