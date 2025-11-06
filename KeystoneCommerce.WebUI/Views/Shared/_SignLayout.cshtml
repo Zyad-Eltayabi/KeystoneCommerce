@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] | KeystoneCommerce </title>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="/assets/css/bootstrap-icons/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/assets/css/vendor/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/styles/sign.css">
+    <link rel="icon" href="/assets/img/logo/Logo.ico">
+</head>
+<body>
+   @RenderBody()
+    <script src="/assets/js/vendor/jquery-3.4.1.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false);
+</body>
+
+</html>
