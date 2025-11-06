@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace KeystoneCommerce.Infrastructure.Persistence.Data;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : IdentityDbContext<ApplicationUser>(options)
+    : IdentityDbContext<ApplicationUser, ApplicationRole, string>(options)
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -16,4 +16,4 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<Product> Products { get; set; } = null!;
     public DbSet<Banner> Banners { get; set; } = null!;
-};
+}
