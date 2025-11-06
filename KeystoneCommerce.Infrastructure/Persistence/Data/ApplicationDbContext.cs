@@ -1,10 +1,12 @@
 using KeystoneCommerce.Domain.Entities;
+using KeystoneCommerce.Infrastructure.Persistence.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace KeystoneCommerce.Infrastructure.Persistence.Data;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : DbContext(options)
+    : IdentityDbContext<ApplicationUser>(options)
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
