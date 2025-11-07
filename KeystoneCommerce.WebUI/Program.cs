@@ -33,13 +33,14 @@ else
     app.UseDeveloperExceptionPage();
 }
 
-app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.MapStaticAssets();
 
