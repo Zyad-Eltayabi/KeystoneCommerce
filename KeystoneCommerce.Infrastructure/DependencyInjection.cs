@@ -8,6 +8,7 @@ using KeystoneCommerce.Infrastructure.Repositories;
 using KeystoneCommerce.Infrastructure.Services;
 using KeystoneCommerce.Infrastructure.Validation;
 using KeystoneCommerce.Infrastructure.Validation.Validators.Banner;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -41,6 +42,7 @@ namespace KeystoneCommerce.Infrastructure
         {
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<IMappingService, MappingService>();
+            services.AddScoped<IIdentityService, IdentityService>();
         }
 
         private static void RegisterRepositoryServices(IServiceCollection services)
@@ -81,6 +83,21 @@ namespace KeystoneCommerce.Infrastructure
 
         private static void AddIdentityConfiguration(IServiceCollection services)
         {
+            services.Configure<SecurityStampValidatorOptions>(opts =>
+            {
+                // Enables immediate logout, after updating the user's security stamp.
+                opts.ValidationInterval = TimeSpan.FromHours(1);
+            });
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.Name = "KeystoneCommerce";
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.ExpireTimeSpan = TimeSpan.FromHours(2);
+                options.SlidingExpiration = true;
+                options.LoginPath = "/Account/Login";
+            });
+
             services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
             {
                 options.Password.RequireDigit = true;

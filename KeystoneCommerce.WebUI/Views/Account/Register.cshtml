@@ -11,7 +11,8 @@
             <p>Enter your credentials to create new account</p>
         </div>
 
-        <form class="login-form" id="loginForm" novalidate>
+        <form class="login-form" id="loginForm" asp-action="Register" asp-controller="Account" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="mb-3">
                 <label asp-for="FullName" class="form-label fw-bold d-flex align-items-center">
                     <i class="bi bi-person-fill mx-1"></i>
@@ -29,7 +30,7 @@
             <div class="mb-3">
                 <label asp-for="Email" class="form-label fw-bold d-flex align-items-center">
                     <i class="bi bi-envelope-at-fill mx-1"></i>
-                   Email
+                    Email
                 </label>
                 <div class="input-group">
                     <span class="input-group-text bg-light border-end-0">
@@ -64,3 +65,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
