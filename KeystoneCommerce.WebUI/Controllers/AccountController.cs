@@ -1,6 +1,7 @@
 ﻿using KeystoneCommerce.Application.DTOs.Account;
 using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.WebUI.ViewModels.Account;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KeystoneCommerce.WebUI.Controllers
@@ -35,6 +36,33 @@ namespace KeystoneCommerce.WebUI.Controllers
                 result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
             }
             return View("Register", model);
+        }
+
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View("Login");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var loginDto = _mappingService.Map<LoginDto>(model);
+                var result = await _accountService.LoginAsync(loginDto);
+                if (result.IsSuccess)
+                    return RedirectToAction("Index", "Home");
+                result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
+            }
+            return View("Login", model);
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View("AccessDenied");
         }
     }
 }

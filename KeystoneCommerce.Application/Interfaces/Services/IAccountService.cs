@@ -6,5 +6,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
     public interface IAccountService
     {
         Task<Result<RegisterDto>> RegisterAsync(RegisterDto registerDto);
+        Task<Result<RegisterDto>> LoginAsync(LoginDto loginDto);
     }
 }

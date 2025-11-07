@@ -68,5 +68,14 @@ namespace KeystoneCommerce.Infrastructure.Services
                 FullName = fullName
             };
         }
+
+        public async Task<bool> LoginUserAsync(string email, string password, bool rememberMe)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null || await _userManager.CheckPasswordAsync(user, password) is false)
+                return false;
+            await _signInManager.SignInAsync(user, isPersistent: rememberMe);
+            return true;
+        }
     }
 }

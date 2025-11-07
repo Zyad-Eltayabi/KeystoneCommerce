@@ -96,6 +96,7 @@ namespace KeystoneCommerce.Infrastructure
                 options.ExpireTimeSpan = TimeSpan.FromHours(2);
                 options.SlidingExpiration = true;
                 options.LoginPath = "/Account/Login";
+                options.AccessDeniedPath = "/Account/AccessDenied";
             });
 
             services.AddIdentity<ApplicationUser, ApplicationRole>(options =>

@@ -66,6 +66,9 @@ namespace KeystoneCommerce.WebUI.Profiles
 
             CreateMap<RegisterViewModel, RegisterDto>()
                 .ReverseMap();
+
+            CreateMap<LoginViewModel, LoginDto>()
+                .ReverseMap();
         }
     }
 }
