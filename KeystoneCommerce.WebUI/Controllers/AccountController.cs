@@ -1,7 +1,7 @@
-﻿using KeystoneCommerce.Application.DTOs.Account;
+﻿using KeystoneCommerce.Application.Common.Result_Pattern;
+using KeystoneCommerce.Application.DTOs.Account;
 using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.WebUI.ViewModels.Account;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KeystoneCommerce.WebUI.Controllers
@@ -29,10 +29,13 @@ namespace KeystoneCommerce.WebUI.Controllers
         {
             if (ModelState.IsValid)
             {
-                var registerDto = _mappingService.Map<RegisterDto>(model);
-                var result = await _accountService.RegisterAsync(registerDto);
+                RegisterDto registerDto = _mappingService.Map<RegisterDto>(model);
+                Result<RegisterDto> result = await _accountService.RegisterAsync(registerDto);
                 if (result.IsSuccess)
+                {
+                    TempData["SuccessMessage"] = "Registration successful";
                     return RedirectToAction("Index", "Home");
+                }
                 result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
             }
             return View("Register", model);
@@ -50,10 +53,13 @@ namespace KeystoneCommerce.WebUI.Controllers
         {
             if (ModelState.IsValid)
             {
-                var loginDto = _mappingService.Map<LoginDto>(model);
-                var result = await _accountService.LoginAsync(loginDto);
+                LoginDto loginDto = _mappingService.Map<LoginDto>(model);
+                Result<RegisterDto> result = await _accountService.LoginAsync(loginDto);
                 if (result.IsSuccess)
+                {
+                    TempData["SuccessMessage"] = "Login successful!, Welcome Back.";
                     return RedirectToAction("Index", "Home");
+                }
                 result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
             }
             return View("Login", model);
