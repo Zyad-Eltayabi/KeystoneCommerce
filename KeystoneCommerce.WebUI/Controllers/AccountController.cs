@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace KeystoneCommerce.WebUI.Controllers
 {
-    [RedirectAuthenticatedUser]
     public class AccountController : Controller
     {
         private readonly IAccountService _accountService;
@@ -21,6 +20,7 @@ namespace KeystoneCommerce.WebUI.Controllers
         }
 
         [HttpGet]
+        [RedirectAuthenticatedUser]
         public IActionResult Register()
         {
             return View("Register");
@@ -28,6 +28,7 @@ namespace KeystoneCommerce.WebUI.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RedirectAuthenticatedUser]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (ModelState.IsValid)
@@ -45,6 +46,7 @@ namespace KeystoneCommerce.WebUI.Controllers
         }
 
         [HttpGet]
+        [RedirectAuthenticatedUser]
         public IActionResult Login()
         {
             return View("Login");
@@ -52,6 +54,7 @@ namespace KeystoneCommerce.WebUI.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RedirectAuthenticatedUser]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (ModelState.IsValid)
@@ -69,10 +72,25 @@ namespace KeystoneCommerce.WebUI.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult AccessDenied()
         {
             return View("AccessDenied");
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            bool isLoggedOut = await _accountService.LogoutAsync();
+            if (isLoggedOut)
+            {
+                TempData["SuccessMessage"] = "You have been logged out successfully.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Logout failed. Please try again.";
+            }
+            return RedirectToAction("Index", "Home");
         }
     }
 }

@@ -77,5 +77,11 @@ namespace KeystoneCommerce.Infrastructure.Services
             await _signInManager.SignInAsync(user, isPersistent: rememberMe);
             return true;
         }
+
+        public async Task<bool> LogoutUserAsync()
+        {
+            await _signInManager.SignOutAsync();
+            return true;
+        }
     }
 }

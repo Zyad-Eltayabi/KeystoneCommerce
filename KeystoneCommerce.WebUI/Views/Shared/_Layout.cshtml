@@ -295,7 +295,7 @@
                                                     <li><a href="#">My Account</a></li>
                                                     <li><a href="#">Order list</a></li>
                                                 }
-                                                <li><a href="#">Log out</a></li>
+                                                <li><a asp-action="Logout" asp-controller="Account">Log out</a></li>
                                             }
                                             else
                                             {
@@ -458,7 +458,17 @@
             });
         </script>
     }
-
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <script>
+              Swal.fire({
+              title: "Oops!",
+              text: '@TempData["ErrorMessage"]',
+              icon: "error",
+              timer: 3000
+            });
+        </script>
+    }
 </body>
 </html>
 

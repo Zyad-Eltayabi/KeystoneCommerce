@@ -67,5 +67,11 @@ namespace KeystoneCommerce.Application.Services
             _logger.LogInformation("User logged in successfully with email: {Email}", loginDto.Email);
             return Result<RegisterDto>.Success();
         }
+
+
+        public async Task<bool> LogoutAsync()
+        {
+            return await _identityService.LogoutUserAsync();
+        }
     }
 }

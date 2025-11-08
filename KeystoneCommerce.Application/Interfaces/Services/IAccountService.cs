@@ -7,5 +7,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
     {
         Task<Result<RegisterDto>> RegisterAsync(RegisterDto registerDto);
         Task<Result<RegisterDto>> LoginAsync(LoginDto loginDto);
+        Task<bool> LogoutAsync();
     }
 }
