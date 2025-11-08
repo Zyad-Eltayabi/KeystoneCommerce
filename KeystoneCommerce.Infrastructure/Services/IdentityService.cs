@@ -1,5 +1,6 @@
 ﻿using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.Infrastructure.Persistence.Identity;
+using KeystoneCommerce.Shared.Constants;
 using Microsoft.AspNetCore.Identity;
 
 namespace KeystoneCommerce.Infrastructure.Services
@@ -9,7 +10,6 @@ namespace KeystoneCommerce.Infrastructure.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
-        private const string defaultRole = "User";
 
 
         public IdentityService(UserManager<ApplicationUser> userManager,
@@ -30,7 +30,7 @@ namespace KeystoneCommerce.Infrastructure.Services
                 userCreationErrors.AddRange(userCreationResult.Errors.Select(e => e.Description));
                 return userCreationErrors;
             }
-            var roleAssignmentResult = await _userManager.AddToRoleAsync(user, defaultRole);
+            var roleAssignmentResult = await _userManager.AddToRoleAsync(user, SystemRoles.User);
             if (!roleAssignmentResult.Succeeded)
                 userCreationErrors.AddRange(roleAssignmentResult.Errors.Select(e => e.Description));
             return userCreationErrors;
@@ -49,11 +49,11 @@ namespace KeystoneCommerce.Infrastructure.Services
 
         private async Task EnsureDefaultUserRoleAsync()
         {
-            if (!await _roleManager.RoleExistsAsync(defaultRole))
+            if (!await _roleManager.RoleExistsAsync(SystemRoles.User))
             {
                 await _roleManager.CreateAsync(new ApplicationRole
                 {
-                    Name = defaultRole,
+                    Name = SystemRoles.User,
                     Description = "Default role for regular users"
                 });
             }

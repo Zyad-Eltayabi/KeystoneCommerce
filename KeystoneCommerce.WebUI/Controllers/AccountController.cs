@@ -1,7 +1,7 @@
 ﻿using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Account;
 using KeystoneCommerce.Application.Interfaces.Services;
-using KeystoneCommerce.WebUI.Filters.YourProject.Filters;
+using KeystoneCommerce.WebUI.Filters;
 using KeystoneCommerce.WebUI.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
