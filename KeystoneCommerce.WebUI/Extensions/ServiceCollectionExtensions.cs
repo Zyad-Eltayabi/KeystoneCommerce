@@ -12,6 +12,7 @@ namespace KeystoneCommerce.WebUI.Extensions
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IShopService, ShopService>();
             services.AddScoped<IProductDetailsService, ProductDetailsService>();
+            services.AddScoped<IAccountService, AccountService>();
             return services;
         }
     }

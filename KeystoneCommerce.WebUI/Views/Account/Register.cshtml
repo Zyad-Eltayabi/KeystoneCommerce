@@ -1,0 +1,71 @@
+﻿@model RegisterViewModel;
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_SignLayout.cshtml";
+}
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>Sign Up</h2>
+            <p>Enter your credentials to create new account</p>
+        </div>
+
+        <form class="login-form" id="loginForm" asp-action="Register" asp-controller="Account" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label fw-bold d-flex align-items-center">
+                    <i class="bi bi-person-fill mx-1"></i>
+                    Full Name
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="bi bi-pencil-square text-muted"></i>
+                    </span>
+                    <input asp-for="FullName" class="form-control border-start-0 ps-2" placeholder="Enter your full name" />
+                </div>
+                <span asp-validation-for="FullName" class="text-danger small mt-1 d-block"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label fw-bold d-flex align-items-center">
+                    <i class="bi bi-envelope-at-fill mx-1"></i>
+                    Email
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="bi bi-pencil-square text-muted"></i>
+                    </span>
+                    <input asp-for="Email" class="form-control border-start-0 ps-2" placeholder="Enter your email" />
+                </div>
+                <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label fw-bold d-flex align-items-center">
+                    <i class="bi bi-key-fill mx-1"></i>
+                    Password
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="bi bi-pencil-square text-muted"></i>
+                    </span>
+                    <input type="password" asp-for="Password" class="form-control border-start-0 ps-2" placeholder="Enter your password" />
+                </div>
+                <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+            </div>
+
+            <div class="form-group mt-3 mb-1 w-100">
+                <input type="submit" value="Sign Up" class="btn btn-primary w-100" />
+            </div>
+        </form>
+
+        <div class="signup-link text-center " style="font-size:14px">
+            <p>have an account? <a asp-action="Login" asp-controller="Account" class="text-decoration-none">Log in</a></p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

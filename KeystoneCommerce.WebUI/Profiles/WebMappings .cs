@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using KeystoneCommerce.Application.DTOs;
+using KeystoneCommerce.Application.DTOs.Account;
 using KeystoneCommerce.Application.DTOs.Banner;
 using KeystoneCommerce.Application.DTOs.Product;
 using KeystoneCommerce.Application.DTOs.Shop;
 using KeystoneCommerce.Domain.Enums;
+using KeystoneCommerce.WebUI.ViewModels.Account;
 using KeystoneCommerce.WebUI.ViewModels.Banner;
 using KeystoneCommerce.WebUI.ViewModels.Products;
 using KeystoneCommerce.WebUI.ViewModels.Shop;
@@ -60,6 +62,12 @@ namespace KeystoneCommerce.WebUI.Profiles
                 .ForMember(e => e.HasDeletedImages, e => e.Ignore());
 
             CreateMap<ProductCardDto, ProductCardViewModel>()
+                .ReverseMap();
+
+            CreateMap<RegisterViewModel, RegisterDto>()
+                .ReverseMap();
+
+            CreateMap<LoginViewModel, LoginDto>()
                 .ReverseMap();
         }
     }
