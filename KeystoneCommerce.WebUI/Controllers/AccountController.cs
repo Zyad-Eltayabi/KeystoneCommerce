@@ -1,11 +1,14 @@
 ﻿using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Account;
 using KeystoneCommerce.Application.Interfaces.Services;
+using KeystoneCommerce.WebUI.Filters.YourProject.Filters;
 using KeystoneCommerce.WebUI.ViewModels.Account;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KeystoneCommerce.WebUI.Controllers
 {
+    [RedirectAuthenticatedUser]
     public class AccountController : Controller
     {
         private readonly IAccountService _accountService;
@@ -66,6 +69,7 @@ namespace KeystoneCommerce.WebUI.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult AccessDenied()
         {
             return View("AccessDenied");
