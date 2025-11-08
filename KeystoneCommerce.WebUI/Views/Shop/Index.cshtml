@@ -26,17 +26,21 @@
                     </div>
                     <div class="toolbar_btn_wrapper d-flex align-items-center">
                         <div class="view_btn">
-                            <a class="view" href="#">VIEW
+                            <a class="view" href="#">
+                                VIEW
                             </a>
                         </div>
                         <div class="shop_toolbar_btn">
                             <ul class="d-flex align-items-center">
-                                <li><a href="#" class="active btn-grid-3" data-role="grid_3"
+                                <li>
+                                    <a href="#" class="active btn-grid-3" data-role="grid_3"
                                        data-tippy="3" data-tippy-inertia="true"
                                        data-tippy-delay="50" data-tippy-arrow="true"
-                                       data-tippy-placement="top"><i class="ion-grid"></i></a></li>
+                                       data-tippy-placement="top"><i class="ion-grid"></i></a>
+                                </li>
 
-                                <li><a href="#" class="btn-list" data-role="grid_list"
+                                <li>
+                                    <a href="#" class="btn-list" data-role="grid_list"
                                        data-tippy="List" data-tippy-inertia="true"
                                        data-tippy-delay="50" data-tippy-arrow="true"
                                        data-tippy-placement="top"><i class="ion-navicon"></i></a>
@@ -46,14 +50,14 @@
                     </div>
                 </div>
                 <!--shop toolbar end-->
-                
                 @* create search form *@
                 <form method="get" asp-action="Index"
                       class="d-flex justify-content-end align-items-center flex-wrap my-3">
 
                     <div class="input-group input-group-md" style="width: auto">
                         <select asp-for="SearchBy" class="form-select m-1"
-                                style="border-radius:20px; min-width: 150px;">>
+                                style="border-radius:20px; min-width: 150px;">
+                            >
                             <option value="Title">Title</option>
                             <option value="Description">Description</option>
                             <option value="Tags">Tags</option>
@@ -69,19 +73,21 @@
                     </div>
 
                     <!-- hidden fields -->
-                    <input type="hidden" name="pageNumber" value="1"/>
-                    <input type="hidden" name="pageSize" value="@Model.PageSize"/>
-                    <input type="hidden" name="sortBy" value="@Model.SortBy"/>
-                    <input type="hidden" name="sortOrder" value="@Model.SortOrder"/>
+                    <input type="hidden" name="pageNumber" value="1" />
+                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                    <input type="hidden" name="sortBy" value="@Model.SortBy" />
+                    <input type="hidden" name="sortOrder" value="@Model.SortOrder" />
                 </form>
-                
+
                 <div class="row shop_wrapper mt-5">
                     @foreach (var product in Model.Items)
                     {
                         <div class="col-lg-4 col-md-4 col-sm-6 col-6 ">
                             <div class="single_product">
                                 <div class="product_thumb">
-                                    <a href="#">
+                                    <a asp-controller="ProductDetails"
+                                       asp-action="Index"
+                                       asp-route-id="@product.Id">
                                         <img class="primary_img"
                                              src="@FilePaths.WebProductPath/@product.ImageName"
                                              alt="consectetur">
@@ -98,21 +104,31 @@
                                 <div class="product_content grid_content text-center">
                                     <div class="product_ratting">
                                         <ul class="d-flex justify-content-center">
-                                            <li><a href="#"><i class="ion-android-star"></i></a>
+                                            <li>
+                                                <a href="#"><i class="ion-android-star"></i></a>
                                             </li>
-                                            <li><a href="#"><i class="ion-android-star"></i></a>
+                                            <li>
+                                                <a href="#"><i class="ion-android-star"></i></a>
                                             </li>
-                                            <li><a href="#"><i class="ion-android-star"></i></a>
+                                            <li>
+                                                <a href="#"><i class="ion-android-star"></i></a>
                                             </li>
-                                            <li><a href="#"><i class="ion-android-star"></i></a>
+                                            <li>
+                                                <a href="#"><i class="ion-android-star"></i></a>
                                             </li>
-                                            <li><a href="#"><i class="ion-android-star"></i></a>
+                                            <li>
+                                                <a href="#"><i class="ion-android-star"></i></a>
                                             </li>
                                             <li><span>(2)</span></li>
                                         </ul>
                                     </div>
-                                    <h4 class="product_name"><a href="#">
-                                            @product.Title</a></h4>
+                                    <h4 class="product_name">
+                                        <a asp-controller="ProductDetails"
+                                           asp-action="Index"
+                                           asp-route-id="@product.Id">
+                                            @product.Title
+                                        </a>
+                                    </h4>
                                     <div class="price_box">
                                         @if (product.Discount is > 0)
                                         {
@@ -128,8 +144,10 @@
                                     <div class="add_to_cart">
                                         <a class="btn btn-primary" href="#" data-tippy="Add To Cart"
                                            data-tippy-inertia="true" data-tippy-delay="50"
-                                           data-tippy-arrow="true" data-tippy-placement="top">Add To
-                                            Cart</a>
+                                           data-tippy-arrow="true" data-tippy-placement="top">
+                                            Add To
+                                            Cart
+                                        </a>
                                     </div>
                                 </div>
                                 <div class="product_list_content">
@@ -153,8 +171,10 @@
                                     <div class="add_to_cart">
                                         <a class="btn btn-primary" href="#" data-tippy="Add To Cart"
                                            data-tippy-inertia="true" data-tippy-delay="50"
-                                           data-tippy-arrow="true" data-tippy-placement="top">Add To
-                                            Cart</a>
+                                           data-tippy-arrow="true" data-tippy-placement="top">
+                                            Add To
+                                            Cart
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -168,5 +188,4 @@
     </div>
 </div>
 <!--shop  area end-->
-
 @await Html.PartialAsync("_PageNavigatorPartial")
