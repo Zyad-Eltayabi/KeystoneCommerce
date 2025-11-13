@@ -1,6 +1,7 @@
 ﻿using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Account;
 using KeystoneCommerce.Application.Interfaces.Services;
+using KeystoneCommerce.Application.Notifications.Contracts;
 using Microsoft.Extensions.Logging;
 
 namespace KeystoneCommerce.Application.Services
@@ -11,13 +12,19 @@ namespace KeystoneCommerce.Application.Services
         private readonly ILogger<AccountService> _logger;
         private readonly IApplicationValidator<RegisterDto> _registerValidator;
         private readonly IApplicationValidator<LoginDto> _loginValidator;
+        private readonly INotificationOrchestrator _notificationService;
 
-        public AccountService(IIdentityService identityService, ILogger<AccountService> logger, IApplicationValidator<RegisterDto> validator, IApplicationValidator<RegisterDto> registerValidator, IApplicationValidator<LoginDto> loginValidator)
+        public AccountService(IIdentityService identityService, ILogger<AccountService> logger, 
+            IApplicationValidator<RegisterDto> validator, 
+            IApplicationValidator<RegisterDto> registerValidator, 
+            IApplicationValidator<LoginDto> loginValidator, 
+            INotificationOrchestrator notificationService)
         {
             _identityService = identityService;
             _logger = logger;
             _registerValidator = registerValidator;
             _loginValidator = loginValidator;
+            _notificationService = notificationService;
         }
 
         public async Task<Result<RegisterDto>> RegisterAsync(RegisterDto registerDto)
@@ -72,6 +79,13 @@ namespace KeystoneCommerce.Application.Services
         public async Task<bool> LogoutAsync()
         {
             return await _identityService.LogoutUserAsync();
+        }
+
+        public Task SendWelcomeMessage()
+        {
+            EmailMessage emailMessage = new();
+            _notificationService.SendAsync(emailMessage);
+            return Task.CompletedTask;
         }
     }
 }

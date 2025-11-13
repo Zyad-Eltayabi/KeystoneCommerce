@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
+using KeystoneCommerce.Application.Notifications.Contracts;
 using KeystoneCommerce.Infrastructure.Persistence.Data;
 using KeystoneCommerce.Infrastructure.Persistence.Identity;
 using KeystoneCommerce.Infrastructure.Profiles;
@@ -43,6 +44,8 @@ namespace KeystoneCommerce.Infrastructure
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<IMappingService, MappingService>();
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddTransient<INotificationService<EmailMessage>, EmailService>();
+
         }
 
         private static void RegisterRepositoryServices(IServiceCollection services)
