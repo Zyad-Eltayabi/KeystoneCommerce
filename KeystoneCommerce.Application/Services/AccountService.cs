@@ -1,6 +1,7 @@
 ﻿using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Account;
 using KeystoneCommerce.Application.Interfaces.Services;
+using KeystoneCommerce.Application.Notifications.Contracts;
 using Microsoft.Extensions.Logging;
 
 namespace KeystoneCommerce.Application.Services
@@ -11,13 +12,19 @@ namespace KeystoneCommerce.Application.Services
         private readonly ILogger<AccountService> _logger;
         private readonly IApplicationValidator<RegisterDto> _registerValidator;
         private readonly IApplicationValidator<LoginDto> _loginValidator;
+        private readonly INotificationOrchestrator _notificationOrchestrator;
 
-        public AccountService(IIdentityService identityService, ILogger<AccountService> logger, IApplicationValidator<RegisterDto> validator, IApplicationValidator<RegisterDto> registerValidator, IApplicationValidator<LoginDto> loginValidator)
+        public AccountService(IIdentityService identityService, ILogger<AccountService> logger,
+            IApplicationValidator<RegisterDto> validator,
+            IApplicationValidator<RegisterDto> registerValidator,
+            IApplicationValidator<LoginDto> loginValidator,
+            INotificationOrchestrator notificationService)
         {
             _identityService = identityService;
             _logger = logger;
             _registerValidator = registerValidator;
             _loginValidator = loginValidator;
+            _notificationOrchestrator = notificationService;
         }
 
         public async Task<Result<RegisterDto>> RegisterAsync(RegisterDto registerDto)
@@ -58,7 +65,7 @@ namespace KeystoneCommerce.Application.Services
 
         private async Task<Result<RegisterDto>> CompleteLoginAsync(LoginDto loginDto)
         {
-            var result = await _identityService.LoginUserAsync(loginDto.Email, loginDto.Password,loginDto.RememberMe);
+            var result = await _identityService.LoginUserAsync(loginDto.Email, loginDto.Password, loginDto.RememberMe);
             if (!result)
             {
                 _logger.LogWarning("User login failed for email: {Email}", loginDto.Email);
@@ -72,6 +79,40 @@ namespace KeystoneCommerce.Application.Services
         public async Task<bool> LogoutAsync()
         {
             return await _identityService.LogoutUserAsync();
+        }
+
+        public async Task<bool> SendPasswordResetLinkAsync(string email)
+        {
+            if (!await _identityService.IsUserExists(email))
+            {
+                _logger.LogWarning("Password reset link request failed. No user found with email: {Email}", email);
+                return false;
+            }
+            EmailMessage emailMessage = new()
+            {
+                To = email,
+                Subject = "Reset Your Password - KeystoneCommerce"
+            };
+            var result = await _notificationOrchestrator.SendAsync(emailMessage);
+            if (!result)
+            {
+                _logger.LogError("Failed to send password reset link to email: {Email}", email);
+                return false;
+            }
+            _logger.LogInformation("Password reset link sent successfully to email: {Email}", email);
+            return true;
+        }
+
+        public async Task<Result<string>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
+        {
+            var result = await _identityService.ResetPasswordAsync(resetPasswordDto.Email, resetPasswordDto.Token, resetPasswordDto.Password);
+            if (result.Any())
+            {
+                _logger.LogWarning("Password reset failed for email: {Email}. Errors: {Errors}", resetPasswordDto.Email, string.Join(", ", result));
+                return Result<string>.Failure(result);
+            }
+            _logger.LogInformation("Password reset successfully for email: {Email}", resetPasswordDto.Email);
+            return Result<string>.Success();
         }
     }
 }
