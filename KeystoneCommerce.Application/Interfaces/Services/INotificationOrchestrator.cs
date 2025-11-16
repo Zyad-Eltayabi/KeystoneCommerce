@@ -2,6 +2,6 @@
 {
     public interface INotificationOrchestrator
     {
-        Task SendAsync<TMessage>(TMessage message);
+        Task<bool> SendAsync<TMessage>(TMessage message);
     }
 }

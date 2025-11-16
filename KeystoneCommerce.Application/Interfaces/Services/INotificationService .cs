@@ -2,6 +2,6 @@
 {
     public interface INotificationService<TMessage>
     {
-        Task SendNotificationAsync(TMessage message);
+        Task<bool> SendNotificationAsync(TMessage message);
     }
 }

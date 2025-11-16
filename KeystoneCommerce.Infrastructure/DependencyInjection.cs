@@ -2,6 +2,7 @@
 using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.Application.Notifications.Contracts;
+using KeystoneCommerce.Infrastructure.Helpers;
 using KeystoneCommerce.Infrastructure.Persistence.Data;
 using KeystoneCommerce.Infrastructure.Persistence.Identity;
 using KeystoneCommerce.Infrastructure.Profiles;
@@ -31,7 +32,14 @@ namespace KeystoneCommerce.Infrastructure
             RegisterRepositoryServices(services);
             RegisterInfrastructureServices(services);
             AddAutoMapperServices(services);
+            ConfigureEmailOptions(services, configuration);
             return services;
+        }
+
+        private static void ConfigureEmailOptions(IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<EmailSettings>(
+                configuration.GetSection("EmailSettings"));
         }
 
         private static void AddAutoMapperServices(IServiceCollection services)

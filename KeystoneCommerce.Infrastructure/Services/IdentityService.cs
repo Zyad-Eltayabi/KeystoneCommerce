@@ -1,7 +1,10 @@
-﻿using KeystoneCommerce.Application.Interfaces.Services;
+﻿using KeystoneCommerce.Application.DTOs.Account;
+using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.Infrastructure.Persistence.Identity;
 using KeystoneCommerce.Shared.Constants;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 
 namespace KeystoneCommerce.Infrastructure.Services
 {
@@ -82,6 +85,37 @@ namespace KeystoneCommerce.Infrastructure.Services
         {
             await _signInManager.SignOutAsync();
             return true;
+        }
+
+        public async Task<bool> IsUserExists(string email)
+        {
+            return await _userManager.FindByEmailAsync(email) is not null;
+        }
+
+        public async Task<List<string>> ResetPasswordAsync(string email, string token, string newPassword)
+        {
+            List<string> errors = new();
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null)
+            {
+                errors.Add("Invalid password reset request.");
+                return errors;
+            }
+
+            // Decode the token that was passed in from the reset link
+            var decodedBytes = WebEncoders.Base64UrlDecode(token);
+            var decodedToken = Encoding.UTF8.GetString(decodedBytes);
+
+            // Attempt to reset the user's password with the new one
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, newPassword);
+            // If successful, update the Security Stamp to invalidate any active sessions or tokens
+            if (result.Succeeded)
+            {
+                await _userManager.UpdateSecurityStampAsync(user);
+                return errors;
+            }
+            errors.AddRange(result.Errors.Select(e => e.Description));
+            return errors;
         }
     }
 }

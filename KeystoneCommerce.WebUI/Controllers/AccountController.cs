@@ -92,5 +92,54 @@ namespace KeystoneCommerce.WebUI.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
+
+        [HttpGet]
+        [RedirectAuthenticatedUser]
+        public IActionResult ForgotPassword()
+        {
+            return View("ForgotPassword");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RedirectAuthenticatedUser]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                await _accountService.SendPasswordResetLinkAsync(model.Email);
+                TempData["SuccessMessage"] = "If an account with that email exists, " +
+                "a recovery email has been sent.";
+                return RedirectToAction("Login");
+            }
+            return View("ForgotPassword", model);
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string email, string token)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+                return BadRequest("Invalid password reset request.");
+
+            return View(new ResetPasswordViewModel { Email = email, Token = token });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                ResetPasswordDto dto = _mappingService.Map<ResetPasswordDto>(model);
+                var result = await _accountService.ResetPasswordAsync(dto);
+                if (result.IsSuccess)
+                {
+                    TempData["SuccessMessage"] = "Password has been reset successfully. You can now log in with your new password.";
+                    return RedirectToAction("Login");
+                }
+                result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
+            }
+            return View(model);
+        }
     }
 }

@@ -12,7 +12,7 @@ namespace KeystoneCommerce.Application.Services
             _provider = provider;
         }
 
-        public Task SendAsync<TMessage>(TMessage message)
+        public Task<bool> SendAsync<TMessage>(TMessage message)
         {
             var service = _provider.GetRequiredService<INotificationService<TMessage>>();
             return service.SendNotificationAsync(message);

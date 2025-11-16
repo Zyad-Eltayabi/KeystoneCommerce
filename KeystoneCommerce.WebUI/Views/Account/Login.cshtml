@@ -42,11 +42,18 @@
                 <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
             </div>
 
-            <div class="mb-3 form-check d-flex align-items-center" style="font-size:14px">
-                <input asp-for="RememberMe" class="form-check-input me-2 mr-1" type="checkbox" id="rememberMe" />
-                <label class="form-check-label fw-normal" asp-for="RememberMe">
-                    Remember me
-                </label>
+            <div class="mb-3 d-flex justify-content-between align-items-center" style="font-size:14px">
+                <div class="form-check d-flex align-items-center">
+                    <input asp-for="RememberMe" class="form-check-input me-2 mr-1" type="checkbox" id="rememberMe" />
+                    <label class="form-check-label fw-normal" asp-for="RememberMe">
+                        Remember me
+                    </label>
+                </div>
+                <div>
+                    <a asp-action="ForgotPassword" asp-controller="Account" class="text-decoration-none text-primary">
+                        Forgot Password?
+                    </a>
+                </div>
             </div>
 
             <div class="form-group mt-3 mb-1 w-100">
@@ -62,4 +69,16 @@
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script src="/assets/sweetalert2/sweetalert2.all.min.js"></script>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+              Swal.fire({
+              title: "Good job!",
+              text: '@TempData["SuccessMessage"]',
+              icon: "success",
+              timer: 3000
+            });
+        </script>
+    }
 }
