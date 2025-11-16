@@ -85,8 +85,8 @@ namespace KeystoneCommerce.Application.Services
         {
             if (!await _identityService.IsUserExists(email))
             {
-                _logger.LogWarning("Password reset link request failed. No user found with email: {Email}", email);
-                return false;
+                _logger.LogInformation("Password reset link workflow executed.");
+                return true;
             }
             EmailMessage emailMessage = new()
             {
@@ -96,10 +96,10 @@ namespace KeystoneCommerce.Application.Services
             var result = await _notificationOrchestrator.SendAsync(emailMessage);
             if (!result)
             {
-                _logger.LogError("Failed to send password reset link to email: {Email}", email);
-                return false;
+                _logger.LogError("Failed to send password reset link.");
+                return true;
             }
-            _logger.LogInformation("Password reset link sent successfully to email: {Email}", email);
+            _logger.LogInformation("Password reset link workflow executed.");
             return true;
         }
 
@@ -108,10 +108,10 @@ namespace KeystoneCommerce.Application.Services
             var result = await _identityService.ResetPasswordAsync(resetPasswordDto.Email, resetPasswordDto.Token, resetPasswordDto.Password);
             if (result.Any())
             {
-                _logger.LogWarning("Password reset failed for email: {Email}. Errors: {Errors}", resetPasswordDto.Email, string.Join(", ", result));
+                _logger.LogWarning("Password reset attempt failed");
                 return Result<string>.Failure(result);
             }
-            _logger.LogInformation("Password reset successfully for email: {Email}", resetPasswordDto.Email);
+            _logger.LogInformation("Password reset workflow completed successfully.");
             return Result<string>.Success();
         }
     }
