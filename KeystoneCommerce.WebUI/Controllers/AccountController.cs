@@ -106,13 +106,11 @@ namespace KeystoneCommerce.WebUI.Controllers
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
             if (ModelState.IsValid)
-            {
                 await _accountService.SendPasswordResetLinkAsync(model.Email);
-                TempData["SuccessMessage"] = "If an account with that email exists, " +
+
+            TempData["SuccessMessage"] = "If an account with that email exists, " +
                 "a recovery email has been sent.";
-                return RedirectToAction("Login");
-            }
-            return View("ForgotPassword", model);
+            return RedirectToAction("Login");
         }
 
         [HttpGet]
