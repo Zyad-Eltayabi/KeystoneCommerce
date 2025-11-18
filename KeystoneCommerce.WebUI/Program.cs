@@ -1,5 +1,7 @@
+using Ganss.Xss;
 using KeystoneCommerce.Infrastructure;
 using KeystoneCommerce.WebUI.Extensions;
+using KeystoneCommerce.WebUI.Middleware;
 using KeystoneCommerce.WebUI.Middlewares;
 using KeystoneCommerce.WebUI.Profiles;
 
@@ -17,6 +19,7 @@ builder.Services.AddInfrastructure(builder.Configuration, builder.Host);
 // Register AutoMapper
 builder.Services.AddAutoMapper(a => { a.AddProfile<WebMappings>(); });
 
+builder.Services.AddSingleton<HtmlSanitizer>();
 builder.Services.AddExceptionHandler<GlobalExceptionMiddleware>();
 builder.Services.AddScoped<RequestLoggingMiddleware>();
 

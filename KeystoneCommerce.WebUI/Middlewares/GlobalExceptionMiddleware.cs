@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Diagnostics;
-namespace KeystoneCommerce.WebUI.Middlewares;
+namespace KeystoneCommerce.WebUI.Middleware;
 public class GlobalExceptionMiddleware(ILogger<GlobalExceptionMiddleware> logger)
     : IExceptionHandler
 {
