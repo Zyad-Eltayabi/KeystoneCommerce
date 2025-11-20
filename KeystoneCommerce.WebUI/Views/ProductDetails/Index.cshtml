@@ -179,9 +179,36 @@
                                 <p>@Html.Raw(Model.Product.Description.Replace("\n", "<br>"))</p>
                             </div>
                         </div>
+
                         <div class="tab-pane fade" id="reviews" role="tabpanel">
                             <div class="reviews_wrapper">
-                                <h2>1 review for Donec eu furniture</h2>
+                                <div class="comment_title">
+                                    <h2>Add a review </h2>
+                                </div>
+                                <div class="product_ratting mb-10">
+                                    <h3>Your rating</h3>
+                                    <ul class="d-flex">
+                                        <li><a href="#"><i class="icon-star"></i></a></li>
+                                        <li><a href="#"><i class="icon-star"></i></a></li>
+                                        <li><a href="#"><i class="icon-star"></i></a></li>
+                                        <li><a href="#"><i class="icon-star"></i></a></li>
+                                        <li><a href="#"><i class="icon-star"></i></a></li>
+                                    </ul>
+                                </div>
+                                <div class="product_review_form">
+                                    <form action="#">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <label for="review_comment">Your review </label>
+                                                <textarea name="comment"
+                                                          id="review_comment"></textarea>
+                                            </div>
+                                        </div>
+                                        <button class="mt-0" type="submit">Submit</button>
+                                    </form>
+                                </div>
+
+                                <h2 class="mt-3">1 review for Donec eu furniture</h2>
                                 <div class="reviews_comment_box">
                                     <div class="comment_thmb">
                                         <img src="/assets/img/blog/comment2.jpg" alt="">
@@ -207,44 +234,9 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="comment_title">
-                                    <h2>Add a review </h2>
-                                    <p>Your email address will not be published. Required fields are
-                                        marked </p>
-                                </div>
-                                <div class="product_ratting mb-10">
-                                    <h3>Your rating</h3>
-                                    <ul class="d-flex">
-                                        <li><a href="#"><i class="icon-star"></i></a></li>
-                                        <li><a href="#"><i class="icon-star"></i></a></li>
-                                        <li><a href="#"><i class="icon-star"></i></a></li>
-                                        <li><a href="#"><i class="icon-star"></i></a></li>
-                                        <li><a href="#"><i class="icon-star"></i></a></li>
-                                    </ul>
-                                </div>
-                                <div class="product_review_form">
-                                    <form action="#">
-                                        <div class="row">
-                                            <div class="col-12">
-                                                <label for="review_comment">Your review </label>
-                                                <textarea name="comment"
-                                                          id="review_comment"></textarea>
-                                            </div>
-                                            <div class="col-lg-6 col-md-6">
-                                                <label for="author">Name</label>
-                                                <input id="author" type="text">
-
-                                            </div>
-                                            <div class="col-lg-6 col-md-6">
-                                                <label for="email">Email </label>
-                                                <input id="email" type="text">
-                                            </div>
-                                        </div>
-                                        <button type="submit">Submit</button>
-                                    </form>
-                                </div>
                             </div>
                         </div>
+
                         <div class="tab-pane fade" id="tags" role="tabpanel">
                             <div class="product_info_content">
                                 @if (!string.IsNullOrEmpty(Model.Product.Tags))
