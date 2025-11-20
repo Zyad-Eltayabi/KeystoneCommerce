@@ -16,4 +16,5 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<Product> Products { get; set; } = null!;
     public DbSet<Banner> Banners { get; set; } = null!;
+    public DbSet<Review> Reviews { get; set; } = null!;
 }
