@@ -4,6 +4,7 @@ using KeystoneCommerce.Infrastructure.Persistence.Identity;
 using KeystoneCommerce.Shared.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using System.Security.Claims;
 using System.Text;
 
 namespace KeystoneCommerce.Infrastructure.Services
@@ -46,7 +47,11 @@ namespace KeystoneCommerce.Infrastructure.Services
             var userCreationErrors = await SaveUserAsync(user, password);
             if (userCreationErrors.Any())
                 return userCreationErrors;
-            await _signInManager.SignInAsync(user, isPersistent: false);
+            IEnumerable<Claim> additionalClaims = new List<Claim>
+            {
+                new Claim("FullName", fullName)
+            };
+            await _signInManager.SignInWithClaimsAsync(user, isPersistent: false,additionalClaims);
             return userCreationErrors;
         }
 
@@ -77,7 +82,11 @@ namespace KeystoneCommerce.Infrastructure.Services
             var user = await _userManager.FindByEmailAsync(email);
             if (user is null || await _userManager.CheckPasswordAsync(user, password) is false)
                 return false;
-            await _signInManager.SignInAsync(user, isPersistent: rememberMe);
+            IEnumerable<Claim> additionalClaims = new List<Claim>
+            {
+                new Claim("FullName", user.FullName)
+            };
+            await _signInManager.SignInWithClaimsAsync(user, isPersistent: false, additionalClaims);
             return true;
         }
 
