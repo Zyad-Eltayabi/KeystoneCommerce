@@ -21,28 +21,24 @@
     </div>
 </div>
 <!--breadcrumbs area end-->
-
 <!--product details start-->
 <section class="product_details mb-135">
     <div class="container">
         <div class="row">
             <div class="col-lg-6 col-md-6">
                 <div class="d-flex justify-content-center align-items-center">
-                    <img
-                        src="@FilePaths.WebProductPath/@Model.Product.ImageName" alt="Product"
-                        class="img-fluid rounded mb-3 product-image" id="mainImage">
+                    <img src="@FilePaths.WebProductPath/@Model.Product.ImageName" alt="Product"
+                         class="img-fluid rounded mb-3 product-image" id="mainImage">
                 </div>
                 <div class="d-flex justify-content-center flex-wrap">
-                    <img
-                        src="@FilePaths.WebProductPath/@Model.Product.ImageName"
-                        alt="Thumbnail 1" class="thumbnail rounded active">
+                    <img src="@FilePaths.WebProductPath/@Model.Product.ImageName"
+                         alt="Thumbnail 1" class="thumbnail rounded active">
                     @if (Model.Product.GalleryImageNames is not null && Model.Product.GalleryImageNames.Any())
                     {
                         foreach (var photo in Model.Product.GalleryImageNames)
                         {
-                            <img
-                                src="@FilePaths.WebProductPath/@photo"
-                                alt="Thumbnail" class="thumbnail rounded"/>
+                            <img src="@FilePaths.WebProductPath/@photo"
+                                 alt="Thumbnail" class="thumbnail rounded" />
                         }
                     }
                 </div>
@@ -69,15 +65,16 @@
                             </div>
                         </div>
                         <div class="price_box">
-                            <span
-                                class="current_price">@(Model.Product.Price - Model.Product.Discount)</span>
+                            <span class="current_price">@(Model.Product.Price - Model.Product.Discount)</span>
                         </div>
                         <div class="product_availalbe">
                             <ul class="d-flex">
-                                <li><i class="icon-layers icons"></i> Only
+                                <li>
+                                    <i class="icon-layers icons"></i> Only
                                     <span>@Model.Product.QTY</span> left
                                 </li>
-                                <li>Available:
+                                <li>
+                                    Available:
                                     @if (Model.Product.QTY > 0)
                                     {
                                         <span class="stock">In Stock</span>
@@ -100,8 +97,7 @@
                                         <input min="1" max="100" type="text" value="1">
                                     </div>
                                     <button class="button btn btn-primary" type="submit">
-                                        <i
-                                            class="ion-android-add"></i> Add To Cart
+                                        <i class="ion-android-add"></i> Add To Cart
                                     </button>
                                 }
                             </div>
@@ -122,8 +118,8 @@
                                                asp-action="Index"
                                                asp-route-searchBy="tags"
                                                asp-route-searchValue="@tag.Trim()"
-                                               class=""
-                                            >@tag.Trim()
+                                               class="">
+                                                @tag.Trim()
                                             </a>
                                         </li>
                                     }
@@ -135,10 +131,12 @@
                             <ul>
                                 <li><a href="#"><i class="ion-social-twitter"></i></a></li>
                                 <li><a href="#"><i class="ion-social-facebook"></i></a></li>
-                                <li><a href="#"><i class="ion-social-googleplus-outline"></i></a>
+                                <li>
+                                    <a href="#"><i class="ion-social-googleplus-outline"></i></a>
                                 </li>
                                 <li><a href="#"><i class="ion-social-pinterest"></i></a></li>
-                                <li><a href="#"><i class="ion-social-instagram-outline"></i></a>
+                                <li>
+                                    <a href="#"><i class="ion-social-instagram-outline"></i></a>
                                 </li>
                             </ul>
                         </div>
@@ -149,7 +147,6 @@
     </div>
 </section>
 <!--product details end-->
-
 <!--product info start-->
 <div class="product_d_info mb-118">
     <div class="container">
@@ -160,11 +157,14 @@
                         <ul class="nav" role="tablist">
                             <li>
                                 <a class="active" data-toggle="tab" href="#info" role="tab"
-                                   aria-controls="info" aria-selected="false">Product
-                                    Description</a>
+                                   aria-controls="info" aria-selected="false">
+                                    Product
+                                    Description
+                                </a>
                             </li>
                             <li>
                                 <a data-toggle="tab" href="#reviews" role="tab"
+                                   data-product-id="@Model.Product.Id"
                                    aria-controls="reviews" aria-selected="false">Reviews </a>
                             </li>
                             <li>
@@ -208,31 +208,46 @@
                                     </form>
                                 </div>
 
-                                <h2 class="mt-3">1 review for Donec eu furniture</h2>
-                                <div class="reviews_comment_box">
-                                    <div class="comment_thmb">
-                                        <img src="/assets/img/blog/comment2.jpg" alt="">
-                                    </div>
-                                    <div class="comment_text">
-                                        <div class="reviews_meta">
-                                            <div class="star_rating">
-                                                <ul class="d-flex">
-                                                    <li><a href="#"><i class="icon-star"></i></a>
-                                                    </li>
-                                                    <li><a href="#"><i class="icon-star"></i></a>
-                                                    </li>
-                                                    <li><a href="#"><i class="icon-star"></i></a>
-                                                    </li>
-                                                    <li><a href="#"><i class="icon-star"></i></a>
-                                                    </li>
-                                                    <li><a href="#"><i class="icon-star"></i></a>
-                                                    </li>
-                                                </ul>
+                                <div class="reviews-box">
+                                    <h2 class="mt-3"><span class="reviews-count"></span> Reviews For @Model.Product.Title</h2>
+                                    <div class="review-item">
+                                        <div class="reviews_comment_box">
+                                            <div class="comment_thmb">
+                                                <img src="/assets/img/blog/comment2.jpg" alt="">
                                             </div>
-                                            <p><strong>admin </strong>- September 12, 2018</p>
-                                            <span>roadthemes</span>
+                                            <div class="comment_text">
+                                                <div class="reviews_meta">
+                                                    <div class="star_rating">
+                                                        <ul class="d-flex">
+                                                            <li>
+                                                                <a href="#"><i class="icon-star"></i></a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#"><i class="icon-star"></i></a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#"><i class="icon-star"></i></a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#"><i class="icon-star"></i></a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#"><i class="icon-star"></i></a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                    <p><strong>admin </strong>- September 12, 2018</p>
+                                                    <span>roadthemes</span>
+                                                </div>
+                                            </div>
+                                          
                                         </div>
                                     </div>
+                                </div>
+                                
+                                <div>
+                                    <button class="load-more mt-0 w-100 p-2 btn btn-outline-secondary"
+                                    type="button">Load More</button>
                                 </div>
                             </div>
                         </div>
@@ -250,8 +265,8 @@
                                                    asp-action="Index"
                                                    asp-route-searchBy="tags"
                                                    asp-route-searchValue="@tag.Trim()"
-                                                   class=""
-                                                >@tag.Trim()
+                                                   class="">
+                                                    @tag.Trim()
                                                 </a>
                                             </li>
                                         }
@@ -267,7 +282,6 @@
     </div>
 </div>
 <!--product info end-->
-
 @if (Model.NewArrivals is not null && Model.NewArrivals.Any())
 {
     <!--product area start-->
@@ -282,19 +296,19 @@
             </div>
             <div class="product_container row">
                 <div class=" product_slick slick_slider_activation" data-slick='{
-                        "slidesToShow": 4,
-                        "slidesToScroll": 1,
-                        "arrows": true,
-                        "dots": false,
-                        "autoplay": false,
-                        "speed": 300,
-                        "infinite": true,
-                        "responsive":[
-                          {"breakpoint":992, "settings": { "slidesToShow": 3 } },
-                          {"breakpoint":768, "settings": { "slidesToShow": 2 } },
-                          {"breakpoint":300, "settings": { "slidesToShow": 1 } }
-                         ]
-                    }'>
+                            "slidesToShow": 4,
+                            "slidesToScroll": 1,
+                            "arrows": true,
+                            "dots": false,
+                            "autoplay": false,
+                            "speed": 300,
+                            "infinite": true,
+                            "responsive":[
+                              {"breakpoint":992, "settings": { "slidesToShow": 3 } },
+                              {"breakpoint":768, "settings": { "slidesToShow": 2 } },
+                              {"breakpoint":300, "settings": { "slidesToShow": 1 } }
+                             ]
+                        }'>
                     @foreach (var product in Model.NewArrivals)
                     {
                         <div class="col-lg-3">
@@ -312,15 +326,20 @@
                                     <figcaption class="product_content text-center">
                                         <div class="product_ratting">
                                             <ul class="d-flex justify-content-center">
-                                                <li><a href="#"><i class="ion-android-star"></i></a>
+                                                <li>
+                                                    <a href="#"><i class="ion-android-star"></i></a>
                                                 </li>
-                                                <li><a href="#"><i class="ion-android-star"></i></a>
+                                                <li>
+                                                    <a href="#"><i class="ion-android-star"></i></a>
                                                 </li>
-                                                <li><a href="#"><i class="ion-android-star"></i></a>
+                                                <li>
+                                                    <a href="#"><i class="ion-android-star"></i></a>
                                                 </li>
-                                                <li><a href="#"><i class="ion-android-star"></i></a>
+                                                <li>
+                                                    <a href="#"><i class="ion-android-star"></i></a>
                                                 </li>
-                                                <li><a href="#"><i class="ion-android-star"></i></a>
+                                                <li>
+                                                    <a href="#"><i class="ion-android-star"></i></a>
                                                 </li>
                                                 <li><span>(4)</span></li>
                                             </ul>
@@ -328,10 +347,10 @@
                                         <h4 class="product_name">
                                             <a asp-action="Index"
                                                asp-controller="ProductDetails"
-                                               asp-route-id="@product.Id"
-                                            >
+                                               asp-route-id="@product.Id">
                                                 @product.Title
-                                            </a></h4>
+                                            </a>
+                                        </h4>
                                         <div class="price_box">
                                             @if (product.Discount is > 0)
                                             {
@@ -348,9 +367,11 @@
                                             <a class="btn btn-primary" href="#"
                                                data-tippy="Add To Cart"
                                                data-tippy-inertia="true" data-tippy-delay="50"
-                                               data-tippy-arrow="true" data-tippy-placement="top">Add
+                                               data-tippy-arrow="true" data-tippy-placement="top">
+                                                Add
                                                 To
-                                                Cart</a>
+                                                Cart
+                                            </a>
                                         </div>
                                     </figcaption>
                                 </figure>
@@ -395,7 +416,6 @@
     </div>
 </section>
 <!---newsletter section end-->
-
 @section Styles {
     <style>
         .product-image {
@@ -413,13 +433,15 @@
             margin: 5px;
         }
 
-        .thumbnail:hover, .thumbnail.active {
-            opacity: 1;
-        }
+            .thumbnail:hover, .thumbnail.active {
+                opacity: 1;
+            }
     </style>
 }
 
 @section Scripts {
+    <script defer src="~/assets/js/axios/axios.min.js"></script>
     <script defer src="/assets/js/scripts/product-details.js"></script>
+    <script defer src="~/assets/js/scripts/reviews.js"></script>
 }
 

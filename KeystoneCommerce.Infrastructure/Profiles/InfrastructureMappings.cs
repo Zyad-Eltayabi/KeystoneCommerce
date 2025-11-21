@@ -2,6 +2,7 @@
 using KeystoneCommerce.Application.DTOs;
 using KeystoneCommerce.Application.DTOs.Banner;
 using KeystoneCommerce.Application.DTOs.Product;
+using KeystoneCommerce.Application.DTOs.Review;
 using KeystoneCommerce.Domain.Entities;
 using KeystoneCommerce.Domain.Enums;
 namespace KeystoneCommerce.Infrastructure.Profiles
@@ -13,7 +14,7 @@ namespace KeystoneCommerce.Infrastructure.Profiles
             CreateMap<CreateBannerDto, Banner>()
                 .ForMember(e => e.BannerType, e => e.MapFrom(src => (BannerType)src.BannerType))
                 .ReverseMap();
-            
+
             CreateMap<UpdateBannerDto, Banner>()
                 .ForMember(e => e.BannerType, e => e.MapFrom(src => (BannerType)src.BannerType))
                 .ReverseMap();
@@ -34,9 +35,10 @@ namespace KeystoneCommerce.Infrastructure.Profiles
                 .ForMember(e => e.UpdatedAt, e => e.Ignore())
                 .ForMember(e => e.ImageName, e => e.Ignore())
                 .ForMember(e => e.Galleries, e => e.Ignore())
-                .ForMember(e => e.UpdatedAt,e => e.MapFrom(_ => DateTime.UtcNow));
+                .ForMember(e => e.UpdatedAt, e => e.MapFrom(_ => DateTime.UtcNow));
 
-
+            CreateMap<Review, ReviewDto>()
+                .ReverseMap();
         }
     }
 }
