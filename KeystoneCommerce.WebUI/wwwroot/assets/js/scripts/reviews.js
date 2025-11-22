@@ -1,4 +1,4 @@
-﻿const baseUrl = "https://localhost:7204";
+﻿const baseUrl = "https://localhost:7204/api";
 
 const reviewsNav = document.querySelector(
     ".product_info_button ul li a[href='#reviews']"
@@ -56,7 +56,9 @@ function renderReview(review) {
                                 )}
                             </ul>
                         </div>
-                        <p><strong>${review.userFullName}</strong> - ${new Date(review.createdAt).toLocaleString("en-US")}</p>
+                        <p><strong>${review.userFullName}</strong> - ${new Date(
+        review.createdAt
+    ).toLocaleString("en-US")}</p>
                         <span>${review.comment}</span>
                     </div>
                 </div>
@@ -77,9 +79,100 @@ async function fetchReviews() {
         renderReviews(data.items);
         updatePagination(data);
     } catch (ex) {
-        alert(ex.response?.data ?? "Unexpected error");
+        showError(ex.response?.data ?? "Unexpected error");
     }
 }
 
 reviewsNav.addEventListener("click", fetchReviews);
 loadMoreBtn.addEventListener("click", fetchReviews);
+
+// Submit new review
+const submitReviewBtn = document.querySelector(
+    ".product_review_form form button[type='submit']"
+);
+const reviewTextarea = document.querySelector(
+    ".product_review_form form textarea"
+);
+
+function getReviewData() {
+    return {
+        ProductId: productId,
+        Comment: reviewTextarea.value.trim(),
+    };
+}
+
+function showSuccess(message) {
+    Swal.fire({
+        title: message,
+        icon: "success",
+        draggable: true,
+    });
+}
+
+function showError(message) {
+    Swal.fire({
+        title: "Oops...",
+        icon: "error",
+        text: message,
+    });
+}
+
+async function submitReview(data) {
+    try {
+        const response = await axios.post(`${baseUrl}/Reviews`, data);
+        return { success: true, data: response.data };
+    } catch (ex) {
+        const detail = ex.response?.data?.Detail || "Unexpected error";
+        return { success: false, data: detail };
+    }
+}
+
+function addNewReview(data) {
+    const review = {
+        userFullName: data.userFullName,
+        comment: data.comment,
+        createdAt: new Date().toLocaleString("en-US"),
+    };
+    insertReviewInDOM(review);
+    updateReviewsCount();
+}
+
+function insertReviewInDOM(review) {
+    const html = renderReview(review);
+    const h2 = reviewsBox.querySelector("h2");
+    if (h2) {
+        h2.insertAdjacentHTML("afterend", html);
+    } else {
+        reviewsBox.insertAdjacentHTML("afterbegin", html);
+    }
+}
+function updateReviewsCount() {
+    let span = reviewsBox.querySelector("h2 span");
+    if (span) {
+        span.textContent = parseInt(span.textContent) + 1;
+    }
+}
+
+async function handleSubmitReview(e) {
+    e.preventDefault();
+
+    const reviewData = getReviewData();
+
+    // Validate before sending
+    if (!reviewData.Comment) {
+        showError("Review cannot be empty.");
+        return;
+    }
+
+    const result = await submitReview(reviewData);
+
+    if (result.success) {
+        addNewReview(result.data);
+        showSuccess("Review submitted successfully.");
+        reviewTextarea.value = "";
+    } else {
+        showError(result.data);
+    }
+}
+
+submitReviewBtn.addEventListener("click", handleSubmitReview);

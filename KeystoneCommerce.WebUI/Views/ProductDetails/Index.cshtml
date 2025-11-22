@@ -200,8 +200,7 @@
                                         <div class="row">
                                             <div class="col-12">
                                                 <label for="review_comment">Your review </label>
-                                                <textarea name="comment"
-                                                          id="review_comment"></textarea>
+                                                <textarea id="review_comment"></textarea>
                                             </div>
                                         </div>
                                         <button class="mt-0" type="submit">Submit</button>
@@ -240,14 +239,16 @@
                                                     <span>roadthemes</span>
                                                 </div>
                                             </div>
-                                          
+
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div>
                                     <button class="load-more mt-0 w-100 p-2 btn btn-outline-secondary"
-                                    type="button">Load More</button>
+                                            type="button">
+                                        Load More
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -296,19 +297,19 @@
             </div>
             <div class="product_container row">
                 <div class=" product_slick slick_slider_activation" data-slick='{
-                            "slidesToShow": 4,
-                            "slidesToScroll": 1,
-                            "arrows": true,
-                            "dots": false,
-                            "autoplay": false,
-                            "speed": 300,
-                            "infinite": true,
-                            "responsive":[
-                              {"breakpoint":992, "settings": { "slidesToShow": 3 } },
-                              {"breakpoint":768, "settings": { "slidesToShow": 2 } },
-                              {"breakpoint":300, "settings": { "slidesToShow": 1 } }
-                             ]
-                        }'>
+                                "slidesToShow": 4,
+                                "slidesToScroll": 1,
+                                "arrows": true,
+                                "dots": false,
+                                "autoplay": false,
+                                "speed": 300,
+                                "infinite": true,
+                                "responsive":[
+                                  {"breakpoint":992, "settings": { "slidesToShow": 3 } },
+                                  {"breakpoint":768, "settings": { "slidesToShow": 2 } },
+                                  {"breakpoint":300, "settings": { "slidesToShow": 1 } }
+                                 ]
+                            }'>
                     @foreach (var product in Model.NewArrivals)
                     {
                         <div class="col-lg-3">
@@ -437,11 +438,12 @@
                 opacity: 1;
             }
     </style>
+    <link href="~/assets/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
 }
 
 @section Scripts {
     <script defer src="~/assets/js/axios/axios.min.js"></script>
+    <script defer src="~/assets/sweetalert2/sweetalert2.all.min.js"></script>
     <script defer src="/assets/js/scripts/product-details.js"></script>
     <script defer src="~/assets/js/scripts/reviews.js"></script>
 }
-
