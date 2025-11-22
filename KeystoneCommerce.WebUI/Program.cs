@@ -22,18 +22,18 @@ builder.Services.AddAutoMapper(a => { a.AddProfile<WebMappings>(); });
 builder.Services.AddSingleton<HtmlSanitizer>();
 builder.Services.AddExceptionHandler<GlobalExceptionMiddleware>();
 builder.Services.AddScoped<RequestLoggingMiddleware>();
-
+builder.Services.AddProblemDetails();
 WebApplication app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    app.UseDeveloperExceptionPage();
 }
 else
 {
-    app.UseDeveloperExceptionPage();
+    app.UseExceptionHandler();
+    app.UseHsts();
 }
 
 
@@ -52,4 +52,4 @@ app.MapControllerRoute(
         pattern: "{controller=Home}/{action=Index}/{id?}")
    .WithStaticAssets();
 
-app.Run();
+await app.RunAsync();
