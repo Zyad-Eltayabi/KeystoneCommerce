@@ -1,11 +1,14 @@
 ﻿using KeystoneCommerce.Application.Common.Pagination;
 using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Product;
+using KeystoneCommerce.Application.DTOs.Shop;
 using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.Domain.Entities;
 using KeystoneCommerce.Shared.Constants;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace KeystoneCommerce.Application.Services
 {
@@ -354,6 +357,12 @@ namespace KeystoneCommerce.Application.Services
                 SearchBy = parameters.SearchBy,
                 SearchValue = parameters.SearchValue
             };
+        }
+
+        public async Task<List<ProductCardDto>> GetAllProducts(Expression<Func<Product, bool>> filter)
+        {
+            var products = await _productRepository.GetAllAsync(filter, false);
+            return _mappingService.Map<List<ProductCardDto>>(products);
         }
     }
 }

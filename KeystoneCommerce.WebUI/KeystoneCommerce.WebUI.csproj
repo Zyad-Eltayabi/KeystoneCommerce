@@ -61,4 +61,8 @@
       <AdditionalFiles Include="Views\Banner\Index.cshtml" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Views\Cart\" />
+    </ItemGroup>
+
 </Project>

@@ -41,6 +41,14 @@ namespace KeystoneCommerce.Infrastructure.Repositories
             return await Entity.AsNoTracking().ToListAsync();
         }
 
+        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>> expression, bool tracking = false)
+        {
+            var query = Entity.AsQueryable();
+            if (!tracking)
+                query = query.AsNoTracking();
+            return await query.Where(expression).ToListAsync();
+        }
+
         public async Task<T?> GetByIdAsync(int id)
         {
             return await Entity.FindAsync(id);

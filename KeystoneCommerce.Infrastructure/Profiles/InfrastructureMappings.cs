@@ -3,6 +3,7 @@ using KeystoneCommerce.Application.DTOs;
 using KeystoneCommerce.Application.DTOs.Banner;
 using KeystoneCommerce.Application.DTOs.Product;
 using KeystoneCommerce.Application.DTOs.Review;
+using KeystoneCommerce.Application.DTOs.Shop;
 using KeystoneCommerce.Domain.Entities;
 using KeystoneCommerce.Domain.Enums;
 namespace KeystoneCommerce.Infrastructure.Profiles
@@ -39,6 +40,9 @@ namespace KeystoneCommerce.Infrastructure.Profiles
 
             CreateMap<Review, ReviewDto>()
                 .ReverseMap();
+
+            CreateMap<Product, ProductCardDto>();
+
         }
     }
 }

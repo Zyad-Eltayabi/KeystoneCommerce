@@ -1,11 +1,24 @@
 ﻿using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.Application.Services;
+using KeystoneCommerce.WebUI.Services;
 
 namespace KeystoneCommerce.WebUI.Extensions
 {
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+        {
+            ConfigureApplicationServices(services);
+            ConfigureWebService(services);
+            return services;
+        }
+
+        private static void ConfigureWebService(IServiceCollection services)
+        {
+            services.AddScoped<CartCookieService>();
+        }
+
+        private static void ConfigureApplicationServices(IServiceCollection services)
         {
             // Register Application Services
             services.AddScoped<IBannerService, BannerService>();
@@ -15,7 +28,6 @@ namespace KeystoneCommerce.WebUI.Extensions
             services.AddScoped<IAccountService, AccountService>();
             services.AddTransient<INotificationOrchestrator, NotificationService>();
             services.AddScoped<IReviewService, ReviewService>();
-            return services;
         }
     }
 }
