@@ -65,7 +65,7 @@ namespace KeystoneCommerce.WebUI.Services
             {
                 // If greater than zero, it means the user wants to update the quantity; otherwise, it will be removed from the cart.
                 if (request.Count > 0)
-                    foundProductInCart.Count += request.Count;
+                    foundProductInCart.Count = request.Count;
                 else
                     cartItems.Remove(foundProductInCart);
             }
@@ -76,6 +76,11 @@ namespace KeystoneCommerce.WebUI.Services
         private void SaveCookies(string json, CookieOptions options)
         {
             _response.Cookies.Append(CartCookieName, json, options);
+        }
+
+        public void ClearCart()
+        {
+            _response.Cookies.Delete(CartCookieName);
         }
     }
 }

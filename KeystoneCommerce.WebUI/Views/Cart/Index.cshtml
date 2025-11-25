@@ -1,0 +1,131 @@
+﻿@model List<ProductCartViewModel>
+
+@if (Model is null || !Model.Any())
+{
+    <div class="shopping_cart_area" style="margin-top:200px;">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h3>Your shopping cart is empty.</h3>
+                    <a href="@Url.Action("Index", "Shop")" class="btn btn-primary mt-3">Continue Shopping</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    return;
+}
+
+<div class="breadcrumbs_area breadcrumbs_other" style="margin-top:100px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb_content text-center">
+                    <ul>
+                        <li><a asp-action="Index" asp-controller="Home">home</a></li>
+                        <li><a asp-action="Index" asp-controller="Shop">shop</a></li>
+                    </ul>
+                    <h3>Shopping Cart</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="shopping_cart_area" >
+    <div class="container">
+        <form action="#">
+            <div class="cart_page_inner mb-60">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="cart_page_tabel">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>product </th>
+                                        <th>information</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var product in Model)
+                                    {
+                                        <tr class="border-top" id="@product.Id">
+                                            <td>
+                                                <div class="cart_product_thumb">
+                                                    <img src="@FilePaths.WebProductPath/@product.ImageName" alt="@product.Title">
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="cart_product_text">
+                                                    <h4>@product.Title</h4>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="cart_product_price">
+                                                    <span>$@(product.Price)</span>
+                                                </div>
+                                            </td>
+                                            <td class="product_quantity">
+                                                <div class="cart_product_quantity">
+                                                    <input asp-for="@product.Count" min="0" max="100" type="number" data-product-id="@product.Id">
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="cart_product_price cart_product_total">
+                                                    <span>$@product.RowSumPrice.GetValueOrDefault().ToString("F")</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="cart_product_remove text-right">
+                                                    <a onclick="updateCart(@product.Id,0)"><i class="ion-android-close"></i></a>
+                                                </div>
+                                            </td>
+
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="cart_page_button border-top d-flex justify-content-between">
+                            <div class="shopping_cart_btn">
+                                <a asp-action="ClearCart" asp-controller="Cart" class="btn btn-primary border">CLEAR SHOPPING CART</a>
+                            </div>
+                            <div class="shopping_continue_btn">
+                                <a asp-action="Index" asp-controller="Shop" class="btn btn-primary" type="submit">CONTINUE SHOPPING</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--coupon code area start-->
+            <div class="cart_page_bottom">
+                <div class="row d-flex justify-content-end">
+                    <div class="col-lg-4 col-md-6 col-sm-8">
+                        <div class="grand_totall_area">
+                            <div class="grand_totall_inner border-bottom">
+                                <div class="cart_grandtotal d-flex justify-content-between">
+                                    <p>Total</p>
+                                    <span>$@Model.Sum(x => x.RowSumPrice)?.ToString("F")</span>
+                                </div>
+                            </div>
+                            <div class="proceed_checkout_btn">
+                                <a class="btn btn-primary" href="#">Proceed to Checkout</a>
+                            </div>
+                            <a href="#">Checkout with Mutilple Adresses</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--coupon code area end-->
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script defer src="/assets/sweetalert2/sweetalert2.all.min.js"></script>
+    <script defer src="~/assets/js/axios/axios.min.js"></script>
+    <script defer src="~/assets/js/scripts/cart.js"></script>
+    <script defer src="~/assets/js/scripts/shopping-cart.js"></script>
+}

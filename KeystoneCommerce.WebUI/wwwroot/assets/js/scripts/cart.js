@@ -43,10 +43,15 @@ async function updateCart(productId, count) {
         setItemCount(response.data);
         await getMiniCart();
         if (count) showSuccess("Cart updated successfully");
+        else {
+            showSuccess("Product removed successfully");
+        }
     } catch (err) {
         showError(err, "Error product not found");
     }
 }
+
+
 
 function showSuccess(message) {
     const Toast = Swal.mixin({

@@ -64,5 +64,19 @@ namespace KeystoneCommerce.WebUI.Controllers
 
             return productCartViewModels;
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            var productCartItems = await GetProductCartViewModels();
+            return View(productCartItems);
+        }
+
+        [HttpGet]
+        public IActionResult ClearCart()
+        {
+            _cartCookieService.ClearCart();
+            return RedirectToAction("Index", "Shop");
+        }
     }
 }
