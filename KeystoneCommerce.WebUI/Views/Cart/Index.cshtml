@@ -1,5 +1,8 @@
 ﻿@model List<ProductCartViewModel>
-
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "My Cart";
+}
 @if (Model is null || !Model.Any())
 {
     <div class="shopping_cart_area" style="margin-top:200px;">
@@ -7,7 +10,8 @@
             <div class="row">
                 <div class="col-12 text-center">
                     <h3>Your shopping cart is empty.</h3>
-                    <a href="@Url.Action("Index", "Shop")" class="btn btn-primary mt-3">Continue Shopping</a>
+                    <a href="@Url.Action("Index", "Shop")" class="btn btn-primary mt-3">Continue
+                        Shopping</a>
                 </div>
             </div>
         </div>
@@ -31,7 +35,7 @@
     </div>
 </div>
 
-<div class="shopping_cart_area" >
+<div class="shopping_cart_area">
     <div class="container">
         <form action="#">
             <div class="cart_page_inner mb-60">
@@ -40,60 +44,66 @@
                         <div class="cart_page_tabel">
                             <table>
                                 <thead>
-                                    <tr>
-                                        <th>product </th>
-                                        <th>information</th>
-                                        <th>Price</th>
-                                        <th>Quantity</th>
-                                        <th>Total</th>
-                                    </tr>
+                                <tr>
+                                    <th>product</th>
+                                    <th>information</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var product in Model)
-                                    {
-                                        <tr class="border-top" id="@product.Id">
-                                            <td>
-                                                <div class="cart_product_thumb">
-                                                    <img src="@FilePaths.WebProductPath/@product.ImageName" alt="@product.Title">
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="cart_product_text">
-                                                    <h4>@product.Title</h4>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="cart_product_price">
-                                                    <span>$@(product.Price)</span>
-                                                </div>
-                                            </td>
-                                            <td class="product_quantity">
-                                                <div class="cart_product_quantity">
-                                                    <input asp-for="@product.Count" min="0" max="100" type="number" data-product-id="@product.Id">
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="cart_product_price cart_product_total">
-                                                    <span>$@product.RowSumPrice.GetValueOrDefault().ToString("F")</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="cart_product_remove text-right">
-                                                    <a onclick="updateCart(@product.Id,0)"><i class="ion-android-close"></i></a>
-                                                </div>
-                                            </td>
+                                @foreach (var product in Model)
+                                {
+                                    <tr class="border-top" id="@product.Id">
+                                        <td>
+                                            <div class="cart_product_thumb">
+                                                <img
+                                                    src="@FilePaths.WebProductPath/@product.ImageName"
+                                                    alt="@product.Title">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="cart_product_text">
+                                                <h4>@product.Title</h4>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="cart_product_price">
+                                                <span>$@(product.Price)</span>
+                                            </div>
+                                        </td>
+                                        <td class="product_quantity">
+                                            <div class="cart_product_quantity">
+                                                <input asp-for="@product.Count" min="0" max="100"
+                                                       type="number" data-product-id="@product.Id">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="cart_product_price cart_product_total">
+                                                <span>$@product.RowSumPrice.GetValueOrDefault().ToString("F")</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="cart_product_remove text-right">
+                                                <a onclick="removeProduct(@product.Id,0)"><i
+                                                        class="ion-android-close"></i></a>
+                                            </div>
+                                        </td>
 
-                                        </tr>
-                                    }
+                                    </tr>
+                                }
                                 </tbody>
                             </table>
                         </div>
                         <div class="cart_page_button border-top d-flex justify-content-between">
                             <div class="shopping_cart_btn">
-                                <a asp-action="ClearCart" asp-controller="Cart" class="btn btn-primary border">CLEAR SHOPPING CART</a>
+                                <a asp-action="ClearCart" asp-controller="Cart"
+                                   class="btn btn-primary border">CLEAR SHOPPING CART</a>
                             </div>
                             <div class="shopping_continue_btn">
-                                <a asp-action="Index" asp-controller="Shop" class="btn btn-primary" type="submit">CONTINUE SHOPPING</a>
+                                <a asp-action="Index" asp-controller="Shop" class="btn btn-primary"
+                                   type="submit">CONTINUE SHOPPING</a>
                             </div>
                         </div>
                     </div>
@@ -111,9 +121,9 @@
                                 </div>
                             </div>
                             <div class="proceed_checkout_btn">
-                                <a class="btn btn-primary" href="#">Proceed to Checkout</a>
+                                <a class="btn btn-primary" asp-action="Index"
+                                   asp-controller="Checkout">Proceed to Checkout</a>
                             </div>
-                            <a href="#">Checkout with Mutilple Adresses</a>
                         </div>
                     </div>
                 </div>

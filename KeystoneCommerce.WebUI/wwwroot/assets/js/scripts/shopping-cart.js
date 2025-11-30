@@ -65,3 +65,8 @@ function updateTotalPrice() {
     });
     grandTotalElement.textContent = `$${totalPrice.toFixed(2)}`;
 }
+
+async function removeProduct(productId, quantity) {
+    await updateCart(productId, quantity);
+    removeProductFromPage(productId);
+}
