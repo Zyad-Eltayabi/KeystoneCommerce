@@ -64,6 +64,7 @@ namespace KeystoneCommerce.Infrastructure
             services.AddScoped<IShopRepository, ShopRepository>();
             services.AddScoped<IProductDetailsRepository, ProductDetailsRepository>();
             services.AddScoped<IReviewRepository, ReviewRepository>();
+            services.AddScoped<IUnitOfWork,UnitOfWork>();
         }
 
         private static void AddFluentValidationServices(IServiceCollection services)
