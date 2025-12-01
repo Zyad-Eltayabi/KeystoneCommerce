@@ -24,6 +24,7 @@ public class ShippingMethodConfiguration : IEntityTypeConfiguration<ShippingMeth
             .HasColumnType("decimal(18,2)");
 
         builder.Property(sm => sm.EstimatedDays)
+            .HasMaxLength(50)
             .IsRequired();
 
         builder.HasMany(sm => sm.Orders)

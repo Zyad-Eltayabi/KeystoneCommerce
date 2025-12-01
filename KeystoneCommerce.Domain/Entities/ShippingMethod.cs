@@ -6,6 +6,6 @@ public class ShippingMethod
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
     public decimal Price { get; set; }
-    public int EstimatedDays { get; set; }
+    public string EstimatedDays { get; set; } = string.Empty;
     public ICollection<Order> Orders { get; set; } = new List<Order>();
 }
