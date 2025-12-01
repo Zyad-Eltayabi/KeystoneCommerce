@@ -16,6 +16,7 @@ namespace KeystoneCommerce.WebUI.Extensions
         private static void ConfigureWebService(IServiceCollection services)
         {
             services.AddScoped<CartCookieService>();
+            services.AddScoped<CartService>();
         }
 
         private static void ConfigureApplicationServices(IServiceCollection services)
@@ -28,6 +29,7 @@ namespace KeystoneCommerce.WebUI.Extensions
             services.AddScoped<IAccountService, AccountService>();
             services.AddTransient<INotificationOrchestrator, NotificationService>();
             services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<ICouponService, CouponService>();
         }
     }
 }
