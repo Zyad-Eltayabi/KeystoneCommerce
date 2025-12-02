@@ -57,7 +57,7 @@
                         <div id="checkout_coupon2" class="collapse" data-parent="#accordion">
                             <div class="checkout_info coupon_info">
                                 <form asp-action="ApplyCoupon" asp-controller="Checkout" method="post">
-                                    <input asp-for="@Model.ApplyCoupon.CouponCode" name="couponCode" placeholder="Coupon code" type="text">
+                                    <input form="CheckoutForm" asp-for="@Model.ApplyCoupon.CouponCode" name="couponCode" placeholder="Coupon code" type="text" >
                                     <button class="btn btn-primary" type="submit">
                                         Apply coupon
                                     </button>
@@ -70,31 +70,36 @@
         </div>
 
         <div class="checkout_form">
-            <div class="row">
-                <div class="col-lg-7 col-md-6">
-                    <form action="#">
+            <form id="CheckoutForm" asp-action="ProcessCheckOut" asp-controller="Checkout" method="post">
+                <div class="row">
+                    <div class="col-lg-7 col-md-6">
                         <h3>Shipping Details</h3>
                         <div class="checkout_form_input">
                             <div class="checkout_form_input">
-                                <label>Full Name <span>*</span></label>
-                                <input type="text">
+                                <label asp-for="ShippingDetails.FullName">Full Name <span>*</span></label>
+                                <input asp-for="ShippingDetails.FullName" type="text">
+                                <span asp-validation-for="ShippingDetails.FullName" class="text-danger"></span>
                             </div>
                             <div class="checkout_form_input">
-                                <label> Email <span>*</span></label>
-                                <input type="text">
+                                <label asp-for="ShippingDetails.Email"> Email <span>*</span></label>
+                                <input asp-for="ShippingDetails.Email" type="text">
+                                <span asp-validation-for="ShippingDetails.Email" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="checkout_form_input">
-                            <label>Address<span>*</span></label>
-                            <input type="text">
+                            <label asp-for="ShippingDetails.Address">Address<span>*</span></label>
+                            <input asp-for="ShippingDetails.Address" type="text">
+                            <span asp-validation-for="ShippingDetails.Address" class="text-danger"></span>
                         </div>
                         <div class="checkout_form_input">
-                            <label>Town / City <span>*</span></label>
-                            <input type="text">
+                            <label asp-for="ShippingDetails.City">Town / City <span>*</span></label>
+                            <input asp-for="ShippingDetails.City" type="text">
+                            <span asp-validation-for="ShippingDetails.City" class="text-danger"></span>
                         </div>
                         <div class="checkout_form_input">
-                            <label for="country">country <span>*</span></label>
-                            <select class="select_option" name="cuntry" id="country">
+                            <label asp-for="ShippingDetails.Country">country <span>*</span></label>
+                            <select asp-for="ShippingDetails.Country" class="select_option">
+                                <option value="">Select a country</option>
                                 <option value="Argentina">Argentina</option>
                                 <option value="Australia">Australia</option>
                                 <option value="Bangladesh">Bangladesh</option>
@@ -142,20 +147,21 @@
                                 <option value="Venezuela">Venezuela</option>
                                 <option value="Vietnam">Vietnam</option>
                             </select>
+                            <span asp-validation-for="ShippingDetails.Country" class="text-danger"></span>
                         </div>
                         <div class="checkout_form_input">
                             <label> Phone <span>*</span></label>
-                            <input type="text">
+                            <input asp-for="ShippingDetails.Phone" type="text">
+                            <span asp-validation-for="ShippingDetails.Phone" class="text-danger"></span>
                         </div>
                         <div class="checkout_form_input">
                             <label> Postal Code </label>
-                            <input type="text">
+                            <input asp-for="ShippingDetails.PostalCode" type="text">
+                            <span asp-validation-for="ShippingDetails.PostalCode" class="text-danger"></span>
                         </div>
-                    </form>
-                </div>
-                <div class="col-lg-5 col-md-6">
-                    <div class="order_table_right">
-                        <form action="#">
+                    </div>
+                    <div class="col-lg-5 col-md-6">
+                        <div class="order_table_right">
                             <h3>Your order</h3>
                             <div class="order_table table-responsive">
                                 <table>
@@ -200,10 +206,10 @@
                                                             var method = Model.ShippingMethods[i];
                                                             <div class="shipping-method-option" style="margin-bottom: 10px; padding: 10px; border: 1px solid #e8e8e8; border-radius: 4px; transition: all 0.3s ease;">
                                                                 <label for="shipping_@i" style="margin: 0; cursor: pointer; display: flex; align-items: center; width: 100%;">
-                                                                    <input class="shipping-method-radio" 
-                                                                           type="radio" 
-                                                                           name="shippingMethod" 
-                                                                           id="shipping_@i" 
+                                                                    <input class="shipping-method-radio"
+                                                                           type="radio"
+                                                                           name="shippingMethod"
+                                                                           id="shipping_@i"
                                                                            value="@method.Name"
                                                                            data-price="@method.Price"
                                                                            style="margin-right: 10px; cursor: pointer;"
@@ -318,13 +324,12 @@
                                 </div>
                             </div>
                             <div class="place_order_btn">
-                                <a class="btn btn-primary" href="#">place order</a>
+                                <button type="submit" class="btn btn-primary w-100">place order</button>
                             </div>
-
-                        </form>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
