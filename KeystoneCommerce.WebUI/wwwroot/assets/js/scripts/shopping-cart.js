@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function removeProductFromPage(productId) {
     let product = document.getElementById(productId);
     if (product) product.remove();
+    updateTotalPrice();
 }
 
 function showError(err, defaultMessage = "An unexpected error occurred") {
