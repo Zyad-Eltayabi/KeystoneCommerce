@@ -30,6 +30,7 @@ namespace KeystoneCommerce.WebUI.Extensions
             services.AddTransient<INotificationOrchestrator, NotificationService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<ICouponService, CouponService>();
+            services.AddScoped<IShippingMethodService, ShippingMethodService>();
         }
     }
 }

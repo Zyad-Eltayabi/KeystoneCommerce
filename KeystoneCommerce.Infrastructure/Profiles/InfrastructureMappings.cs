@@ -3,6 +3,7 @@ using KeystoneCommerce.Application.DTOs;
 using KeystoneCommerce.Application.DTOs.Banner;
 using KeystoneCommerce.Application.DTOs.Product;
 using KeystoneCommerce.Application.DTOs.Review;
+using KeystoneCommerce.Application.DTOs.ShippingMethod;
 using KeystoneCommerce.Application.DTOs.Shop;
 using KeystoneCommerce.Domain.Entities;
 using KeystoneCommerce.Domain.Enums;
@@ -43,6 +44,8 @@ namespace KeystoneCommerce.Infrastructure.Profiles
 
             CreateMap<Product, ProductCardDto>();
 
+            CreateMap<ShippingMethod, ShippingMethodDto>()
+                .ReverseMap();
         }
     }
 }
