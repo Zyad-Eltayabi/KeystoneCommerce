@@ -22,7 +22,6 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\dist\jquery.slim.min.js" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\dist\jquery.slim.min.map" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\LICENSE.txt" />
-      <_ContentIncludedByDefault Remove="wwwroot\js\site.js" />
       <_ContentIncludedByDefault Remove="Views\Admin\Banner\Index.cshtml" />
       <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_banner.scss" />
       <_ContentIncludedByDefault Remove="wwwroot\assets\scss\section\_blog-details.scss" />

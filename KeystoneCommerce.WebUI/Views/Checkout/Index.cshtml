@@ -189,14 +189,54 @@
                                                 <td class="text-right">@Model.ApplyCoupon.DiscountAmount%</td>
                                             </tr>
                                         }
+                                        @if (Model.ShippingMethods != null && Model.ShippingMethods.Any())
+                                        {
+                                            <tr>
+                                                <td colspan="2" style="padding: 15px 0;">
+                                                    <div style="font-weight: 400; font-size: 14px; margin-bottom: 12px;">Shipping Method</div>
+                                                    <div class="shipping-methods">
+                                                        @for (int i = 0; i < Model.ShippingMethods.Count; i++)
+                                                        {
+                                                            var method = Model.ShippingMethods[i];
+                                                            <div class="shipping-method-option" style="margin-bottom: 10px; padding: 10px; border: 1px solid #e8e8e8; border-radius: 4px; transition: all 0.3s ease;">
+                                                                <label for="shipping_@i" style="margin: 0; cursor: pointer; display: flex; align-items: center; width: 100%;">
+                                                                    <input class="shipping-method-radio" 
+                                                                           type="radio" 
+                                                                           name="shippingMethod" 
+                                                                           id="shipping_@i" 
+                                                                           value="@method.Name"
+                                                                           data-price="@method.Price"
+                                                                           style="margin-right: 10px; cursor: pointer;"
+                                                                           @(i == 0 ? "checked" : "")>
+                                                                    <div style="flex: 1;">
+                                                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                                            <span style="font-weight: 400; font-size: 14px; color: #333;">@method.Name</span>
+                                                                            <span style="font-weight: 500; font-size: 14px; color: #333;">$@method.Price.ToString("F2")</span>
+                                                                        </div>
+                                                                        <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                                                            Estimated delivery: @method.EstimatedDays days
+                                                                        </div>
+                                                                    </div>
+                                                                </label>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Shipping</td>
+                                                <td class="text-right">$<span id="shippingPrice">@(Model.ShippingMethods.FirstOrDefault()?.Price.ToString("F2") ?? "0.00")</span></td>
+                                            </tr>
+                                        }
                                         <tr class="order_total">
                                             <th>Order Total</th>
                                             @{
                                                 var subTotal = Model.Products.Sum(x => x.RowSumPrice);
                                                 var discount = subTotal * (Model.ApplyCoupon.DiscountAmount / 100m);
-                                                var total = subTotal - discount;
+                                                var shippingPrice = Model.ShippingMethods?.FirstOrDefault()?.Price ?? 0;
+                                                var total = subTotal - discount + shippingPrice;
                                             }
-                                            <td class="text-right">$@total?.ToString("F2")</td>
+                                            <td class="text-right">$<span id="orderTotal">@total?.ToString("F2")</span></td>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -289,8 +329,12 @@
     </div>
 </div>
 <!--Checkout page section end-->
+@section Styles {
+    <link href="~/assets/css/styles/checkout.css" rel="stylesheet" />
+}
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script src="~/assets/js/scripts/checkout.js"></script>
     <script>
         const Toast = Swal.mixin({
                         toast: true,
@@ -322,5 +366,11 @@
             });
         </script>
     }
+    <script>
+        var subtotal = @Model.Products.Sum(x => x.RowSumPrice);
+        var discountPercentage = @Model.ApplyCoupon.DiscountAmount;
+        initializeCheckout(subtotal, discountPercentage);
+    </script>
 
 }
+
