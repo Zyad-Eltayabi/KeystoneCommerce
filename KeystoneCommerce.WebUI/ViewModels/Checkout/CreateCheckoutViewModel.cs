@@ -11,4 +11,5 @@ public class CreateCheckoutViewModel
     public ShippingDetailsViewModel ShippingDetails { get; set; } = new();
     public string ShippingMethod { get; set; } = string.Empty;
     public string CouponCode { get; set; } = string.Empty;
+    public int PaymentType { get; set; }
 }
