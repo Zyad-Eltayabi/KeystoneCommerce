@@ -364,5 +364,30 @@ namespace KeystoneCommerce.Application.Services
             var products = await _productRepository.GetAllAsync(filter, false);
             return _mappingService.Map<List<ProductCardDto>>(products);
         }
+
+        public async Task<bool> AreAllProductsExistAsync(List<int> productIds)
+        {
+            if (productIds == null || productIds.Count == 0)
+            {
+                _logger.LogWarning("Product IDs validation failed - empty or null list provided");
+                return false;
+            }
+
+            _logger.LogInformation("Validating existence of {Count} product IDs", productIds.Count);
+
+            var allExist = await _productRepository.AreAllProductIdsExistAsync(productIds);
+
+            if (!allExist)
+            {
+                _logger.LogWarning("One or more product IDs do not exist in the database. Provided IDs: {ProductIds}", 
+                    string.Join(", ", productIds));
+            }
+            else
+            {
+                _logger.LogInformation("All {Count} product IDs validated successfully", productIds.Distinct().Count());
+            }
+
+            return allExist;
+        }
     }
 }

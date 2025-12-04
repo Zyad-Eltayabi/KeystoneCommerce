@@ -20,6 +20,14 @@ namespace KeystoneCommerce.Infrastructure.Repositories
                 .Include(p => p.Galleries)
                 .FirstOrDefaultAsync(p => p.Id == productId);
         }
-        
+
+        public async Task<bool> AreAllProductIdsExistAsync(List<int> productIds)
+        {
+            var distinctIds = productIds.Distinct().ToList();
+            var existingProductsCount = await _context.Products
+                .Where(p => distinctIds.Contains(p.Id))
+                .CountAsync();
+            return existingProductsCount == distinctIds.Count;
+        }
     }
 }
