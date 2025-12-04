@@ -14,7 +14,7 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
 
         builder.Property(p => p.Provider)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasConversion<int>();
 
         builder.Property(p => p.ProviderTransactionId)
             .HasMaxLength(200);
