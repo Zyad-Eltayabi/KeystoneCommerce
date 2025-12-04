@@ -56,11 +56,6 @@ namespace KeystoneCommerce.Infrastructure.Persistence.Configurations
                 .WithOne(o => o.Product)
                 .HasForeignKey(o => o.ProductId)
                 .OnDelete(DeleteBehavior.NoAction);
-            
-            builder.HasMany(x => x.Orders)
-                .WithOne(x => x.Product)
-                .HasForeignKey(x => x.ProductId)
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -20,11 +20,9 @@ public class Order
     public int ShippingMethodId { get; set; }
     public string UserId { get; set; } = null!;
     public int? CouponId { get; set; }
-    public int ProductId { get; set; } 
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     public Payment? Payment { get; set; } 
     public Coupon? Coupon { get; set; }
-    public Product Product { get; set; } = null!;
     public ShippingMethod ShippingMethod { get; set; } = null!;
-    public ShippingAddress ShippingAddress { get; set; } = null;
+    public ShippingAddress ShippingAddress { get; set; } = null!;
 }
