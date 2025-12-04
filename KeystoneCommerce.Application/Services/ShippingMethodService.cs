@@ -14,5 +14,13 @@ namespace KeystoneCommerce.Application.Services
                 return null;
             return mapping.Map<List<ShippingMethodDto>>(shippingMethods);
         }
+
+        public async Task<ShippingMethodDto?> GetShippingMethodByNameAsync(string name)
+        {
+            var shippingMethod = await repository.FindAsync(sm => sm.Name == name);
+            if (shippingMethod is null)
+                return null;
+            return mapping.Map<ShippingMethodDto>(shippingMethod);
+        }
     }
 }
