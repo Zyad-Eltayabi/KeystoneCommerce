@@ -31,6 +31,10 @@ namespace KeystoneCommerce.WebUI.Extensions
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<ICouponService, CouponService>();
             services.AddScoped<IShippingMethodService, ShippingMethodService>();
+            services.AddScoped<ICheckoutService, CheckoutService>();
+            services.AddScoped<IShippingAddressService, ShippingAddressService>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IPaymentService, PaymentService>();
         }
     }
 }

@@ -4,6 +4,7 @@ using KeystoneCommerce.Infrastructure.Persistence.Identity;
 using KeystoneCommerce.Shared.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text;
 
@@ -99,6 +100,11 @@ namespace KeystoneCommerce.Infrastructure.Services
         public async Task<bool> IsUserExists(string email)
         {
             return await _userManager.FindByEmailAsync(email) is not null;
+        }
+
+        public async Task<bool> IsUserExistsById(string userId)
+        {
+            return await _userManager.Users.AnyAsync(u => u.Id == userId);
         }
 
         public async Task<List<string>> ResetPasswordAsync(string email, string token, string newPassword)

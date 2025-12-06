@@ -53,7 +53,6 @@ namespace KeystoneCommerce.Infrastructure
             services.AddScoped<IMappingService, MappingService>();
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddTransient<INotificationService<EmailMessage>, EmailService>();
-
         }
 
         private static void RegisterRepositoryServices(IServiceCollection services)
@@ -68,6 +67,8 @@ namespace KeystoneCommerce.Infrastructure
             services.AddScoped<ICouponRepository, CouponRepository>();
             services.AddScoped<IShippingMethodRepository, ShippingMethodRepository>();
             services.AddScoped<IShippingAddressRepository, ShippingAddressRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
         }
 
         private static void AddFluentValidationServices(IServiceCollection services)

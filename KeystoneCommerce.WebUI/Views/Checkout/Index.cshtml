@@ -249,7 +249,7 @@
                                 </table>
                                 <div class="panel-default">
                                     <div class="panel_radio">
-                                        <input value="2" id="payment3" name="PaymentType" type="radio"
+                                        <input value="CashOnDelivery" asp-for="@Model.PaymentProvider" type="radio"
                                                data-target="createp_account" />
                                         <span class="checkmark"></span>
                                     </div>
@@ -258,13 +258,14 @@
                                 </div>
                                 <div class="panel-default">
                                     <div class="panel_radio">
-                                        <input value="1" id="payment4" name="PaymentType" type="radio"
+                                        <input value="PayPal" asp-for="@Model.PaymentProvider" type="radio"
                                                data-target="createp_account" />
                                         <span class="checkmark"></span>
                                     </div>
                                     <label for="payment4" data-toggle="collapse"
-                                           data-target="#method4">Paypal</label>
+                                           data-target="#method4">PayPal</label>
                                 </div>
+                                <span asp-validation-for="@Model.PaymentProvider" class="text-danger"></span>
                             </div>
                             <div class="place_order_btn">
                                 <button type="submit" class="btn btn-primary w-100">place order</button>

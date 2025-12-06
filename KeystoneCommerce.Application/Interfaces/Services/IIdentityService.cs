@@ -9,6 +9,7 @@ namespace KeystoneCommerce.Application.Interfaces.Services
         Task<bool> LoginUserAsync(string email, string password,bool rememberMe);
         Task<bool> LogoutUserAsync();
         Task<bool> IsUserExists(string email);
+        Task<bool> IsUserExistsById(string userId);
         Task<List<string>> ResetPasswordAsync(string email, string token, string newPassword);
     }
 }
