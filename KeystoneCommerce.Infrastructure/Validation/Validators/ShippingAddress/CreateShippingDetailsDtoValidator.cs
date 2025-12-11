@@ -42,8 +42,6 @@ namespace KeystoneCommerce.Infrastructure.Validation.Validators.ShippingAddress
             RuleFor(x => x.Phone)
                 .NotEmpty()
                 .WithMessage("Phone is required.")
-                .Matches(@"^\+?[1-9]\d{1,14}$")
-                .WithMessage("Invalid phone number.")
                 .MaximumLength(20)
                 .WithMessage("Phone cannot exceed 20 characters.");
 
