@@ -53,6 +53,7 @@ namespace KeystoneCommerce.Infrastructure
             services.AddScoped<IMappingService, MappingService>();
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddTransient<INotificationService<EmailMessage>, EmailService>();
+            services.AddScoped<IStripPaymentService, StripPaymentService>();
         }
 
         private static void RegisterRepositoryServices(IServiceCollection services)

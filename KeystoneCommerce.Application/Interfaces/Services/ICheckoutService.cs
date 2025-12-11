@@ -6,6 +6,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
 {
     public interface ICheckoutService
     {
-        Task<Result<bool>> SubmitOrder(CreateOrderDto order);
+        Task<Result<OrderDto>> SubmitOrder(CreateOrderDto order);
     }
 }
