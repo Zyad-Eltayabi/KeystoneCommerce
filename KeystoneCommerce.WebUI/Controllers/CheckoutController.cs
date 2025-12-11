@@ -48,12 +48,15 @@ public class CheckoutController(CartService cartService, ICouponService couponSe
             TempData["ErrorMessage"] = "Please correct the errors in the form.";
             return RedirectToAction("Index", model);
         }
+
         var productCartViewModels = await cartService.GetProductCartViewModels();
-        if (productCartViewModels == null)
+        if (productCartViewModels == null || !productCartViewModels.Any())
         {
             TempData["ErrorMessage"] = "Your cart is empty.";
             return RedirectToAction("Index", model);
         }
+
+        // Process other payment methods or complete order
         var order = new CreateOrderDto()
         {
             ShippingMethod = model.ShippingMethod,
@@ -62,16 +65,27 @@ public class CheckoutController(CartService cartService, ICouponService couponSe
             UserId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value ?? "Anonymous",
             PaymentProvider = model.PaymentProvider
         };
+
         foreach (var item in productCartViewModels)
         {
             order.ProductsWithQuantity.Add(item.Id, item.Count);
         }
+
         var processResult = await checkoutService.SubmitOrder(order);
         if (!processResult.IsSuccess)
         {
             TempData["ErrorMessage"] = string.Join(",", processResult.Errors);
             return RedirectToAction("Index", model);
         }
+
+        if (model.PaymentProvider == "Stripe")
+        {
+            return RedirectToAction("CreateCheckoutSession", "Payment", new
+            {
+                totalPrice = processResult.Data!.Total,
+            });
+        }
+
         TempData["Success"] = "Checkout processed successfully!";
         return RedirectToAction("Index", model);
     }

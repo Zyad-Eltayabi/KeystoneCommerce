@@ -258,12 +258,12 @@
                                 </div>
                                 <div class="panel-default">
                                     <div class="panel_radio">
-                                        <input value="PayPal" asp-for="@Model.PaymentProvider" type="radio"
+                                        <input value="Stripe" asp-for="@Model.PaymentProvider" type="radio"
                                                data-target="createp_account" />
                                         <span class="checkmark"></span>
                                     </div>
                                     <label for="payment4" data-toggle="collapse"
-                                           data-target="#method4">PayPal</label>
+                                           data-target="#method4">Stripe</label>
                                 </div>
                                 <span asp-validation-for="@Model.PaymentProvider" class="text-danger"></span>
                             </div>
