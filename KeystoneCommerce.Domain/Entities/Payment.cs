@@ -10,6 +10,7 @@ public class Payment
     public decimal Amount { get; set; }
     public string Currency { get; set; } = null!;
     public PaymentStatus Status { get; set; }
+    public bool IsFulfilled { get; set; } = false;
     public DateTime CreatedAt { get;private set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
     public string UserId { get; set; } = null!;

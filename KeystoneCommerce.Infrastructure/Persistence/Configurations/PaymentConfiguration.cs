@@ -31,6 +31,10 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
             .IsRequired()
             .HasConversion<int>();
 
+        builder.Property(p => p.IsFulfilled)
+            .IsRequired()
+            .HasDefaultValue(false);
+
         builder.Property(p => p.CreatedAt)
             .IsRequired()
             .HasDefaultValueSql("GETUTCDATE()");
