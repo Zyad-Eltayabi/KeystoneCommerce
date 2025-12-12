@@ -173,6 +173,40 @@ namespace KeystoneCommerce.Application.Services
             return Result<OrderDto>.Success(orderDto);
         }
 
+        public async Task<Result<bool>> UpdateOrderPaymentStatus(int orderId)
+        {
+            _logger.LogInformation("Updating payment status for order ID: {OrderId}", orderId);
+
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order is null)
+            {
+                _logger.LogWarning("Order not found with ID: {OrderId}", orderId);
+                return Result<bool>.Failure("Order not found.");
+            }
+
+            if (order.IsPaid)
+            {
+                _logger.LogWarning("Order ID: {OrderId} is already marked as paid.", orderId);
+                return Result<bool>.Failure("Order is already paid.");
+            }
+
+            order.IsPaid = true;
+            order.Status = Domain.Enums.OrderStatus.Paid;
+            order.UpdatedAt = DateTime.UtcNow;
+
+            _orderRepository.Update(order);
+            var result = await _orderRepository.SaveChangesAsync();
+
+            if (result == 0)
+            {
+                _logger.LogError("Failed to update payment status for order ID: {OrderId}", orderId);
+                return Result<bool>.Failure("Failed to update order payment status.");
+            }
+
+            _logger.LogInformation("Payment status updated successfully for order ID: {OrderId}", orderId);
+            return Result<bool>.Success();
+        }
+
         private async Task<bool> TryReserveStockAsync(Dictionary<int, int> ProductsWithQuantity)
         {
             foreach (var item in ProductsWithQuantity)

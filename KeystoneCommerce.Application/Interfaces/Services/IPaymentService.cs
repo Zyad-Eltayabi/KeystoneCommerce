@@ -6,5 +6,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
     public interface IPaymentService
     {
         Task<Result<int>> CreatePaymentAsync(CreatePaymentDto createPaymentDto);
+        Task<Result<bool>> ConfirmPaymentAsync(ConfirmPaymentDto confirmPaymentDto);
     }
 }

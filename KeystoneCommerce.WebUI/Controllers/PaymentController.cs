@@ -4,47 +4,46 @@ using KeystoneCommerce.WebUI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 using Stripe.Checkout;
+using System.Threading.Tasks;
 
 namespace KeystoneCommerce.WebUI.Controllers
 {
     public class PaymentController : Controller
     {
-        private readonly CartService _cartService;
         private readonly IPaymentGatewayService _paymentGatewayService;
         private readonly IConfiguration _configuration;
+        private readonly IPaymentService _paymentService;
+        private readonly ILogger<PaymentController> _logger;
         public PaymentController(
-            CartService cartService,
             IPaymentGatewayService paymentGatewayService,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IPaymentService paymentService,
+            ILogger<PaymentController> logger)
         {
-            _cartService = cartService;
             _paymentGatewayService = paymentGatewayService;
             _configuration = configuration;
+            _paymentService = paymentService;
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<IActionResult> CreateCheckoutSession(decimal totalPrice)
+        public async Task<IActionResult> CreateCheckoutSession(decimal totalPrice, int paymentId)
         {
-            var productCartViewModels = await _cartService.GetProductCartViewModels();
-            if (productCartViewModels == null || !productCartViewModels.Any())
-            {
-                TempData["ErrorMessage"] = "Your cart is empty.";
-                return RedirectToAction("Index", "Cart");
-            }
             var baseUrl = _configuration["AppSettings:BaseUrl"];
             var sessionDto = new CreatePaymentSessionDto
             {
-                LineItems = productCartViewModels.Select(item => new PaymentLineItemDto
-                {
-                    ProductName = item.Title,
-                    Quantity = item.Count
-                }).ToList(),
                 TotalPrice = totalPrice,
+                PaymentId = paymentId,
                 SuccessUrl = $"{baseUrl}/payment/success",
                 CancelUrl = $"{baseUrl}/payment/cancel"
             };
             var result = await _paymentGatewayService.CreatePaymentSessionAsync(sessionDto);
-            Response.Headers.Append("Location", result.PaymentUrl);
+            if (!result.IsSuccess)
+            {
+                TempData["ErrorMessage"] = "Failed to process payment, pleases try again later.";
+                return RedirectToAction("Index", "Checkout");
+            }
+            Response.Headers.Append("Location", result.Data!.PaymentUrl);
             return new StatusCodeResult(303);
         }
 
@@ -57,10 +56,54 @@ namespace KeystoneCommerce.WebUI.Controllers
         {
             return Content("Payment canceled.");
         }
-    }
 
-    public static class StripeSessionStore
-    {
-        public static HashSet<string> Sessions = [];
+        [HttpPost]
+        [Route("webhooks/stripe")]
+        public async Task<IActionResult> StripeWebhook()
+        {
+            var secret = _configuration["StripeSettings:WebhookSecret"];
+            var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+
+            try
+            {
+                var stripeEvent = EventUtility.ConstructEvent(
+                  json,
+                  Request.Headers["Stripe-Signature"],
+                  secret
+                );
+
+                if (stripeEvent.Type == EventTypes.CheckoutSessionCompleted ||
+                  stripeEvent.Type == EventTypes.CheckoutSessionAsyncPaymentSucceeded)
+                {
+                    var session = stripeEvent.Data.Object as Session;
+                    if (session is null)
+                        return BadRequest();
+                    await FulfillCheckout(session.Id);
+                }
+                return Ok();
+            }
+            catch (StripeException ex)
+            {
+                _logger.LogError(ex, "Stripe web hook error: {Message}", ex.Message);
+                return BadRequest();
+            }
+        }
+
+        private async Task FulfillCheckout(string sessionId)
+        {
+            StripeConfiguration.ApiKey = _configuration["StripeSettings:SecretKey"];
+            var service = new SessionService();
+            var checkoutSession = service.Get(sessionId, new() { Expand = ["line_items"] });
+            if (checkoutSession.PaymentStatus == "paid")
+            {
+                ConfirmPaymentDto confirm = new()
+                {
+                    Amount = (decimal)(checkoutSession.AmountTotal / 100m)!,
+                    PaymentId = int.Parse(checkoutSession.Metadata["PaymentId_DB"].ToString()),
+                    ProviderTransactionId = checkoutSession.PaymentIntentId,
+                };
+                await _paymentGatewayService.ConfirmPaymentAndUpdateOrderAsync(confirm);
+            }
+        }
     }
 }

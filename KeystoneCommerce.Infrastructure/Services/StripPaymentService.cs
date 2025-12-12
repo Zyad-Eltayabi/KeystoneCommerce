@@ -19,28 +19,11 @@ namespace KeystoneCommerce.Infrastructure.Services
 
         public async Task<PaymentSessionResultDto> CreatePaymentSessionAsync(CreatePaymentSessionDto sessionDto)
         {
-            var lineItems = new List<SessionLineItemOptions>();
-
-            // Add each product as a line item (for display only, price is in total)
-            //foreach (var item in sessionDto.LineItems)
-            //{
-            //    lineItems.Add(new SessionLineItemOptions
-            //    {
-            //        PriceData = new SessionLineItemPriceDataOptions
-            //        {
-            //            Currency = "usd",
-            //            UnitAmountDecimal = (long)(10 * 100), // Zero price for individual items
-            //            ProductData = new SessionLineItemPriceDataProductDataOptions
-            //            {
-            //                Name = item.ProductName,
-            //            },
-            //        },
-            //        Quantity = item.Quantity,
-            //    });
-            //}
-            lineItems.Add(new SessionLineItemOptions
+            var lineItems = new List<SessionLineItemOptions>()
             {
-                PriceData = new SessionLineItemPriceDataOptions
+                new()
+                {
+                    PriceData = new SessionLineItemPriceDataOptions
                 {
                     Currency = "usd",
                     UnitAmountDecimal = (long)(sessionDto.TotalPrice * 100),
@@ -52,8 +35,8 @@ namespace KeystoneCommerce.Infrastructure.Services
 
                 },
                 Quantity = 1,
-            });
-
+                }
+            };
 
             var options = new SessionCreateOptions
             {
@@ -64,7 +47,11 @@ namespace KeystoneCommerce.Infrastructure.Services
                 PaymentMethodTypes = new List<string>
                 {
                     "card",
-                }
+                },
+                Metadata = new Dictionary<string, string>
+                {
+                    { "PaymentId_DB", sessionDto.PaymentId.ToString() },
+                },
             };
 
             var service = new SessionService();
@@ -72,7 +59,8 @@ namespace KeystoneCommerce.Infrastructure.Services
             return new PaymentSessionResultDto
             {
                 SessionId = session.Id,
-                PaymentUrl = session.Url
+                PaymentUrl = session.Url,
+                PaymentId = sessionDto.PaymentId,
             };
         }
     }

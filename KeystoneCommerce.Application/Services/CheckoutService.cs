@@ -58,7 +58,7 @@ public class CheckoutService : ICheckoutService
                 Provider = paymentType,
                 UserId = order.UserId,
                 Currency = orderData.Currency,
-                Status = PaymentStatus.Pending,
+                Status = PaymentStatus.Processing,
             };
 
             var paymentResult = await _paymentService.CreatePaymentAsync(paymentDto);
@@ -69,6 +69,7 @@ public class CheckoutService : ICheckoutService
             }
 
             await _unitOfWork.CommitAsync();
+            orderCreationResult.Data!.PaymentId = paymentResult.Data;
             return Result<OrderDto>.Success(orderCreationResult.Data);
         }
         catch (Exception ex)

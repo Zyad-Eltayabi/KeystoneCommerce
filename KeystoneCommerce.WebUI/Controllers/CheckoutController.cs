@@ -83,6 +83,7 @@ public class CheckoutController(CartService cartService, ICouponService couponSe
             return RedirectToAction("CreateCheckoutSession", "Payment", new
             {
                 totalPrice = processResult.Data!.Total,
+                paymentId = processResult.Data.PaymentId
             });
         }
 

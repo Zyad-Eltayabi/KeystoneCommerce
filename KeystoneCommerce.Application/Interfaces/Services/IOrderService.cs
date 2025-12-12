@@ -7,5 +7,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
     public interface IOrderService
     {
         Task<Result<OrderDto>> CreateNewOrder(CreateOrderDto createOrderDto);
+        Task<Result<bool>> UpdateOrderPaymentStatus(int orderId);
     }
 }

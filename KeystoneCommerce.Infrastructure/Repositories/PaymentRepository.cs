@@ -1,6 +1,7 @@
 using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Domain.Entities;
 using KeystoneCommerce.Infrastructure.Persistence.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace KeystoneCommerce.Infrastructure.Repositories
 {
@@ -12,6 +13,13 @@ namespace KeystoneCommerce.Infrastructure.Repositories
         {
             _context = context;
         }
-        
+
+        public async Task<int?> GetOrderIdByPaymentIdAsync(int paymentId)
+        {
+            return await _context.Payments
+                .Where(p => p.Id == paymentId)
+                .Select(p => p.OrderId)
+                .FirstOrDefaultAsync();
+        }
     }
 }
