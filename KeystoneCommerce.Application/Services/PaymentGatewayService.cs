@@ -51,6 +51,15 @@ public class PaymentGatewayService : IPaymentGatewayService
         _logger.LogInformation("Starting payment confirmation process for Payment ID: {PaymentId}", 
             confirmPaymentDto.PaymentId);
 
+        // Check if payment is already fulfilled (duplicate request)
+        var isFulfilled = await _paymentRepository.IsPaymentFulfilledAsync(confirmPaymentDto.PaymentId);
+        if (isFulfilled)
+        {
+            _logger.LogInformation("Payment ID: {PaymentId} is already fulfilled. Skipping duplicate request.", 
+                confirmPaymentDto.PaymentId);
+            return Result<bool>.Success();
+        }
+
         await _unitOfWork.BeginTransactionAsync();
         
         try

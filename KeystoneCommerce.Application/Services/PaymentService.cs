@@ -87,6 +87,7 @@ namespace KeystoneCommerce.Application.Services
             // Update payment
             payment.ProviderTransactionId = confirmPaymentDto.ProviderTransactionId;
             payment.Status = PaymentStatus.Successful;
+            payment.IsFulfilled = true;
             payment.UpdatedAt = DateTime.UtcNow;
 
             _paymentRepository.Update(payment);

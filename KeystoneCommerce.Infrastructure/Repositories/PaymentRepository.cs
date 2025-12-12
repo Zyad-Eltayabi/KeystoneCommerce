@@ -21,5 +21,13 @@ namespace KeystoneCommerce.Infrastructure.Repositories
                 .Select(p => p.OrderId)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<bool> IsPaymentFulfilledAsync(int paymentId)
+        {
+            return await _context.Payments
+                .Where(p => p.Id == paymentId)
+                .Select(p => p.IsFulfilled)
+                .FirstOrDefaultAsync();
+        }
     }
 }
