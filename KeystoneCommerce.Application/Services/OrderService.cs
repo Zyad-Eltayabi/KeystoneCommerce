@@ -246,6 +246,43 @@ namespace KeystoneCommerce.Application.Services
             return Result<string>.Success();
         }
 
+        public async Task<Result<string>> UpdateOrderStatusToCancelled(int orderId)
+        {
+            _logger.LogInformation("Updating order status to cancelled for order ID: {OrderId}", orderId);
+
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order is null)
+            {
+                _logger.LogWarning("Order not found with ID: {OrderId}", orderId);
+                return Result<string>.Failure("Order not found.");
+            }
+
+            if (order.IsPaid)
+            {
+                _logger.LogWarning("Cannot cancel order - Order ID: {OrderId} is already paid.", orderId);
+                return Result<string>.Failure("Cannot cancel a paid order.");
+            }
+
+            if (order.Status == OrderStatus.Cancelled)
+            {
+                _logger.LogWarning("Order ID: {OrderId} is already cancelled.", orderId);
+                return Result<string>.Failure("Order is already cancelled.");
+            }
+
+            order.Status = OrderStatus.Cancelled;
+            order.UpdatedAt = DateTime.UtcNow;
+            _orderRepository.Update(order);
+            var result = await _orderRepository.SaveChangesAsync();
+            if (result == 0)
+            {
+                _logger.LogError("Failed to update order status to cancelled for order ID: {OrderId}", orderId);
+                return Result<string>.Failure("Failed to update order status.");
+            }
+
+            _logger.LogInformation("Order status updated to cancelled successfully for order ID: {OrderId}", orderId);
+            return Result<string>.Success();
+        }
+
         private async Task<bool> TryReserveStockAsync(Dictionary<int, int> ProductsWithQuantity)
         {
             foreach (var item in ProductsWithQuantity)

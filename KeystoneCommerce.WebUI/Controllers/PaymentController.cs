@@ -90,12 +90,12 @@ namespace KeystoneCommerce.WebUI.Controllers
                     await HandleSuccessfulPaymentAsync(stripeEvent);
                     break;
 
-                case EventTypes.CheckoutSessionAsyncPaymentFailed:
                 case EventTypes.CheckoutSessionExpired:
+                    await HandleCancelledPaymentAsync(stripeEvent);
                     break;
 
                 case EventTypes.PaymentIntentPaymentFailed:
-                    await HandleFailedPaymentAsync(stripeEvent);
+                    await HandlePaymentIntentFailureAsync(stripeEvent);
                     break;
 
                 default:
@@ -117,26 +117,67 @@ namespace KeystoneCommerce.WebUI.Controllers
             await FulfillCheckout(session.Id);
         }
 
-        private async Task HandleFailedPaymentAsync(Event stripeEvent)
+        private async Task HandleCancelledPaymentAsync(Event stripeEvent)
         {
-            var paymentSession = stripeEvent.Data.Object as PaymentIntent;
-            if (paymentSession is null)
+            var session = stripeEvent.Data.Object as Session;
+            if (session is null)
             {
-                _logger.LogWarning("Failed to parse session from failed payment event");
+                _logger.LogWarning("Failed to parse session from cancelled payment event");
                 return;
             }
 
-            if (paymentSession.Metadata == null || !paymentSession.Metadata.ContainsKey("PaymentId_DB"))
+            _logger.LogWarning("Payment cancelled or expired for session: {SessionId}, Event Type: {EventType}",
+                session.Id, stripeEvent.Type);
+
+            if (session.Metadata == null || !session.Metadata.ContainsKey("PaymentId_DB"))
             {
-                _logger.LogError("PaymentId_DB metadata not found in session: {SessionId}", paymentSession.Id);
-                return; 
+                _logger.LogError("PaymentId_DB metadata not found in session: {SessionId}", session.Id);
+                return;
             }
 
-            var paymentId = int.Parse(paymentSession.Metadata["PaymentId_DB"].ToString());
+            var paymentId = int.Parse(session.Metadata["PaymentId_DB"].ToString());
+            var cancelPaymentDto = new CancelPaymentDto
+            {
+                PaymentId = paymentId,
+                ProviderTransactionId = session.PaymentIntentId ?? session.Id
+            };
+
+            var result = await _paymentGatewayService.CancelPaymentAndUpdateOrderAsync(cancelPaymentDto);
+            if (!result.IsSuccess)
+            {
+                _logger.LogError("Failed to mark payment and order as cancelled. Payment ID: {PaymentId}. Errors: {Errors}",
+                    paymentId, string.Join(", ", result.Errors));
+            }
+            else
+            {
+                _logger.LogInformation("Successfully marked payment and order as cancelled. Payment ID: {PaymentId}",
+                    paymentId);
+            }
+        }
+
+        private async Task HandlePaymentIntentFailureAsync(Event stripeEvent)
+        {
+            var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+            if (paymentIntent is null)
+            {
+                _logger.LogWarning("Failed to parse PaymentIntent from event");
+                return;
+            }
+
+            _logger.LogWarning("PaymentIntent failed: {PaymentIntentId}, Event Type: {EventType}",
+                paymentIntent.Id, stripeEvent.Type);
+
+            if (paymentIntent.Metadata == null || !paymentIntent.Metadata.ContainsKey("PaymentId_DB"))
+            {
+                _logger.LogError("PaymentId_DB metadata not found in PaymentIntent: {PaymentIntentId}", paymentIntent.Id);
+                return;
+            }
+
+            var paymentId = int.Parse(paymentIntent.Metadata["PaymentId_DB"].ToString());
             var failPaymentDto = new FailPaymentDto
             {
                 PaymentId = paymentId,
-                ProviderTransactionId = paymentSession.Id ?? throw new InvalidOperationException("PaymentIntentId is null")
+                ProviderTransactionId = paymentIntent.Id
             };
 
             var result = await _paymentGatewayService.FailPaymentAndUpdateOrderAsync(failPaymentDto);
@@ -144,10 +185,12 @@ namespace KeystoneCommerce.WebUI.Controllers
             {
                 _logger.LogError("Failed to mark payment and order as failed. Payment ID: {PaymentId}. Errors: {Errors}",
                     paymentId, string.Join(", ", result.Errors));
-                return;
             }
-            _logger.LogInformation("Successfully marked payment and order as failed. Payment ID: {PaymentId}",
-                paymentId);
+            else
+            {
+                _logger.LogInformation("Successfully marked payment and order as failed due to PaymentIntent failure. Payment ID: {PaymentId}",
+                    paymentId);
+            }
         }
 
         private async Task FulfillCheckout(string sessionId)

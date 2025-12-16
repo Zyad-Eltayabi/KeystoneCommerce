@@ -162,4 +162,55 @@ public class PaymentGatewayService : IPaymentGatewayService
             return Result<string>.Failure("An unexpected error occurred during payment failure processing.");
         }
     }
+
+    public async Task<Result<string>> CancelPaymentAndUpdateOrderAsync(CancelPaymentDto cancelPaymentDto)
+    {
+        _logger.LogInformation("Starting payment cancellation process for Payment ID: {PaymentId}",
+            cancelPaymentDto.PaymentId);
+
+        await _unitOfWork.BeginTransactionAsync();
+
+        try
+        {
+            // Step 1: Mark the payment as cancelled and retrieve the order ID
+            var cancelPaymentResult = await _paymentService.CancelPaymentAsync(
+                cancelPaymentDto.PaymentId,
+                cancelPaymentDto.ProviderTransactionId);
+
+            if (!cancelPaymentResult.IsSuccess)
+            {
+                _logger.LogWarning("Payment cancellation update failed for Payment ID: {PaymentId}. Errors: {Errors}",
+                    cancelPaymentDto.PaymentId, string.Join(", ", cancelPaymentResult.Errors));
+                await _unitOfWork.RollbackAsync();
+                return Result<string>.Failure(cancelPaymentResult.Errors);
+            }
+
+            var orderId = cancelPaymentResult.Data;
+            _logger.LogInformation("Payment marked as cancelled successfully for Payment ID: {PaymentId}, Order ID: {OrderId}",
+                cancelPaymentDto.PaymentId, orderId);
+
+            // Step 2: Update the order status to cancelled
+            var updateOrderResult = await _orderService.UpdateOrderStatusToCancelled(orderId);
+            if (!updateOrderResult.IsSuccess)
+            {
+                _logger.LogError("Failed to update order status to cancelled for Order ID: {OrderId} after payment cancellation. Payment ID: {PaymentId}. Errors: {Errors}",
+                    orderId, cancelPaymentDto.PaymentId, string.Join(", ", updateOrderResult.Errors));
+                await _unitOfWork.RollbackAsync();
+                return Result<string>.Failure(updateOrderResult.Errors);
+            }
+
+            _logger.LogInformation("Payment and order marked as cancelled successfully. Payment ID: {PaymentId}, Order ID: {OrderId}",
+                cancelPaymentDto.PaymentId, orderId);
+
+            await _unitOfWork.CommitAsync();
+            return Result<string>.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error during payment cancellation process. Payment ID: {PaymentId}",
+                cancelPaymentDto.PaymentId);
+            await _unitOfWork.RollbackAsync();
+            return Result<string>.Failure("An unexpected error occurred during payment cancellation processing.");
+        }
+    }
 }
