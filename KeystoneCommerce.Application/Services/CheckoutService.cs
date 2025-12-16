@@ -12,17 +12,17 @@ public class CheckoutService : ICheckoutService
 {
     private readonly IOrderService _orderService;
     private readonly IPaymentService _paymentService;
-    private readonly IPaymentRepository _paymentRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CheckoutService> _logger;
+    private readonly IInventoryReservationService _inventoryReservationService;
 
-    public CheckoutService(IOrderService orderService, IPaymentRepository paymentRepository, IUnitOfWork unitOfWork, ILogger<CheckoutService> logger, IPaymentService paymentService)
+    public CheckoutService(IOrderService orderService, IUnitOfWork unitOfWork, ILogger<CheckoutService> logger, IPaymentService paymentService, IInventoryReservationService inventoryReservationService)
     {
         _orderService = orderService;
-        _paymentRepository = paymentRepository;
         _unitOfWork = unitOfWork;
         _logger = logger;
         _paymentService = paymentService;
+        _inventoryReservationService = inventoryReservationService;
     }
 
     public async Task<Result<OrderDto>> SubmitOrder(CreateOrderDto order)
@@ -51,16 +51,15 @@ public class CheckoutService : ICheckoutService
             }
 
             var orderData = orderCreationResult.Data!;
-            var paymentDto = new CreatePaymentDto
-            {
-                OrderId = orderData.Id,
-                Amount = orderData.Total,
-                Provider = paymentType,
-                UserId = order.UserId,
-                Currency = orderData.Currency,
-                Status = PaymentStatus.Processing,
-            };
 
+            var reservationResult = await _inventoryReservationService.CreateReservationAsync(orderData.Id);
+            if (!reservationResult.IsSuccess)
+            {
+                await _unitOfWork.RollbackAsync();
+                return Result<OrderDto>.Failure(reservationResult.Errors);
+            }
+
+            CreatePaymentDto paymentDto = CreatePaymentDto(order, paymentType, orderData);
             var paymentResult = await _paymentService.CreatePaymentAsync(paymentDto);
             if (!paymentResult.IsSuccess)
             {
@@ -78,5 +77,18 @@ public class CheckoutService : ICheckoutService
             _logger.LogError(ex, "An error occurred while submitting the order.");
             return Result<OrderDto>.Failure("An unexpected error occurred while processing your order. Please try again later.");
         }
+    }
+
+    private static CreatePaymentDto CreatePaymentDto(CreateOrderDto order, PaymentType paymentType, OrderDto orderData)
+    {
+        return new CreatePaymentDto
+        {
+            OrderId = orderData.Id,
+            Amount = orderData.Total,
+            Provider = paymentType,
+            UserId = order.UserId,
+            Currency = orderData.Currency,
+            Status = PaymentStatus.Processing,
+        };
     }
 }

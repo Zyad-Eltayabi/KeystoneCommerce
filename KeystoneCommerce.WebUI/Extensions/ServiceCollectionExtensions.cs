@@ -36,6 +36,7 @@ namespace KeystoneCommerce.WebUI.Extensions
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IPaymentGatewayService, PaymentGatewayService>();
+            services.AddScoped<IInventoryReservationService, InventoryReservationService>();
         }
     }
 }

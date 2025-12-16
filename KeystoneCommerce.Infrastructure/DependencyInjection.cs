@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KeystoneCommerce.Application.Common.Settings;
 using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.Application.Notifications.Contracts;
@@ -33,7 +34,14 @@ namespace KeystoneCommerce.Infrastructure
             RegisterInfrastructureServices(services);
             AddAutoMapperServices(services);
             ConfigureEmailOptions(services, configuration);
+            ConfigureInventoryOptions(services, configuration);
             return services;
+        }
+
+        private static void ConfigureInventoryOptions(IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<InventorySettings>(
+                configuration.GetSection("InventorySettings"));
         }
 
         private static void ConfigureEmailOptions(IServiceCollection services, IConfiguration configuration)
@@ -70,6 +78,7 @@ namespace KeystoneCommerce.Infrastructure
             services.AddScoped<IShippingAddressRepository, ShippingAddressRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<IInventoryReservationRepository, InventoryReservationRepository>();
         }
 
         private static void AddFluentValidationServices(IServiceCollection services)
