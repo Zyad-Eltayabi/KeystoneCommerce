@@ -7,5 +7,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
     {
         Task<Result<PaymentSessionResultDto>> CreatePaymentSessionAsync(CreatePaymentSessionDto sessionDto);
         Task<Result<bool>> ConfirmPaymentAndUpdateOrderAsync(ConfirmPaymentDto confirmPaymentDto);
+        Task<Result<string>> FailPaymentAndUpdateOrderAsync(FailPaymentDto failPaymentDto);
     }
 }

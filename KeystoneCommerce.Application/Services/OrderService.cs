@@ -4,6 +4,7 @@ using KeystoneCommerce.Application.DTOs.Order;
 using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.Domain.Entities;
+using KeystoneCommerce.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace KeystoneCommerce.Application.Services
@@ -205,6 +206,44 @@ namespace KeystoneCommerce.Application.Services
 
             _logger.LogInformation("Payment status updated successfully for order ID: {OrderId}", orderId);
             return Result<bool>.Success();
+        }
+
+        public async Task<Result<string>> UpdateOrderStatusToFailed(int orderId)
+        {
+            _logger.LogInformation("Updating order status to failed for order ID: {OrderId}", orderId);
+
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order is null)
+            {
+                _logger.LogWarning("Order not found with ID: {OrderId}", orderId);
+                return Result<string>.Failure("Order not found.");
+            }
+
+            if (order.IsPaid)
+            {
+                _logger.LogWarning("Cannot mark order as failed - Order ID: {OrderId} is already paid.", orderId);
+                return Result<string>.Failure("Cannot mark a paid order as failed.");
+            }
+
+            if (order.Status == OrderStatus.Cancelled)
+            {
+                _logger.LogWarning("Cannot mark order as failed - Order ID: {OrderId} is already cancelled.", orderId);
+                return Result<string>.Failure("Cannot mark a cancelled order as failed.");
+            }
+
+            order.Status = OrderStatus.Failed;
+            order.UpdatedAt = DateTime.UtcNow;
+            _orderRepository.Update(order);
+            var result = await _orderRepository.SaveChangesAsync();
+
+            if (result == 0)
+            {
+                _logger.LogError("Failed to update order status to failed for order ID: {OrderId}", orderId);
+                return Result<string>.Failure("Failed to update order status.");
+            }
+
+            _logger.LogInformation("Order status updated to failed successfully for order ID: {OrderId}", orderId);
+            return Result<string>.Success();
         }
 
         private async Task<bool> TryReserveStockAsync(Dictionary<int, int> ProductsWithQuantity)

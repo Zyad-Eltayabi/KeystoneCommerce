@@ -106,5 +106,48 @@ namespace KeystoneCommerce.Application.Services
 
             return Result<bool>.Success();
         }
+
+        public async Task<Result<int>> FailPaymentAsync(int paymentId, string providerTransactionId)
+        {
+            _logger.LogInformation("Marking payment as failed for Payment ID: {PaymentId} with Provider Transaction ID: {ProviderTransactionId}",
+                paymentId, providerTransactionId);
+
+            var payment = await _paymentRepository.GetByIdAsync(paymentId);
+            if (payment is null)
+            {
+                _logger.LogWarning("Payment not found for ID: {PaymentId}", paymentId);
+                return Result<int>.Failure("Payment not found.");
+            }
+
+            if (payment.IsFulfilled)
+            {
+                _logger.LogWarning("Cannot mark payment as failed - Payment ID: {PaymentId} is already fulfilled.", paymentId);
+                return Result<int>.Failure("Cannot mark a fulfilled payment as failed.");
+            }
+
+            if (payment.Status == PaymentStatus.Successful)
+            {
+                _logger.LogWarning("Cannot mark payment as failed - Payment ID: {PaymentId} is already successful.", paymentId);
+                return Result<int>.Failure("Cannot mark a successful payment as failed.");
+            }
+
+            payment.ProviderTransactionId = providerTransactionId;
+            payment.Status = PaymentStatus.Failed;
+            payment.UpdatedAt = DateTime.UtcNow;
+
+            _paymentRepository.Update(payment);
+            var result = await _paymentRepository.SaveChangesAsync();
+
+            if (result == 0)
+            {
+                _logger.LogError("Failed to update payment status to failed. Payment ID: {PaymentId}", paymentId);
+                return Result<int>.Failure("Failed to update payment status.");
+            }
+
+            _logger.LogInformation("Payment marked as failed successfully. Payment ID: {PaymentId}, Order ID: {OrderId}, Provider Transaction ID: {ProviderTransactionId}",
+                paymentId, payment.OrderId, providerTransactionId);
+
+            return Result<int>.Success(payment.OrderId);
+        }
     }
 }

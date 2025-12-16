@@ -58,7 +58,7 @@ namespace KeystoneCommerce.WebUI.Controllers
         }
 
         [HttpPost]
-        [Route("webhooks/stripe")]
+        [Route("payment/webhooks/stripe")]
         public async Task<IActionResult> StripeWebhook()
         {
             var secret = _configuration["StripeSettings:WebhookSecret"];
@@ -71,15 +71,7 @@ namespace KeystoneCommerce.WebUI.Controllers
                   Request.Headers["Stripe-Signature"],
                   secret
                 );
-
-                if (stripeEvent.Type == EventTypes.CheckoutSessionCompleted ||
-                  stripeEvent.Type == EventTypes.CheckoutSessionAsyncPaymentSucceeded)
-                {
-                    var session = stripeEvent.Data.Object as Session;
-                    if (session is null)
-                        return BadRequest();
-                    await FulfillCheckout(session.Id);
-                }
+                await HandleStripeEventAsync(stripeEvent);
                 return Ok();
             }
             catch (StripeException ex)
@@ -87,6 +79,75 @@ namespace KeystoneCommerce.WebUI.Controllers
                 _logger.LogError(ex, "Stripe web hook error: {Message}", ex.Message);
                 return BadRequest();
             }
+        }
+
+        private async Task HandleStripeEventAsync(Event stripeEvent)
+        {
+            switch (stripeEvent.Type)
+            {
+                case EventTypes.CheckoutSessionCompleted:
+                case EventTypes.CheckoutSessionAsyncPaymentSucceeded:
+                    await HandleSuccessfulPaymentAsync(stripeEvent);
+                    break;
+
+                case EventTypes.CheckoutSessionAsyncPaymentFailed:
+                case EventTypes.CheckoutSessionExpired:
+                    break;
+
+                case EventTypes.PaymentIntentPaymentFailed:
+                    await HandleFailedPaymentAsync(stripeEvent);
+                    break;
+
+                default:
+                    _logger.LogInformation("Unhandled event type: {EventType}", stripeEvent.Type);
+                    break;
+            }
+        }
+
+        private async Task HandleSuccessfulPaymentAsync(Event stripeEvent)
+        {
+            var session = stripeEvent.Data.Object as Session;
+            if (session is null)
+            {
+                _logger.LogWarning("Failed to parse session from successful payment event");
+                return;
+            }
+
+            _logger.LogInformation("Processing successful payment for session: {SessionId}", session.Id);
+            await FulfillCheckout(session.Id);
+        }
+
+        private async Task HandleFailedPaymentAsync(Event stripeEvent)
+        {
+            var paymentSession = stripeEvent.Data.Object as PaymentIntent;
+            if (paymentSession is null)
+            {
+                _logger.LogWarning("Failed to parse session from failed payment event");
+                return;
+            }
+
+            if (paymentSession.Metadata == null || !paymentSession.Metadata.ContainsKey("PaymentId_DB"))
+            {
+                _logger.LogError("PaymentId_DB metadata not found in session: {SessionId}", paymentSession.Id);
+                return; 
+            }
+
+            var paymentId = int.Parse(paymentSession.Metadata["PaymentId_DB"].ToString());
+            var failPaymentDto = new FailPaymentDto
+            {
+                PaymentId = paymentId,
+                ProviderTransactionId = paymentSession.Id ?? throw new InvalidOperationException("PaymentIntentId is null")
+            };
+
+            var result = await _paymentGatewayService.FailPaymentAndUpdateOrderAsync(failPaymentDto);
+            if (!result.IsSuccess)
+            {
+                _logger.LogError("Failed to mark payment and order as failed. Payment ID: {PaymentId}. Errors: {Errors}",
+                    paymentId, string.Join(", ", result.Errors));
+                return;
+            }
+            _logger.LogInformation("Successfully marked payment and order as failed. Payment ID: {PaymentId}",
+                paymentId);
         }
 
         private async Task FulfillCheckout(string sessionId)

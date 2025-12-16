@@ -111,4 +111,55 @@ public class PaymentGatewayService : IPaymentGatewayService
             return Result<bool>.Failure("An unexpected error occurred during payment processing.");
         }
     }
+
+    public async Task<Result<string>> FailPaymentAndUpdateOrderAsync(FailPaymentDto failPaymentDto)
+    {
+        _logger.LogInformation("Starting payment failure process for Payment ID: {PaymentId}",
+            failPaymentDto.PaymentId);
+
+        await _unitOfWork.BeginTransactionAsync();
+
+        try
+        {
+            // Step 1: Mark the payment as failed and retrieve the order ID
+            var failPaymentResult = await _paymentService.FailPaymentAsync(
+                failPaymentDto.PaymentId,
+                failPaymentDto.ProviderTransactionId);
+
+            if (!failPaymentResult.IsSuccess)
+            {
+                _logger.LogWarning("Payment failure update failed for Payment ID: {PaymentId}. Errors: {Errors}",
+                    failPaymentDto.PaymentId, string.Join(", ", failPaymentResult.Errors));
+                await _unitOfWork.RollbackAsync();
+                return Result<string>.Failure(failPaymentResult.Errors);
+            }
+
+            var orderId = failPaymentResult.Data;
+            _logger.LogInformation("Payment marked as failed successfully for Payment ID: {PaymentId}, Order ID: {OrderId}",
+                failPaymentDto.PaymentId, orderId);
+
+            // Step 2: Update the order status to failed
+            var updateOrderResult = await _orderService.UpdateOrderStatusToFailed(orderId);
+            if (!updateOrderResult.IsSuccess)
+            {
+                _logger.LogError("Failed to update order status to failed for Order ID: {OrderId} after payment failure. Payment ID: {PaymentId}. Errors: {Errors}",
+                    orderId, failPaymentDto.PaymentId, string.Join(", ", updateOrderResult.Errors));
+                await _unitOfWork.RollbackAsync();
+                return Result<string>.Failure(updateOrderResult.Errors);
+            }
+
+            _logger.LogInformation("Payment and order marked as failed successfully. Payment ID: {PaymentId}, Order ID: {OrderId}",
+                failPaymentDto.PaymentId, orderId);
+
+            await _unitOfWork.CommitAsync();
+            return Result<string>.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error during payment failure process. Payment ID: {PaymentId}",
+                failPaymentDto.PaymentId);
+            await _unitOfWork.RollbackAsync();
+            return Result<string>.Failure("An unexpected error occurred during payment failure processing.");
+        }
+    }
 }

@@ -2,7 +2,8 @@ namespace KeystoneCommerce.Domain.Enums;
 
 public enum PaymentStatus
 {
-    Processing = 1,
+    Processing = 1, 
     Failed,
+    Canceled,
     Successful
 }
