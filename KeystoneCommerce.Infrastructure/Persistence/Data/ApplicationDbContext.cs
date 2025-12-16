@@ -24,4 +24,5 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Payment> Payments { get; set; } = null!;
     public DbSet<ShippingAddress> ShippingAddresses { get; set; } = null!;
     public DbSet<Coupon> Coupons { get; set; } = null!;
+    public DbSet<InventoryReservation> InventoryReservations { get; set; } = null!;
 }

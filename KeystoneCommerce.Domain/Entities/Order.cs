@@ -25,4 +25,5 @@ public class Order
     public Coupon? Coupon { get; set; }
     public ShippingMethod ShippingMethod { get; set; } = null!;
     public ShippingAddress ShippingAddress { get; set; } = null!;
+    public InventoryReservation? InventoryReservation { get; set; }
 }

@@ -52,6 +52,7 @@ namespace KeystoneCommerce.Infrastructure.Services
                 {
                     { "PaymentId_DB", sessionDto.PaymentId.ToString() },
                 },
+                ExpiresAt = DateTime.UtcNow.AddMinutes(30)
             };
 
             var service = new SessionService();
