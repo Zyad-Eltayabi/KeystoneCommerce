@@ -91,7 +91,7 @@ public class PaymentGatewayService : IPaymentGatewayService
             }
 
             // Step 3: Update the order status
-            var updateOrderResult = await _orderService.UpdateOrderPaymentStatus(orderId.Value);
+            var updateOrderResult = await _orderService.MarkOrderAsPaid(orderId.Value);
             if (!updateOrderResult.IsSuccess)
             {
                 _logger.LogError("Failed to update order status for Order ID: {OrderId} after successful payment. Payment ID: {PaymentId}. Errors: {Errors}",
