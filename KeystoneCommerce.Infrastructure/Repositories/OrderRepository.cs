@@ -17,7 +17,18 @@ namespace KeystoneCommerce.Infrastructure.Repositories
 
         public async Task ReleaseReservedStock(int orderId)
         {
-            await _context.Database.ExecuteSqlInterpolatedAsync( $"EXEC SP_ReleaseReservedStock {orderId}");
+            await _context.Database.ExecuteSqlInterpolatedAsync($"EXEC SP_ReleaseReservedStock {orderId}");
+        }
+
+        public async Task<string> GetOrderNumberByPaymentId(int paymentId)
+        {
+            var orderNumber = await (from o in _context.Orders
+                                     join p in _context.Payments
+                                     on o.Id equals p.OrderId
+                                     where p.Id == paymentId
+                                     select o.OrderNumber)
+                              .FirstOrDefaultAsync();
+            return orderNumber ?? string.Empty;
         }
     }
 }

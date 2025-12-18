@@ -3,6 +3,7 @@ using KeystoneCommerce.Application.DTOs.Payment;
 using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace KeystoneCommerce.Application.Services;
 
@@ -17,7 +18,7 @@ public class PaymentGatewayService : IPaymentGatewayService
     private readonly IInventoryReservationService _inventoryReservationService;
 
     public PaymentGatewayService(
-        IStripPaymentService stripPaymentService, 
+        IStripPaymentService stripPaymentService,
         IPaymentService paymentService,
         IPaymentRepository paymentRepository,
         IOrderService orderService,
@@ -51,20 +52,20 @@ public class PaymentGatewayService : IPaymentGatewayService
 
     public async Task<Result<bool>> ConfirmPaymentAndUpdateOrderAsync(ConfirmPaymentDto confirmPaymentDto)
     {
-        _logger.LogInformation("Starting payment confirmation process for Payment ID: {PaymentId}", 
+        _logger.LogInformation("Starting payment confirmation process for Payment ID: {PaymentId}",
             confirmPaymentDto.PaymentId);
 
         // Check if payment is already fulfilled (duplicate request)
         var isFulfilled = await _paymentRepository.IsPaymentFulfilledAsync(confirmPaymentDto.PaymentId);
         if (isFulfilled)
         {
-            _logger.LogInformation("Payment ID: {PaymentId} is already fulfilled. Skipping duplicate request.", 
+            _logger.LogInformation("Payment ID: {PaymentId} is already fulfilled. Skipping duplicate request.",
                 confirmPaymentDto.PaymentId);
             return Result<bool>.Success();
         }
 
         await _unitOfWork.BeginTransactionAsync();
-        
+
         try
         {
             // Step 1: Confirm the payment
@@ -77,14 +78,14 @@ public class PaymentGatewayService : IPaymentGatewayService
                 return Result<bool>.Failure(confirmPaymentResult.Errors);
             }
 
-            _logger.LogInformation("Payment confirmed successfully for Payment ID: {PaymentId}", 
+            _logger.LogInformation("Payment confirmed successfully for Payment ID: {PaymentId}",
                 confirmPaymentDto.PaymentId);
 
             // Step 2: Get the OrderId from the payment
             var orderId = await _paymentRepository.GetOrderIdByPaymentIdAsync(confirmPaymentDto.PaymentId);
             if (orderId is null)
             {
-                _logger.LogError("Failed to retrieve order ID after payment confirmation. Payment ID: {PaymentId}", 
+                _logger.LogError("Failed to retrieve order ID after payment confirmation. Payment ID: {PaymentId}",
                     confirmPaymentDto.PaymentId);
                 await _unitOfWork.RollbackAsync();
                 return Result<bool>.Failure("Failed to retrieve order details.");
@@ -118,7 +119,7 @@ public class PaymentGatewayService : IPaymentGatewayService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error during payment confirmation and order update. Payment ID: {PaymentId}", 
+            _logger.LogError(ex, "Unexpected error during payment confirmation and order update. Payment ID: {PaymentId}",
                 confirmPaymentDto.PaymentId);
             await _unitOfWork.RollbackAsync();
             return Result<bool>.Failure("An unexpected error occurred during payment processing.");
@@ -225,5 +226,15 @@ public class PaymentGatewayService : IPaymentGatewayService
             await _unitOfWork.RollbackAsync();
             return Result<string>.Failure("An unexpected error occurred during payment cancellation processing.");
         }
+    }
+
+    public async Task<string> GetOrderNumberByPaymentId(int paymentId)
+    {
+        if (paymentId <= 0)
+        {
+            _logger.LogWarning("Invalid Payment ID: {PaymentId} provided to GetOrderNumberByPaymentId.", paymentId);
+            return string.Empty;
+        }
+        return await _orderService.GetOrderNumberByPaymentId(paymentId);
     }
 }

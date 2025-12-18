@@ -2,6 +2,7 @@ using AutoMapper;
 using KeystoneCommerce.Application.DTOs.Order;
 using KeystoneCommerce.Application.DTOs.ShippingDetails;
 using KeystoneCommerce.Application.Interfaces.Services;
+using KeystoneCommerce.Domain.Entities;
 using KeystoneCommerce.WebUI.Services;
 using KeystoneCommerce.WebUI.ViewModels.Cart;
 using KeystoneCommerce.WebUI.ViewModels.Checkout;
@@ -78,7 +79,7 @@ public class CheckoutController(CartService cartService, ICouponService couponSe
             return RedirectToAction("Index", model);
         }
 
-        if (model.PaymentProvider == "Stripe")
+        if (model.PaymentProvider != "CashOnDelivery")
         {
             return RedirectToAction("CreateCheckoutSession", "Payment", new
             {
@@ -87,8 +88,7 @@ public class CheckoutController(CartService cartService, ICouponService couponSe
             });
         }
 
-        TempData["Success"] = "Checkout processed successfully!";
-        return RedirectToAction("Index", model);
+        return RedirectToAction("Success", "Payment", new { paymentId = processResult.Data?.PaymentId ?? 0 });
     }
 
     private async Task<CreateCheckoutViewModel> BuildCheckoutViewModel(ApplyCouponViewModel? couponViewModel = null)

@@ -7,6 +7,7 @@ using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.Domain.Entities;
 using KeystoneCommerce.Domain.Enums;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace KeystoneCommerce.Application.Services;
 
@@ -235,6 +236,11 @@ public class OrderService : IOrderService
             _logger.LogError(e, "Error releasing reserved stock for order ID: {OrderId} with message {message}", orderId, e.Message);
             return false;
         }
+    }
+
+    public async Task<string> GetOrderNumberByPaymentId(int paymentId)
+    {
+        return await _orderRepository.GetOrderNumberByPaymentId(paymentId);
     }
 
     #region private methods

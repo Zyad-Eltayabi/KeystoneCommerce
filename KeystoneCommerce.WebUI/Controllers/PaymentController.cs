@@ -1,6 +1,7 @@
 ﻿using KeystoneCommerce.Application.DTOs.Payment;
 using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.WebUI.Services;
+using KeystoneCommerce.WebUI.ViewModels.Payment;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 using Stripe.Checkout;
@@ -12,18 +13,18 @@ namespace KeystoneCommerce.WebUI.Controllers
     {
         private readonly IPaymentGatewayService _paymentGatewayService;
         private readonly IConfiguration _configuration;
-        private readonly IPaymentService _paymentService;
         private readonly ILogger<PaymentController> _logger;
+        private readonly CartCookieService _cartCookieService;
         public PaymentController(
             IPaymentGatewayService paymentGatewayService,
             IConfiguration configuration,
-            IPaymentService paymentService,
-            ILogger<PaymentController> logger)
+            ILogger<PaymentController> logger,
+            CartCookieService cartCookieService)
         {
             _paymentGatewayService = paymentGatewayService;
             _configuration = configuration;
-            _paymentService = paymentService;
             _logger = logger;
+            _cartCookieService = cartCookieService;
         }
 
         [HttpGet]
@@ -34,7 +35,7 @@ namespace KeystoneCommerce.WebUI.Controllers
             {
                 TotalPrice = totalPrice,
                 PaymentId = paymentId,
-                SuccessUrl = $"{baseUrl}/payment/success",
+                SuccessUrl = $"{baseUrl}/payment/success?paymentId={paymentId}",
                 CancelUrl = $"{baseUrl}/payment/cancel"
             };
             var result = await _paymentGatewayService.CreatePaymentSessionAsync(sessionDto);
@@ -47,14 +48,32 @@ namespace KeystoneCommerce.WebUI.Controllers
             return new StatusCodeResult(303);
         }
 
-        public IActionResult Success()
+        public async Task<IActionResult> Success(int paymentId)
         {
-            return Content("Payment succeeded!");
+            string orderNumber = await _paymentGatewayService.GetOrderNumberByPaymentId(paymentId);
+
+            if (string.IsNullOrWhiteSpace(orderNumber))
+            {
+                _logger.LogWarning("Order number not found for payment ID: {PaymentId}", paymentId);
+                TempData["ErrorMessage"] = "Order not found for the completed payment.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            _cartCookieService.ClearCart();
+
+            var viewModel = new PaymentSuccessViewModel
+            {
+                OrderNumber = orderNumber
+            };
+
+            return View(viewModel);
+
         }
 
+        [HttpGet]
         public IActionResult Cancel()
         {
-            return Content("Payment canceled.");
+            return RedirectToAction("Index", "Checkout");
         }
 
         [HttpPost]
