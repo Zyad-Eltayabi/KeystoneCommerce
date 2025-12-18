@@ -14,6 +14,7 @@ public class PaymentGatewayService : IPaymentGatewayService
     private readonly IOrderService _orderService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<PaymentGatewayService> _logger;
+    private readonly IInventoryReservationService _inventoryReservationService;
 
     public PaymentGatewayService(
         IStripPaymentService stripPaymentService, 
@@ -21,7 +22,8 @@ public class PaymentGatewayService : IPaymentGatewayService
         IPaymentRepository paymentRepository,
         IOrderService orderService,
         IUnitOfWork unitOfWork,
-        ILogger<PaymentGatewayService> logger)
+        ILogger<PaymentGatewayService> logger,
+        IInventoryReservationService inventoryReservationService)
     {
         _stripPaymentService = stripPaymentService;
         _paymentService = paymentService;
@@ -29,6 +31,7 @@ public class PaymentGatewayService : IPaymentGatewayService
         _orderService = orderService;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _inventoryReservationService = inventoryReservationService;
     }
 
     public async Task<Result<PaymentSessionResultDto>> CreatePaymentSessionAsync(CreatePaymentSessionDto sessionDto)
@@ -97,7 +100,17 @@ public class PaymentGatewayService : IPaymentGatewayService
                 return Result<bool>.Failure(updateOrderResult.Errors);
             }
 
-            _logger.LogInformation("Payment confirmation and order update completed successfully. Payment ID: {PaymentId}, Order ID: {OrderId}",
+            // Step 4: Update inventory reservation status to consumed
+            var updateReservationResult = await _inventoryReservationService.UpdateReservationStatusToConsumedAsync(orderId.Value);
+            if (!updateReservationResult.IsSuccess)
+            {
+                _logger.LogError("Failed to update inventory reservation status to consumed for Order ID: {OrderId} after successful payment. Payment ID: {PaymentId}. Errors: {Errors}",
+                    orderId.Value, confirmPaymentDto.PaymentId, string.Join(", ", updateReservationResult.Errors));
+                await _unitOfWork.RollbackAsync();
+                return Result<bool>.Failure(updateReservationResult.Errors);
+            }
+
+            _logger.LogInformation("Payment confirmation, order update, and inventory reservation consumed completed successfully. Payment ID: {PaymentId}, Order ID: {OrderId}",
                 confirmPaymentDto.PaymentId, orderId.Value);
 
             await _unitOfWork.CommitAsync();

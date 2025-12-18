@@ -101,6 +101,39 @@ public class InventoryReservationService : IInventoryReservationService
         }
     }
 
+    public async Task<Result<string>> UpdateReservationStatusToConsumedAsync(int orderId)
+    {
+        _logger.LogInformation("Updating inventory reservation status to consumed for order: {OrderId}", orderId);
+
+        var reservation = await _inventoryReservationRepository.FindAsync(ir => ir.OrderId == orderId);
+
+        if (reservation == null)
+        {
+            _logger.LogError("No reservation found for order: {OrderId}", orderId);
+            return Result<string>.Failure("No reservation found for this order");
+        }
+
+        if (reservation.Status != ReservationStatus.Active)
+        {
+            _logger.LogWarning("Reservation for order: {OrderId} is not active. Current status: {Status}", 
+                orderId, reservation.Status);
+            return Result<string>.Failure($"Reservation is not active. Current status: {reservation.Status}");
+        }
+
+        reservation.Status = ReservationStatus.Consumed;
+        _inventoryReservationRepository.Update(reservation);
+        var result = await _inventoryReservationRepository.SaveChangesAsync();
+
+        if (result == 0)
+        {
+            _logger.LogError("Failed to update inventory reservation status to consumed for order: {OrderId}", orderId);
+            return Result<string>.Failure("Failed to update reservation status");
+        }
+
+        _logger.LogInformation("Inventory reservation status updated to consumed successfully for order: {OrderId}", orderId);
+        return Result<string>.Success("Reservation status updated to consumed");
+    }
+
     private async Task UpdateReservationStatusToReleasedAsync(int orderId, InventoryReservation reservation)
     {
         reservation!.Status = ReservationStatus.Released;
