@@ -130,7 +130,7 @@ namespace KeystoneCommerce.Application.Services
                         UnitPrice = product.Price,
                         Quantity = productQuantityPair.Value,
                     };
-                    items.Add(orderItem);  
+                    items.Add(orderItem);
                 }
             }
             Order createNewOrder = new()
@@ -283,6 +283,23 @@ namespace KeystoneCommerce.Application.Services
             return Result<string>.Success();
         }
 
+        public async Task<bool> ReleaseReservedStock(int orderId)
+        {
+            _logger.LogInformation("Releasing reserved stock for order ID: {OrderId}", orderId);
+            try
+            {
+                await _orderRepository.ReleaseReservedStock(orderId);
+                _logger.LogInformation("Reserved stock released successfully for order ID: {OrderId}", orderId);
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error releasing reserved stock for order ID: {OrderId} with message {message}", orderId, e.Message);
+                return false;
+            }
+        }
+
+        #region private methods
         private async Task<bool> TryReserveStockAsync(Dictionary<int, int> ProductsWithQuantity)
         {
             foreach (var item in ProductsWithQuantity)
@@ -310,7 +327,7 @@ namespace KeystoneCommerce.Application.Services
                 int quantity = ProductsWithQuantity[product.Id];
                 subTotal += productPrice * quantity;
             }
-           return Math.Round(subTotal, 2);
+            return Math.Round(subTotal, 2);
         }
 
         private decimal CalculateOrderTotal(decimal subTotal, decimal shippingPrice, int couponDiscountAmount)
@@ -349,5 +366,7 @@ namespace KeystoneCommerce.Application.Services
             while (await _orderRepository.ExistsAsync(o => o.OrderNumber == orderNumber));
             return orderNumber;
         }
+
+        #endregion
     }
 }

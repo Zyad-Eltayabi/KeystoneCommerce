@@ -1,4 +1,5 @@
 using Ganss.Xss;
+using Hangfire;
 using KeystoneCommerce.Infrastructure;
 using KeystoneCommerce.WebUI.Extensions;
 using KeystoneCommerce.WebUI.Middleware;
@@ -29,6 +30,7 @@ WebApplication app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+    app.UseHangfireDashboard();
 }
 else
 {
@@ -52,4 +54,4 @@ app.MapControllerRoute(
         pattern: "{controller=Home}/{action=Index}/{id?}")
    .WithStaticAssets();
 
-await app.RunAsync();
+app.Run();

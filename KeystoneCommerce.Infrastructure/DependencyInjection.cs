@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Hangfire;
 using KeystoneCommerce.Application.Common.Settings;
 using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
@@ -35,7 +36,14 @@ namespace KeystoneCommerce.Infrastructure
             AddAutoMapperServices(services);
             ConfigureEmailOptions(services, configuration);
             ConfigureInventoryOptions(services, configuration);
+            ConfigureHangfire(services, configuration);
             return services;
+        }
+
+        private static void ConfigureHangfire(IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddHangfire(x => x.UseSqlServerStorage(configuration.GetConnectionString("DefaultConnection")));
+            services.AddHangfireServer();
         }
 
         private static void ConfigureInventoryOptions(IServiceCollection services, IConfiguration configuration)
@@ -62,6 +70,7 @@ namespace KeystoneCommerce.Infrastructure
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddTransient<INotificationService<EmailMessage>, EmailService>();
             services.AddScoped<IStripPaymentService, StripPaymentService>();
+            services.AddScoped<IBackgroundService, HangfireService>();
         }
 
         private static void RegisterRepositoryServices(IServiceCollection services)
@@ -72,7 +81,7 @@ namespace KeystoneCommerce.Infrastructure
             services.AddScoped<IShopRepository, ShopRepository>();
             services.AddScoped<IProductDetailsRepository, ProductDetailsRepository>();
             services.AddScoped<IReviewRepository, ReviewRepository>();
-            services.AddScoped<IUnitOfWork,UnitOfWork>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ICouponRepository, CouponRepository>();
             services.AddScoped<IShippingMethodRepository, ShippingMethodRepository>();
             services.AddScoped<IShippingAddressRepository, ShippingAddressRepository>();

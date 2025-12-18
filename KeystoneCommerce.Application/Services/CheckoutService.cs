@@ -52,7 +52,8 @@ public class CheckoutService : ICheckoutService
 
             var orderData = orderCreationResult.Data!;
 
-            var reservationResult = await _inventoryReservationService.CreateReservationAsync(orderData.Id);
+
+            var reservationResult = await _inventoryReservationService.CreateReservationAsync(orderData.Id, paymentType);
             if (!reservationResult.IsSuccess)
             {
                 await _unitOfWork.RollbackAsync();

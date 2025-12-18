@@ -17,8 +17,7 @@ public class InventoryReservationConfiguration : IEntityTypeConfiguration<Invent
         builder.Property(ir => ir.OrderId)
             .IsRequired();
 
-        builder.Property(ir => ir.ExpiresAt)
-            .IsRequired();
+        builder.Property(ir => ir.ExpiresAt);
 
         builder.Property(ir => ir.CreatedAt)
             .IsRequired()

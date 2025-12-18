@@ -10,5 +10,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
         Task<Result<bool>> UpdateOrderPaymentStatus(int orderId);
         Task<Result<string>> UpdateOrderStatusToFailed(int orderId);
         Task<Result<string>> UpdateOrderStatusToCancelled(int orderId);
+        Task<bool> ReleaseReservedStock(int orderId);
     }
 }
