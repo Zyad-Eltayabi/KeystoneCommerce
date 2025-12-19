@@ -8,13 +8,9 @@ namespace KeystoneCommerce.Infrastructure.Services
 {
     public class StripPaymentService : IStripPaymentService
     {
-        private readonly string _stripeApiKey;
 
         public StripPaymentService(IConfiguration configuration)
         {
-            _stripeApiKey = configuration["StripeSettings:SecretKey"]
-                ?? throw new InvalidOperationException("Stripe API key not configured");
-            StripeConfiguration.ApiKey = _stripeApiKey;
         }
 
         public async Task<PaymentSessionResultDto> CreatePaymentSessionAsync(CreatePaymentSessionDto sessionDto)
