@@ -2,6 +2,8 @@
 using KeystoneCommerce.Application.DTOs.Payment;
 using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
+using KeystoneCommerce.Application.Notifications.Contracts;
+using KeystoneCommerce.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
@@ -16,6 +18,9 @@ public class PaymentGatewayService : IPaymentGatewayService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<PaymentGatewayService> _logger;
     private readonly IInventoryReservationService _inventoryReservationService;
+    private readonly INotificationOrchestrator _notificationOrchestrator;
+    private readonly IOrderRepository _orderRepository;
+    private readonly IBackgroundService _backgroundService;
 
     public PaymentGatewayService(
         IStripPaymentService stripPaymentService,
@@ -24,7 +29,10 @@ public class PaymentGatewayService : IPaymentGatewayService
         IOrderService orderService,
         IUnitOfWork unitOfWork,
         ILogger<PaymentGatewayService> logger,
-        IInventoryReservationService inventoryReservationService)
+        IInventoryReservationService inventoryReservationService,
+        INotificationOrchestrator notificationOrchestrator,
+        IOrderRepository orderRepository,
+        IBackgroundService backgroundService)
     {
         _stripPaymentService = stripPaymentService;
         _paymentService = paymentService;
@@ -33,6 +41,9 @@ public class PaymentGatewayService : IPaymentGatewayService
         _unitOfWork = unitOfWork;
         _logger = logger;
         _inventoryReservationService = inventoryReservationService;
+        _notificationOrchestrator = notificationOrchestrator;
+        _orderRepository = orderRepository;
+        _backgroundService = backgroundService;
     }
 
     public async Task<Result<PaymentSessionResultDto>> CreatePaymentSessionAsync(CreatePaymentSessionDto sessionDto)
@@ -115,6 +126,10 @@ public class PaymentGatewayService : IPaymentGatewayService
                 confirmPaymentDto.PaymentId, orderId.Value);
 
             await _unitOfWork.CommitAsync();
+
+            // Send order confirmation email
+            _backgroundService.EnqueueJob<IPaymentGatewayService>(
+              p => p.SendOrderConfirmationEmailAsync(orderId.Value));
             return Result<bool>.Success();
         }
         catch (Exception ex)
@@ -236,5 +251,42 @@ public class PaymentGatewayService : IPaymentGatewayService
             return string.Empty;
         }
         return await _orderService.GetOrderNumberByPaymentId(paymentId);
+    }
+
+    public async Task SendOrderConfirmationEmailAsync(int orderId)
+    {
+        try
+        {
+            var order = await _orderRepository.GetByIdAsync(orderId);
+
+            if (order is null)
+            {
+                _logger.LogWarning("Order not found for sending confirmation email. Order ID: {OrderId}", orderId);
+                return;
+            }
+
+            var emailMessage = new EmailMessage
+            {
+                To = order.UserId,
+                Subject = "Order Confirmation - KeystoneCommerce",
+                Body = order.OrderNumber,
+                NotificationType = NotificationType.OrderConfirmation
+            };
+
+            var emailResult = await _notificationOrchestrator.SendAsync(emailMessage);
+            if (!emailResult)
+            {
+                _logger.LogWarning("Failed to send order confirmation email for Order ID: {OrderId}", orderId);
+            }
+            else
+            {
+                _logger.LogInformation("Order confirmation email sent successfully for Order ID: {OrderId}, Order Number: {OrderNumber}",
+                    orderId, order.OrderNumber);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending order confirmation email for Order ID: {OrderId}", orderId);
+        }
     }
 }

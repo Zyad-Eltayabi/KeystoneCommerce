@@ -15,6 +15,11 @@ public class HangfireService : IBackgroundService
         BackgroundJob.Enqueue(methodCall);
     }
 
+    public void EnqueueJob<T>(Expression<Action<T>> methodCall)
+    {
+        BackgroundJob.Enqueue<T>(methodCall);
+    }
+
     public void ScheduleJob(Expression<Action> methodCall, TimeSpan delay)
     {
         BackgroundJob.Schedule(methodCall, delay);

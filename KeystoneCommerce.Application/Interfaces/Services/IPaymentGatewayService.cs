@@ -10,5 +10,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
         Task<Result<bool>> ConfirmPaymentAndUpdateOrderAsync(ConfirmPaymentDto confirmPaymentDto);
         Task<Result<string>> FailPaymentAndUpdateOrderAsync(FailPaymentDto failPaymentDto);
         Task<Result<string>> CancelPaymentAndUpdateOrderAsync(CancelPaymentDto cancelPaymentDto);
+        Task SendOrderConfirmationEmailAsync(int orderId);
     }
 }

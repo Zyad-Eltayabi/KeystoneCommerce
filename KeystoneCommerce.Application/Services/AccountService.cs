@@ -2,6 +2,7 @@
 using KeystoneCommerce.Application.DTOs.Account;
 using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.Application.Notifications.Contracts;
+using KeystoneCommerce.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace KeystoneCommerce.Application.Services
@@ -91,7 +92,8 @@ namespace KeystoneCommerce.Application.Services
             EmailMessage emailMessage = new()
             {
                 To = email,
-                Subject = "Reset Your Password - KeystoneCommerce"
+                Subject = "Reset Your Password - KeystoneCommerce",
+                NotificationType = NotificationType.PasswordReset
             };
             var result = await _notificationOrchestrator.SendAsync(emailMessage);
             if (!result)
