@@ -3,11 +3,15 @@ using KeystoneCommerce.Application.DTOs;
 using KeystoneCommerce.Application.DTOs.Account;
 using KeystoneCommerce.Application.DTOs.Banner;
 using KeystoneCommerce.Application.DTOs.Product;
+using KeystoneCommerce.Application.DTOs.ShippingDetails;
+using KeystoneCommerce.Application.DTOs.ShippingMethod;
 using KeystoneCommerce.Application.DTOs.Shop;
 using KeystoneCommerce.Domain.Enums;
 using KeystoneCommerce.WebUI.ViewModels.Account;
 using KeystoneCommerce.WebUI.ViewModels.Banner;
+using KeystoneCommerce.WebUI.ViewModels.Checkout;
 using KeystoneCommerce.WebUI.ViewModels.Products;
+using KeystoneCommerce.WebUI.ViewModels.ShippingMethod;
 using KeystoneCommerce.WebUI.ViewModels.Shop;
 
 namespace KeystoneCommerce.WebUI.Profiles
@@ -71,6 +75,12 @@ namespace KeystoneCommerce.WebUI.Profiles
                 .ReverseMap();
 
             CreateMap<ResetPasswordViewModel, ResetPasswordDto>()
+                .ReverseMap();
+
+            CreateMap<ShippingMethodDto, ShippingMethodViewModel>()
+                .ReverseMap();
+
+            CreateMap<ShippingDetailsViewModel, CreateShippingDetailsDto>()
                 .ReverseMap();
         }
     }

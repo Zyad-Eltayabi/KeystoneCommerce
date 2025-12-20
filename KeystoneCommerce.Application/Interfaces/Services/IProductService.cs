@@ -18,5 +18,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
         Task<PaginatedResult<ProductDto>> GetAllProductsPaginatedAsync(
             PaginationParameters parameters);
         Task<List<ProductCardDto>> GetAllProducts(Expression<Func<Product, bool>> filter);
+        Task<bool> AreAllProductsExistAsync(List<int> productIds);
     }
 }

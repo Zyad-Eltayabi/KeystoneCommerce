@@ -53,6 +53,13 @@ namespace KeystoneCommerce.Infrastructure.Repositories
         {
             return await Entity.FindAsync(id);
         }
+        public async Task<T?> GetByIdAsync(Expression<Func<T, bool>> expression, List<Expression<Func<T, object>>> includes)
+        {
+            IQueryable<T> query = _context.Set<T>();
+            if (includes is not null && includes.Any())
+                includes.ForEach(include => query = query.Include(include));
+            return await query.FirstOrDefaultAsync(expression);
+        }
 
         public void Update(T entity)
         {

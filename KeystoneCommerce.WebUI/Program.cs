@@ -1,6 +1,8 @@
 using Ganss.Xss;
+using Hangfire;
 using KeystoneCommerce.Infrastructure;
 using KeystoneCommerce.WebUI.Extensions;
+using KeystoneCommerce.WebUI.Filters;
 using KeystoneCommerce.WebUI.Middleware;
 using KeystoneCommerce.WebUI.Middlewares;
 using KeystoneCommerce.WebUI.Profiles;
@@ -39,17 +41,19 @@ else
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.UseMiddleware<RequestLoggingMiddleware>();
-
 app.MapStaticAssets();
+
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireAuthorizationFilter() }
+});
 
 app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")
    .WithStaticAssets();
 
-await app.RunAsync();
+app.Run();

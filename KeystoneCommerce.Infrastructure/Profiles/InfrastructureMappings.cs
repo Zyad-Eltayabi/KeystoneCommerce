@@ -1,8 +1,12 @@
 ﻿using AutoMapper;
 using KeystoneCommerce.Application.DTOs;
 using KeystoneCommerce.Application.DTOs.Banner;
+using KeystoneCommerce.Application.DTOs.Coupon;
+using KeystoneCommerce.Application.DTOs.Payment;
 using KeystoneCommerce.Application.DTOs.Product;
 using KeystoneCommerce.Application.DTOs.Review;
+using KeystoneCommerce.Application.DTOs.ShippingDetails;
+using KeystoneCommerce.Application.DTOs.ShippingMethod;
 using KeystoneCommerce.Application.DTOs.Shop;
 using KeystoneCommerce.Domain.Entities;
 using KeystoneCommerce.Domain.Enums;
@@ -43,6 +47,18 @@ namespace KeystoneCommerce.Infrastructure.Profiles
 
             CreateMap<Product, ProductCardDto>();
 
+            CreateMap<ShippingMethod, ShippingMethodDto>()
+                .ReverseMap();
+
+            CreateMap<CreateShippingDetailsDto, ShippingAddress>();
+
+            CreateMap<Coupon, CouponDto>();
+
+            CreateMap<CreatePaymentDto, Payment>()
+                .ForMember(e => e.Id, e => e.Ignore())
+                .ForMember(e => e.CreatedAt, e => e.Ignore())
+                .ForMember(e => e.UpdatedAt, e => e.Ignore())
+                .ForMember(e => e.Order, e => e.Ignore());
         }
     }
 }

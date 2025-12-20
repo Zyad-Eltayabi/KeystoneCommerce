@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function removeProductFromPage(productId) {
     let product = document.getElementById(productId);
     if (product) product.remove();
+    updateTotalPrice();
 }
 
 function showError(err, defaultMessage = "An unexpected error occurred") {
@@ -64,4 +65,9 @@ function updateTotalPrice() {
         totalPrice += parseFloat(element.textContent.substring(1));
     });
     grandTotalElement.textContent = `$${totalPrice.toFixed(2)}`;
+}
+
+async function removeProduct(productId, quantity) {
+    await updateCart(productId, quantity);
+    removeProductFromPage(productId);
 }

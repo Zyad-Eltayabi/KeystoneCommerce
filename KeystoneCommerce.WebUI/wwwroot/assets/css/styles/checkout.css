@@ -1,0 +1,32 @@
+﻿.shipping-method-option {
+    background-color: #fff;
+}
+
+.shipping-method-option:hover {
+    background-color: #f8f8f8;
+    border-color: #d4d4d4 !important;
+}
+
+.shipping-method-option:has(input:checked) {
+    background-color: #f0f7ff;
+    border-color: #4a90e2 !important;
+}
+
+.shipping-method-radio {
+    width: 18px;
+    height: 18px;
+    accent-color: #4a90e2;
+}
+
+.order_table tfoot tr td {
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+}
+
+.order_table tfoot tr.order_total th,
+.order_table tfoot tr.order_total td {
+    font-weight: 600;
+    font-size: 16px;
+}
+
