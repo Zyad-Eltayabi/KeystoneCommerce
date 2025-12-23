@@ -1,26 +1,26 @@
 ﻿using KeystoneCommerce.Application.DTOs.ShippingMethod;
 using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Application.Interfaces.Services;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
 
 namespace KeystoneCommerce.Application.Services
 {
-    public class ShippingMethodService(IShippingMethodRepository repository,IMappingService mapping) : IShippingMethodService
+    public class ShippingMethodService(IShippingMethodRepository repository, IMappingService mapping) : IShippingMethodService
     {
-        public async Task<List<ShippingMethodDto>?> GetAllShippingMethodsAsync()
+        public async Task<List<ShippingMethodDto>> GetAllShippingMethodsAsync()
         {
             var shippingMethods = await repository.GetAllAsync();
-            if (shippingMethods is null || !shippingMethods.Any())
-                return null;
-            return mapping.Map<List<ShippingMethodDto>>(shippingMethods);
+            return !shippingMethods.Any() ? new() : mapping.Map<List<ShippingMethodDto>>(shippingMethods);
         }
 
         public async Task<ShippingMethodDto?> GetShippingMethodByNameAsync(string name)
         {
-            var shippingMethod = await repository.FindAsync(sm => sm.Name == name);
-            if (shippingMethod is null)
+            if (string.IsNullOrWhiteSpace(name))
                 return null;
-            return mapping.Map<ShippingMethodDto>(shippingMethod);
+            var trimmedName = name.Trim();
+            var shippingMethod = await repository.FindAsync(sm =>
+                sm.Name.Equals(trimmedName, StringComparison.OrdinalIgnoreCase));
+            return shippingMethod is not null ? mapping.Map<ShippingMethodDto>(shippingMethod) : null;
         }
     }
 }
