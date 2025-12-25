@@ -139,32 +139,3 @@ public class ShippingMethodServiceTest
 
     #endregion
 }
-
-
-/*
- Refactor this service method to follow these rules:
-1. Change return type from `Task<List<T>?>` to `Task<List<T>>` (remove nullable)
-2. Remove null check for repository result (GetAllAsync never returns null)
-3. If no items exist, return empty list instead of null
-4. Keep the empty check using `!items.Any()`
-5. Maintain the same mapping logic
-
-Example:
-Before:
-public async Task<List<FooDto>?> GetAllAsync()
-{
-    var items = await repository.GetAllAsync();
-    if (items is null || !items.Any())
-        return null;
-    return mapper.Map<List<FooDto>>(items);
-}
-
-After:
-public async Task<List<FooDto>> GetAllAsync()
-{
-    var items = await repository.GetAllAsync();
-    if (!items.Any())
-        return new List<FooDto>();
-    return mapper.Map<List<FooDto>>(items);
-}
- */

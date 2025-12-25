@@ -9,4 +9,12 @@ public class TestData
             new object[] { "" },
             new object[] { "   " }
      };
+
+    public static IEnumerable<object[]> WhiteSpaceTestData =>
+     new[]
+     {
+            new object[] { "   " },
+            new object[] {"\t"},
+            new object[] { "\n" }
+     };
 }
