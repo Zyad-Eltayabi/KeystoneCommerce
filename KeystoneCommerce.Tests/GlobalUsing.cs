@@ -9,3 +9,6 @@ global using Microsoft.Extensions.Logging;
 global using Moq;
 global using System.Linq.Expressions;
 global using KeystoneCommerce.Infrastructure.Validation;
+global using KeystoneCommerce.Domain.Enums;
+global using Microsoft.Extensions.Options;
+global using KeystoneCommerce.Application.Common.Settings;
