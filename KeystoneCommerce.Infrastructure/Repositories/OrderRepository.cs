@@ -1,3 +1,4 @@
+using KeystoneCommerce.Application.Common.Pagination;
 using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Domain.Entities;
 using KeystoneCommerce.Infrastructure.Persistence.Data;
@@ -29,6 +30,23 @@ namespace KeystoneCommerce.Infrastructure.Repositories
                                      select o.OrderNumber)
                               .FirstOrDefaultAsync();
             return orderNumber ?? string.Empty;
+        }
+
+        public async Task<List<Order>> GetOrdersPagedAsync(OrderPaginationParameters parameters)
+        {
+            var query = ConfigureQueryForPagination(parameters);
+
+            if (parameters.Status.HasValue)
+            {
+                query = query.Where(o => (int)o.Status == parameters.Status.Value);
+            }
+
+            parameters.TotalCount = await query.CountAsync();
+            
+            return await query.AsNoTracking()
+                    .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                    .Take(parameters.PageSize)
+                    .ToListAsync();
         }
     }
 }

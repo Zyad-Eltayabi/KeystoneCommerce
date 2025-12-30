@@ -13,6 +13,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
         Task<Result<string>> UpdateOrderStatusToCancelled(int orderId);
         Task<bool> ReleaseReservedStock(int orderId);
         Task<string> GetOrderNumberByPaymentId(int paymentId);
-        Task<PaginatedResult<OrderDto>> GetAllOrdersPaginatedAsync(PaginationParameters parameters);
+        Task<OrderPaginatedResult<OrderDto>> GetAllOrdersPaginatedAsync(OrderPaginationParameters parameters);
     }
 }

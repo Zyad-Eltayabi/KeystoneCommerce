@@ -15,5 +15,6 @@ namespace KeystoneCommerce.Application.DTOs.Order
         public bool IsPaid { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public int PaymentId { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-@model PaginatedResult<OrderDto>
+@model OrderPaginatedResult<OrderDto>
 @{
     Layout = "_AdminLayout";
     ViewData["Title"] = "Orders";
@@ -7,6 +7,9 @@
 @functions {
     private string GetOrdering()
         => (Model.SortOrder == Sorting.Ascending|| Model.SortOrder == "") ? Sorting.Descending : Sorting.Ascending;
+    
+    private bool IsStatusSelected(int statusValue)
+        => Model.Status.HasValue && Model.Status.Value == statusValue;
 }
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -16,10 +19,28 @@
 @* Page Size Selector *@
 @await Html.PartialAsync("_PageSizeSelectorPartial", model: @Model.PageSize)
 
-@* create search form *@
+@* Filter and Search Form *@
 <form method="get" asp-action="Index"
-      class="d-flex justify-content-end align-items-center flex-wrap my-3">
+      class="d-flex justify-content-between align-items-center flex-wrap my-3">
 
+    @* Status Filter - Left Side *@
+    <div class="input-group input-group-md" style="width: auto">
+        <label for="statusFilter" class="form-label me-2 mb-0 d-flex align-items-center">
+            <i class="bi bi-funnel me-1"></i>
+            <span class="fw-semibold">Filter by Status:</span>
+        </label>
+        <select id="statusFilter" name="status" class="form-select m-1"
+                style="border-radius:20px; min-width: 150px;"
+                onchange="this.form.submit()">
+            <option value="">All Statuses</option>
+            <option value="1" selected="@IsStatusSelected(1)">Processing</option>
+            <option value="2" selected="@IsStatusSelected(2)">Paid</option>
+            <option value="3" selected="@IsStatusSelected(3)">Cancelled</option>
+            <option value="4" selected="@IsStatusSelected(4)">Failed</option>
+        </select>
+    </div>
+
+    @* Search Form - Right Side *@
     <div class="input-group input-group-md" style="width: auto">
         <select asp-for="SearchBy" class="form-select m-1"
                 style="border-radius:20px; min-width: 150px;">
@@ -60,6 +81,7 @@
                     asp-route-sortOrder=@GetOrdering()
                     asp-route-searchBy="@Model.SearchBy"
                     asp-route-searchValue="@Model.SearchValue"
+                    asp-route-status="@Model.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> ID
                 </a>
@@ -73,6 +95,7 @@
                     asp-route-sortOrder=@GetOrdering()
                     asp-route-searchBy="@Model.SearchBy"
                     asp-route-searchValue="@Model.SearchValue"
+                    asp-route-status="@Model.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Order Number
                 </a>
@@ -86,6 +109,7 @@
                     asp-route-sortOrder=@GetOrdering()
                     asp-route-searchBy="@Model.SearchBy"
                     asp-route-searchValue="@Model.SearchValue"
+                    asp-route-status="@Model.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Status
                 </a>
@@ -99,6 +123,7 @@
                     asp-route-sortOrder=@GetOrdering()
                     asp-route-searchBy="@Model.SearchBy"
                     asp-route-searchValue="@Model.SearchValue"
+                    asp-route-status="@Model.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> SubTotal
                 </a>
@@ -112,6 +137,7 @@
                     asp-route-sortOrder=@GetOrdering()
                     asp-route-searchBy="@Model.SearchBy"
                     asp-route-searchValue="@Model.SearchValue"
+                    asp-route-status="@Model.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Shipping
                 </a>
@@ -125,6 +151,7 @@
                     asp-route-sortOrder=@GetOrdering()
                     asp-route-searchBy="@Model.SearchBy"
                     asp-route-searchValue="@Model.SearchValue"
+                    asp-route-status="@Model.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Discount
                 </a>
@@ -138,6 +165,7 @@
                     asp-route-sortOrder=@GetOrdering()
                     asp-route-searchBy="@Model.SearchBy"
                     asp-route-searchValue="@Model.SearchValue"
+                    asp-route-status="@Model.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Total
                 </a>
@@ -151,6 +179,7 @@
                     asp-route-sortOrder=@GetOrdering()
                     asp-route-searchBy="@Model.SearchBy"
                     asp-route-searchValue="@Model.SearchValue"
+                    asp-route-status="@Model.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Currency
                 </a>
@@ -164,6 +193,7 @@
                     asp-route-sortOrder=@GetOrdering()
                     asp-route-searchBy="@Model.SearchBy"
                     asp-route-searchValue="@Model.SearchValue"
+                    asp-route-status="@Model.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Paid
                 </a>
@@ -177,6 +207,7 @@
                     asp-route-sortOrder=@GetOrdering()
                     asp-route-searchBy="@Model.SearchBy"
                     asp-route-searchValue="@Model.SearchValue"
+                    asp-route-status="@Model.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Created At
                 </a>
@@ -190,6 +221,7 @@
                     asp-route-sortOrder=@GetOrdering()
                     asp-route-searchBy="@Model.SearchBy"
                     asp-route-searchValue="@Model.SearchValue"
+                    asp-route-status="@Model.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Updated At
                 </a>
@@ -246,6 +278,21 @@
 </div>
 
 @await Html.PartialAsync("_PageNavigatorPartial");
+
+@* Custom Pagination Script to Add Status Parameter *@
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusFilter = '@Model.Status';
+        if (statusFilter) {
+            const paginationLinks = document.querySelectorAll('.pagination a.page-link');
+            paginationLinks.forEach(link => {
+                const url = new URL(link.href);
+                url.searchParams.set('status', statusFilter);
+                link.href = url.toString();
+            });
+        }
+    });
+</script>
 
 @section Styles {
     <style>

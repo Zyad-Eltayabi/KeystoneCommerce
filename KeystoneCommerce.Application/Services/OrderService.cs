@@ -248,10 +248,10 @@ public class OrderService : IOrderService
         return await _orderRepository.GetOrderNumberByPaymentId(paymentId);
     }
 
-    public async Task<PaginatedResult<OrderDto>> GetAllOrdersPaginatedAsync(PaginationParameters parameters)
+    public async Task<OrderPaginatedResult<OrderDto>> GetAllOrdersPaginatedAsync(OrderPaginationParameters parameters)
     {
-        _logger.LogInformation("Fetching paginated orders. PageNumber: {PageNumber}, PageSize: {PageSize}", 
-            parameters.PageNumber, parameters.PageSize);
+        _logger.LogInformation("Fetching paginated orders. PageNumber: {PageNumber}, PageSize: {PageSize}, Status: {Status}", 
+            parameters.PageNumber, parameters.PageSize, parameters.Status);
 
         if (string.IsNullOrEmpty(parameters.SortBy))
         {
@@ -259,12 +259,12 @@ public class OrderService : IOrderService
             parameters.SortOrder = Sorting.Descending;
         }
 
-        var orders = await _orderRepository.GetPagedAsync(parameters);
+        var orders = await _orderRepository.GetOrdersPagedAsync(parameters);
         var orderDtos = _mappingService.Map<List<OrderDto>>(orders);
 
         _logger.LogInformation("Retrieved {Count} orders successfully", orderDtos.Count);
 
-        return new PaginatedResult<OrderDto>
+        return new OrderPaginatedResult<OrderDto>
         {
             Items = orderDtos,
             PageNumber = parameters.PageNumber,
@@ -273,7 +273,8 @@ public class OrderService : IOrderService
             SortBy = parameters.SortBy,
             SortOrder = parameters.SortOrder,
             SearchBy = parameters.SearchBy,
-            SearchValue = parameters.SearchValue
+            SearchValue = parameters.SearchValue,
+            Status = parameters.Status
         };
     }
 

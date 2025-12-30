@@ -15,7 +15,7 @@ namespace KeystoneCommerce.WebUI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index([FromQuery] PaginationParameters parameters)
+        public async Task<IActionResult> Index([FromQuery] OrderPaginationParameters parameters)
         {
             var paginatedOrders = await _orderService.GetAllOrdersPaginatedAsync(parameters);
             return View(paginatedOrders);
