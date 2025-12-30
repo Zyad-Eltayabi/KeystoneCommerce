@@ -1,3 +1,4 @@
+using KeystoneCommerce.Application.Common.Pagination;
 using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Checkout;
 using KeystoneCommerce.Application.DTOs.Order;
@@ -12,5 +13,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
         Task<Result<string>> UpdateOrderStatusToCancelled(int orderId);
         Task<bool> ReleaseReservedStock(int orderId);
         Task<string> GetOrderNumberByPaymentId(int paymentId);
+        Task<PaginatedResult<OrderDto>> GetAllOrdersPaginatedAsync(PaginationParameters parameters);
     }
 }

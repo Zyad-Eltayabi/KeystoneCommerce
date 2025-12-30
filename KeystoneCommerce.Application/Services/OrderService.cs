@@ -8,6 +8,8 @@ using KeystoneCommerce.Domain.Entities;
 using KeystoneCommerce.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using KeystoneCommerce.Application.Common.Pagination;
+using KeystoneCommerce.Shared.Constants;
 
 namespace KeystoneCommerce.Application.Services;
 
@@ -22,6 +24,7 @@ public class OrderService : IOrderService
     private readonly ICouponService _couponService;
     private readonly IShippingAddressService _shippingAddressService;
     private readonly IShippingMethodService _shippingMethodService;
+    private readonly IMappingService _mappingService;
 
     public OrderService(
         IOrderRepository orderRepository,
@@ -32,7 +35,8 @@ public class OrderService : IOrderService
         IProductRepository productRepository,
         ICouponService couponService,
         IShippingAddressService shippingAddressService,
-        IShippingMethodService shippingMethodService)
+        IShippingMethodService shippingMethodService,
+        IMappingService mappingService)
     {
         _orderRepository = orderRepository;
         _logger = logger;
@@ -43,6 +47,7 @@ public class OrderService : IOrderService
         _couponService = couponService;
         _shippingAddressService = shippingAddressService;
         _shippingMethodService = shippingMethodService;
+        _mappingService = mappingService;
     }
 
     public async Task<Result<OrderDto>> CreateNewOrder(CreateOrderDto order)
@@ -241,6 +246,35 @@ public class OrderService : IOrderService
     public async Task<string> GetOrderNumberByPaymentId(int paymentId)
     {
         return await _orderRepository.GetOrderNumberByPaymentId(paymentId);
+    }
+
+    public async Task<PaginatedResult<OrderDto>> GetAllOrdersPaginatedAsync(PaginationParameters parameters)
+    {
+        _logger.LogInformation("Fetching paginated orders. PageNumber: {PageNumber}, PageSize: {PageSize}", 
+            parameters.PageNumber, parameters.PageSize);
+
+        if (string.IsNullOrEmpty(parameters.SortBy))
+        {
+            parameters.SortBy = "CreatedAt";
+            parameters.SortOrder = Sorting.Descending;
+        }
+
+        var orders = await _orderRepository.GetPagedAsync(parameters);
+        var orderDtos = _mappingService.Map<List<OrderDto>>(orders);
+
+        _logger.LogInformation("Retrieved {Count} orders successfully", orderDtos.Count);
+
+        return new PaginatedResult<OrderDto>
+        {
+            Items = orderDtos,
+            PageNumber = parameters.PageNumber,
+            PageSize = parameters.PageSize,
+            TotalCount = parameters.TotalCount,
+            SortBy = parameters.SortBy,
+            SortOrder = parameters.SortOrder,
+            SearchBy = parameters.SearchBy,
+            SearchValue = parameters.SearchValue
+        };
     }
 
     #region private methods

@@ -1,0 +1,260 @@
+@model PaginatedResult<OrderDto>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Orders";
+}
+
+@functions {
+    private string GetOrdering()
+        => (Model.SortOrder == Sorting.Ascending|| Model.SortOrder == "") ? Sorting.Descending : Sorting.Ascending;
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="mb-4">Orders</h1>
+</div>
+
+@* Page Size Selector *@
+@await Html.PartialAsync("_PageSizeSelectorPartial", model: @Model.PageSize)
+
+@* create search form *@
+<form method="get" asp-action="Index"
+      class="d-flex justify-content-end align-items-center flex-wrap my-3">
+
+    <div class="input-group input-group-md" style="width: auto">
+        <select asp-for="SearchBy" class="form-select m-1"
+                style="border-radius:20px; min-width: 150px;">
+            <option value="Id">Id</option>
+            <option value="OrderNumber">Order Number</option>
+            <option value="SubTotal">Sub Total</option>
+            <option value="Total">Total</option>
+            <option value="Shipping">Shipping</option>
+            <option value="Discount">Discount</option>
+            <option value="Currency">Currency</option>
+        </select>
+
+        <input asp-for="SearchValue" type="text" class="form-control me-1 rounded-pill m-1"
+               placeholder="Search" style="min-width: 200px;">
+
+        <button type="submit" class="btn btn-outline-success rounded-pill m-1">
+            Search
+        </button>
+    </div>
+
+    <!-- hidden fields -->
+    <input type="hidden" name="pageNumber" value="1"/>
+    <input type="hidden" name="pageSize" value="@Model.PageSize"/>
+    <input type="hidden" name="sortBy" value="@Model.SortBy"/>
+    <input type="hidden" name="sortOrder" value="@Model.SortOrder"/>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+        <tr>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="Id"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> ID
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="OrderNumber"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Order Number
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="Status"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Status
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="SubTotal"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> SubTotal
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="Shipping"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Shipping
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="Discount"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Discount
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="Total"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Total
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="Currency"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Currency
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="IsPaid"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Paid
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="CreatedAt"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Created At
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PageNumber"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-sortBy="UpdatedAt"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.SearchBy"
+                    asp-route-searchValue="@Model.SearchValue"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Updated At
+                </a>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var order in Model.Items)
+        {
+            <tr>
+                <td>@order.Id</td>
+                <td>@order.OrderNumber</td>
+                <td>
+                    <span class="badge @(order.Status switch {
+                        OrderStatus.Processing => "bg-warning",
+                        OrderStatus.Paid => "bg-success",
+                        OrderStatus.Cancelled => "bg-danger",
+                        OrderStatus.Failed => "bg-dark",
+                        _ => "bg-secondary"
+                    })">
+                        @order.Status
+                    </span>
+                </td>
+                <td>$@order.SubTotal.ToString("F2")</td>
+                <td>$@order.Shipping.ToString("F2")</td>
+                <td>$@order.Discount.ToString("F2")</td>
+                <td>$@order.Total.ToString("F2")</td>
+                <td>@order.Currency</td>
+                <td>
+                    @if (order.IsPaid)
+                    {
+                        <span class="badge bg-success">Yes</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">No</span>
+                    }
+                </td>
+                <td>@order.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>
+                    @if (order.UpdatedAt.HasValue)
+                    {
+                        @order.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm")
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@await Html.PartialAsync("_PageNavigatorPartial");
+
+@section Styles {
+    <style>
+        .table-responsive .table th a {
+            color: black;
+            white-space: nowrap;
+        }
+        .table-responsive .table th a:hover {
+            color: #3939a9;
+        }
+    </style>
+}

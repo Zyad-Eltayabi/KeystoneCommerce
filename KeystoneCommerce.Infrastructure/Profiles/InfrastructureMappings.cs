@@ -2,6 +2,7 @@
 using KeystoneCommerce.Application.DTOs;
 using KeystoneCommerce.Application.DTOs.Banner;
 using KeystoneCommerce.Application.DTOs.Coupon;
+using KeystoneCommerce.Application.DTOs.Order;
 using KeystoneCommerce.Application.DTOs.Payment;
 using KeystoneCommerce.Application.DTOs.Product;
 using KeystoneCommerce.Application.DTOs.Review;
@@ -59,6 +60,9 @@ namespace KeystoneCommerce.Infrastructure.Profiles
                 .ForMember(e => e.CreatedAt, e => e.Ignore())
                 .ForMember(e => e.UpdatedAt, e => e.Ignore())
                 .ForMember(e => e.Order, e => e.Ignore());
+
+            CreateMap<Order, OrderDto>()
+                .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => src.Payment != null ? src.Payment.Id : 0));
         }
     }
 }
