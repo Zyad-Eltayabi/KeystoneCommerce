@@ -1,11 +1,12 @@
-﻿using KeystoneCommerce.Application.Interfaces.Repositories;
+﻿using KeystoneCommerce.Application.Common.Pagination;
+using KeystoneCommerce.Application.Interfaces.Repositories;
 using KeystoneCommerce.Infrastructure.Persistence.Data;
+using KeystoneCommerce.Shared.Constants;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Reflection;
-using KeystoneCommerce.Application.Common.Pagination;
-using System.Linq.Dynamic.Core;
-using KeystoneCommerce.Shared.Constants;
 
 namespace KeystoneCommerce.Infrastructure.Repositories
 {
@@ -132,7 +133,7 @@ namespace KeystoneCommerce.Infrastructure.Repositories
 
                 if (property is not null)
                 {
-                    var propertyType = property.PropertyType;
+                    Type? propertyType = property.PropertyType;
                     string expression;
 
                     if (propertyType == typeof(string))
@@ -140,14 +141,45 @@ namespace KeystoneCommerce.Infrastructure.Repositories
                     else
                         expression = $"{parameters.SearchBy} == @0";
 
-                    var lambda = DynamicExpressionParser.ParseLambda<T, bool>(
-                        new ParsingConfig(), true, expression, parameters.SearchValue);
-
-                    query = query.Where(lambda);
+                    if (TryConvertUsingTypeConverter(parameters.SearchValue, propertyType, out var convertedValue))
+                    {
+                        var lambda = DynamicExpressionParser.ParseLambda<T, bool>(
+                            new ParsingConfig(), true, expression, convertedValue);
+                        query = query.Where(lambda);
+                    }
                 }
             }
 
             return query;
         }
+
+        private bool TryConvertUsingTypeConverter(string? input, Type targetType, out object? convertedValue)
+        {
+            convertedValue = null;
+
+            if (string.IsNullOrWhiteSpace(input))
+                return (!targetType.IsValueType || Nullable.GetUnderlyingType(targetType) != null) ? true : false;
+
+            var converter = TypeDescriptor.GetConverter(targetType);
+
+            if (!converter.CanConvertFrom(typeof(string)))
+                return false;
+
+            try
+            {
+                object value = converter.ConvertFromInvariantString(input)!;
+
+                if (!targetType.IsAssignableFrom(value.GetType()))
+                    return false;
+
+                convertedValue = value;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
     }
 }
