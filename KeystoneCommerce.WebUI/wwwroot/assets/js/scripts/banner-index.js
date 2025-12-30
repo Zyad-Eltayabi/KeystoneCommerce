@@ -22,7 +22,7 @@ function showModel(id)
 }
 function confirmAction() {
     if (currentBannerId != null) {
-        let url = `/banner/delete/${currentBannerId}`;
+        let url = `/Admin/Banners/Delete/${currentBannerId}`;
         axios.delete(url, {
             headers: {
                 'Content-Type': 'application/json'
