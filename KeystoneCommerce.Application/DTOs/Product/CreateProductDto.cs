@@ -1,5 +1,4 @@
 ﻿using KeystoneCommerce.Application.DTOs.Common;
-using System.ComponentModel.DataAnnotations;
 
 namespace KeystoneCommerce.Application.DTOs.Product
 {

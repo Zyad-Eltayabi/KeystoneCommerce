@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace KeystoneCommerce.Application.Common.Result_Pattern
+﻿namespace KeystoneCommerce.Application.Common.Result_Pattern
 {
     public class Result<T>
     {

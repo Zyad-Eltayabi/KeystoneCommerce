@@ -1,5 +1,4 @@
-﻿using KeystoneCommerce.Application.Common.Result_Pattern;
-using KeystoneCommerce.Application.DTOs.Account;
+﻿using KeystoneCommerce.Application.DTOs.Account;
 using KeystoneCommerce.Application.DTOs.Order;
 
 namespace KeystoneCommerce.Application.Interfaces.Services

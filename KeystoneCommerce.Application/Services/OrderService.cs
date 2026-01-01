@@ -1,14 +1,6 @@
-using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Coupon;
 using KeystoneCommerce.Application.DTOs.Order;
 using KeystoneCommerce.Application.DTOs.Product;
-using KeystoneCommerce.Application.Interfaces.Repositories;
-using KeystoneCommerce.Application.Interfaces.Services;
-using KeystoneCommerce.Domain.Entities;
-using KeystoneCommerce.Domain.Enums;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
-using KeystoneCommerce.Application.Common.Pagination;
 using KeystoneCommerce.Shared.Constants;
 
 namespace KeystoneCommerce.Application.Services;

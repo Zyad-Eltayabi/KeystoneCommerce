@@ -1,5 +1,3 @@
-using KeystoneCommerce.Domain.Enums;
-
 namespace KeystoneCommerce.Application.DTOs.Payment
 {
     public class CreatePaymentDto

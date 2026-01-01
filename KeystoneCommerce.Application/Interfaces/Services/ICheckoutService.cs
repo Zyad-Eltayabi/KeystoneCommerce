@@ -1,4 +1,3 @@
-using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Checkout;
 using KeystoneCommerce.Application.DTOs.Order;
 

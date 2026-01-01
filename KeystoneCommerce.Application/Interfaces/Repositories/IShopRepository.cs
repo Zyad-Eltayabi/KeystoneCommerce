@@ -1,6 +1,4 @@
-using KeystoneCommerce.Application.Common.Pagination;
 using KeystoneCommerce.Application.DTOs.Shop;
-using KeystoneCommerce.Domain.Entities;
 
 namespace KeystoneCommerce.Application.Interfaces.Repositories;
 

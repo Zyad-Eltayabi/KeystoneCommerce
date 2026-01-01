@@ -1,5 +1,4 @@
-﻿using KeystoneCommerce.Application.Common.Result_Pattern;
-using KeystoneCommerce.Application.DTOs.Coupon;
+﻿using KeystoneCommerce.Application.DTOs.Coupon;
 
 namespace KeystoneCommerce.Application.Interfaces.Services
 {

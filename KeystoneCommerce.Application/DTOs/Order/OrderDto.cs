@@ -1,6 +1,4 @@
-﻿using KeystoneCommerce.Domain.Enums;
-
-namespace KeystoneCommerce.Application.DTOs.Order
+﻿namespace KeystoneCommerce.Application.DTOs.Order
 {
     public class OrderDto
     {

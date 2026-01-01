@@ -1,10 +1,5 @@
-using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Order;
 using KeystoneCommerce.Application.DTOs.Payment;
-using KeystoneCommerce.Application.Interfaces.Repositories;
-using KeystoneCommerce.Application.Interfaces.Services;
-using KeystoneCommerce.Domain.Enums;
-using Microsoft.Extensions.Logging;
 
 namespace KeystoneCommerce.Application.Services;
 

@@ -1,10 +1,4 @@
-﻿using KeystoneCommerce.Application.Common.Pagination;
-using KeystoneCommerce.Application.Common.Result_Pattern;
-using KeystoneCommerce.Application.DTOs.Review;
-using KeystoneCommerce.Application.Interfaces.Repositories;
-using KeystoneCommerce.Application.Interfaces.Services;
-using KeystoneCommerce.Domain.Entities;
-using System.Threading.Tasks;
+﻿using KeystoneCommerce.Application.DTOs.Review;
 
 namespace KeystoneCommerce.Application.Services
 {

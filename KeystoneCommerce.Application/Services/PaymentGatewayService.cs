@@ -1,11 +1,5 @@
-﻿using KeystoneCommerce.Application.Common.Result_Pattern;
-using KeystoneCommerce.Application.DTOs.Payment;
-using KeystoneCommerce.Application.Interfaces.Repositories;
-using KeystoneCommerce.Application.Interfaces.Services;
+﻿using KeystoneCommerce.Application.DTOs.Payment;
 using KeystoneCommerce.Application.Notifications.Contracts;
-using KeystoneCommerce.Domain.Enums;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
 namespace KeystoneCommerce.Application.Services;
 

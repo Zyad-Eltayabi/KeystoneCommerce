@@ -1,5 +1,4 @@
-﻿using KeystoneCommerce.Application.Interfaces.Services;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace KeystoneCommerce.Application.Services
 {

@@ -1,5 +1,3 @@
-using KeystoneCommerce.Application.Common.Pagination;
-using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Shop;
 
 namespace KeystoneCommerce.Application.Interfaces.Services;

@@ -1,9 +1,4 @@
-using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.ShippingDetails;
-using KeystoneCommerce.Application.Interfaces.Repositories;
-using KeystoneCommerce.Application.Interfaces.Services;
-using KeystoneCommerce.Domain.Entities;
-using Microsoft.Extensions.Logging;
 
 namespace KeystoneCommerce.Application.Services
 {

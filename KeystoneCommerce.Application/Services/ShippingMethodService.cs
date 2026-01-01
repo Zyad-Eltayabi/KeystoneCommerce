@@ -1,6 +1,4 @@
 ﻿using KeystoneCommerce.Application.DTOs.ShippingMethod;
-using KeystoneCommerce.Application.Interfaces.Repositories;
-using KeystoneCommerce.Application.Interfaces.Services;
 using System.Linq.Expressions;
 
 namespace KeystoneCommerce.Application.Services

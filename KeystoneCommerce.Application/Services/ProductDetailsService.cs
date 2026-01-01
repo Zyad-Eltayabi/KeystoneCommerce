@@ -1,9 +1,6 @@
 using KeystoneCommerce.Application.DTOs.Product;
 using KeystoneCommerce.Application.DTOs.ProductDetails;
 using KeystoneCommerce.Application.DTOs.Shop;
-using KeystoneCommerce.Application.Interfaces.Repositories;
-using KeystoneCommerce.Application.Interfaces.Services;
-using Microsoft.Extensions.Logging;
 
 namespace KeystoneCommerce.Application.Services;
 

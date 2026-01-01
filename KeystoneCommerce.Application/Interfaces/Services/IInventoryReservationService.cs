@@ -1,6 +1,3 @@
-using KeystoneCommerce.Application.Common.Result_Pattern;
-using KeystoneCommerce.Domain.Enums;
-
 namespace KeystoneCommerce.Application.Interfaces.Services
 {
     public interface IInventoryReservationService

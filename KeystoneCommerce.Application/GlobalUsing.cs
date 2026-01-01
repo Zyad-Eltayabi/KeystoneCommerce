@@ -1,0 +1,9 @@
+global using KeystoneCommerce.Application.Common.Pagination;
+global using KeystoneCommerce.Application.Common.Result_Pattern;
+global using KeystoneCommerce.Application.DTOs;
+global using KeystoneCommerce.Application.Interfaces.Repositories;
+global using KeystoneCommerce.Application.Interfaces.Services;
+global using KeystoneCommerce.Domain.Entities;
+global using KeystoneCommerce.Domain.Enums;
+global using Microsoft.Extensions.Logging;
+global using System.Linq.Expressions;

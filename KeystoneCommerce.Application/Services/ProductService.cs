@@ -2,11 +2,7 @@
 using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Product;
 using KeystoneCommerce.Application.DTOs.Shop;
-using KeystoneCommerce.Application.Interfaces.Repositories;
-using KeystoneCommerce.Application.Interfaces.Services;
-using KeystoneCommerce.Domain.Entities;
 using KeystoneCommerce.Shared.Constants;
-using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 

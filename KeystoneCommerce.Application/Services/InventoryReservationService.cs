@@ -1,10 +1,4 @@
-using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.Common.Settings;
-using KeystoneCommerce.Application.Interfaces.Repositories;
-using KeystoneCommerce.Application.Interfaces.Services;
-using KeystoneCommerce.Domain.Entities;
-using KeystoneCommerce.Domain.Enums;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace KeystoneCommerce.Application.Services;

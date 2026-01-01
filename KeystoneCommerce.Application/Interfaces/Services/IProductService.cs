@@ -1,9 +1,5 @@
-﻿using KeystoneCommerce.Application.Common.Pagination;
-using KeystoneCommerce.Application.Common.Result_Pattern;
-using KeystoneCommerce.Application.DTOs.Product;
+﻿using KeystoneCommerce.Application.DTOs.Product;
 using KeystoneCommerce.Application.DTOs.Shop;
-using KeystoneCommerce.Domain.Entities;
-using System.Linq.Expressions;
 
 namespace KeystoneCommerce.Application.Interfaces.Services
 {

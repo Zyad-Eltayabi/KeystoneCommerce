@@ -1,5 +1,4 @@
 ﻿using KeystoneCommerce.Application.DTOs.Product;
-using KeystoneCommerce.Domain.Entities;
 
 namespace KeystoneCommerce.Application.Interfaces.Repositories
 {

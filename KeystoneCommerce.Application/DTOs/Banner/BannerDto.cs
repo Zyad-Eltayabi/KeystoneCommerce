@@ -1,5 +1,3 @@
-using KeystoneCommerce.Domain.Enums;
-
 namespace KeystoneCommerce.Application.DTOs.Banner;
 
 public class BannerDto

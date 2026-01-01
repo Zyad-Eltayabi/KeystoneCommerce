@@ -1,9 +1,5 @@
-﻿using KeystoneCommerce.Application.Common.Result_Pattern;
-using KeystoneCommerce.Application.DTOs.Account;
-using KeystoneCommerce.Application.Interfaces.Services;
+﻿using KeystoneCommerce.Application.DTOs.Account;
 using KeystoneCommerce.Application.Notifications.Contracts;
-using KeystoneCommerce.Domain.Enums;
-using Microsoft.Extensions.Logging;
 
 namespace KeystoneCommerce.Application.Services
 {
