@@ -1,11 +1,8 @@
-﻿using KeystoneCommerce.Application.DTOs.Account;
-using KeystoneCommerce.Application.DTOs.Order;
-using KeystoneCommerce.Application.Interfaces.Services;
+﻿using KeystoneCommerce.Application.DTOs.Order;
 using KeystoneCommerce.Infrastructure.Persistence.Identity;
 using KeystoneCommerce.Shared.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text;
 

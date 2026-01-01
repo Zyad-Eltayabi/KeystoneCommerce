@@ -1,5 +1,4 @@
 ﻿using KeystoneCommerce.Application.DTOs.Payment;
-using KeystoneCommerce.Application.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
 using Stripe;
 using Stripe.Checkout;

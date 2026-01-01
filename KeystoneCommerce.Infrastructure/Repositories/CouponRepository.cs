@@ -1,8 +1,4 @@
-﻿using KeystoneCommerce.Application.Interfaces.Repositories;
-using KeystoneCommerce.Domain.Entities;
-using KeystoneCommerce.Infrastructure.Persistence.Data;
-
-namespace KeystoneCommerce.Infrastructure.Repositories
+﻿namespace KeystoneCommerce.Infrastructure.Repositories
 {
     public class CouponRepository : GenericRepository<Coupon>, ICouponRepository
     {

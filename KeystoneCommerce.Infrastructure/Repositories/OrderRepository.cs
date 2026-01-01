@@ -1,9 +1,4 @@
 using KeystoneCommerce.Application.Common.Pagination;
-using KeystoneCommerce.Application.Interfaces.Repositories;
-using KeystoneCommerce.Domain.Entities;
-using KeystoneCommerce.Infrastructure.Persistence.Data;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace KeystoneCommerce.Infrastructure.Repositories
 {

@@ -1,6 +1,4 @@
-﻿using KeystoneCommerce.Application.Interfaces.Services;
-
-namespace KeystoneCommerce.Infrastructure.Services
+﻿namespace KeystoneCommerce.Infrastructure.Services
 {
     public class ImageService : IImageService
     {

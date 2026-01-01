@@ -1,7 +1,4 @@
-﻿using KeystoneCommerce.Application.Interfaces.Services;
-using KeystoneCommerce.Application.Notifications.Contracts;
-using KeystoneCommerce.Domain.Enums;
-using KeystoneCommerce.Infrastructure.Helpers;
+﻿using KeystoneCommerce.Application.Notifications.Contracts;
 using KeystoneCommerce.Infrastructure.Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;

@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using KeystoneCommerce.Application.Common.Validation;
-using KeystoneCommerce.Application.Interfaces.Services;
 
 namespace KeystoneCommerce.Infrastructure.Validation
 {

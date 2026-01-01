@@ -1,5 +1,3 @@
-using KeystoneCommerce.Application.Interfaces.Repositories;
-using KeystoneCommerce.Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace KeystoneCommerce.Infrastructure.Repositories;

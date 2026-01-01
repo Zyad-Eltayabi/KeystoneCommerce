@@ -1,8 +1,4 @@
 ﻿using KeystoneCommerce.Application.DTOs.Product;
-using KeystoneCommerce.Application.Interfaces.Repositories;
-using KeystoneCommerce.Domain.Entities;
-using KeystoneCommerce.Infrastructure.Persistence.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace KeystoneCommerce.Infrastructure.Repositories
 {

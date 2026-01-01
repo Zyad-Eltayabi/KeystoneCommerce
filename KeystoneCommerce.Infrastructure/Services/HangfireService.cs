@@ -1,6 +1,4 @@
 ﻿using Hangfire;
-using KeystoneCommerce.Application.Interfaces.Services;
-using System.Linq.Expressions;
 
 namespace KeystoneCommerce.Infrastructure.Services;
 

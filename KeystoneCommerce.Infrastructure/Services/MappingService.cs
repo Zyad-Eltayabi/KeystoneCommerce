@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using KeystoneCommerce.Application.Interfaces.Services;
 
 namespace KeystoneCommerce.Infrastructure.Services
 {

@@ -1,9 +1,5 @@
 using KeystoneCommerce.Application.DTOs.Shop;
-using KeystoneCommerce.Application.Interfaces.Repositories;
-using KeystoneCommerce.Domain.Entities;
-using KeystoneCommerce.Infrastructure.Persistence.Data;
 using KeystoneCommerce.Shared.Constants;
-using Microsoft.EntityFrameworkCore;
 
 namespace KeystoneCommerce.Infrastructure.Repositories;
 

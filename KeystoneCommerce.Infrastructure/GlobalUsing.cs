@@ -1,0 +1,8 @@
+global using KeystoneCommerce.Application.Interfaces.Repositories;
+global using KeystoneCommerce.Application.Interfaces.Services;
+global using KeystoneCommerce.Domain.Entities;
+global using KeystoneCommerce.Infrastructure.Persistence.Data;
+global using Microsoft.EntityFrameworkCore;
+global using System.Linq.Expressions;
+global using KeystoneCommerce.Domain.Enums;
+global using KeystoneCommerce.Infrastructure.Helpers;

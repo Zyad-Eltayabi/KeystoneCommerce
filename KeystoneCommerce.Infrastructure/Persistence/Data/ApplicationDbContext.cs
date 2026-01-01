@@ -1,7 +1,5 @@
-using KeystoneCommerce.Domain.Entities;
 using KeystoneCommerce.Infrastructure.Persistence.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 
 namespace KeystoneCommerce.Infrastructure.Persistence.Data;
 
