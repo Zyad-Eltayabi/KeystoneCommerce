@@ -278,6 +278,31 @@ public class OrderService : IOrderService
         };
     }
 
+    public async Task<Result<OrderDetailsDto>> GetOrderDetailsByIdAsync(int orderId)
+    {
+        _logger.LogInformation("Fetching order details for order ID: {OrderId}", orderId);
+
+        var order = await _orderRepository.GetOrderDetailsByIdAsync(orderId);
+        if (order is null)
+        {
+            _logger.LogWarning("Order not found with ID: {OrderId}", orderId);
+            return Result<OrderDetailsDto>.Failure("Order not found.");
+        }
+
+        var userInfo = await _identityService.GetUserBasicInfoByIdAsync(order.UserId);
+        if (userInfo is null)
+        {
+            _logger.LogWarning("User not found for order ID: {OrderId}, User ID: {UserId}", orderId, order.UserId);
+            return Result<OrderDetailsDto>.Failure("User information not found.");
+        }
+
+        var orderDetailsDto = _mappingService.Map<OrderDetailsDto>(order);
+        orderDetailsDto.User = userInfo;
+
+        _logger.LogInformation("Successfully retrieved order details for order ID: {OrderId}", orderId);
+        return Result<OrderDetailsDto>.Success(orderDetailsDto);
+    }
+
     #region private methods
 
     private static OrderDto CreateOrderDto(Order createNewOrder)

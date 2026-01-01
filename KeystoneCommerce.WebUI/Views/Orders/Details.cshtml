@@ -1,0 +1,403 @@
+@model OrderDetailsViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = $"Order Details - {Model.OrderNumber}";
+}
+
+@functions {
+    private string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Processing" => "bg-warning text-dark",
+            "Paid" => "bg-success",
+            "Cancelled" => "bg-danger",
+            "Failed" => "bg-dark",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetPaymentStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Processing" => "bg-warning text-dark",
+            "Successful" => "bg-success",
+            "Failed" => "bg-danger",
+            "Canceled" => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+<div class="container-fluid px-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h3 mb-0">Order Details</h1>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Orders
+        </a>
+    </div>
+
+    <!-- Order Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Order Number</p>
+                            <h5 class="mb-0 fw-bold">@Model.OrderNumber</h5>
+                        </div>
+                        <div>
+                            <i class="bi bi-hash text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Status</p>
+                            <h5 class="mb-0">
+                                <span class="badge @GetStatusBadgeClass(Model.Status)">
+                                    @Model.Status
+                                </span>
+                            </h5>
+                        </div>
+                        <div>
+                            <i class="bi bi-list-check text-info" style="font-size: 3rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Total Amount</p>
+                            <h5 class="mb-0 fw-bold text-success">$@Model.Total.ToString("F2")</h5>
+                        </div>
+                        <div>
+                            <i class="bi bi-currency-dollar text-success" style="font-size: 3rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Payment Status</p>
+                            <h5 class="mb-0">
+                                @if (Model.IsPaid)
+                                {
+                                    <span class="badge bg-success">Paid</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Unpaid</span>
+                                }
+                            </h5>
+                        </div>
+                        <div>
+                            <i class="bi bi-credit-card-2-back text-warning" style="font-size: 3rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Order Items Section -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-bag-check me-2"></i> Order Items
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex ">
+                                                @* <i class="bi bi-box-seam me-2 text-muted"></i> *@
+                                                <strong> @item.ProductName</strong>
+                                            </div>
+                                        </td>
+                                        <td class="text-end">$@item.UnitPrice.ToString("F2")</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-secondary">@item.Quantity</span>
+                                        </td>
+                                        <td class="text-end fw-bold">$@item.TotalPrice.ToString("F2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot class="border-top">
+                                <tr>
+                                    <td colspan="3" class="text-end fw-bold">Subtotal:</td>
+                                    <td class="text-end">$@Model.SubTotal.ToString("F2")</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end fw-bold">Shipping:</td>
+                                    <td class="text-end">$@Model.Shipping.ToString("F2")</td>
+                                </tr>
+                                @if (Model.Discount > 0)
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-end fw-bold text-success">Discount:</td>
+                                        <td class="text-end text-success">-$@Model.Discount.ToString("F2")</td>
+                                    </tr>
+                                }
+                                <tr class="table-active">
+                                    <td colspan="3" class="text-end fw-bold fs-5">Total:</td>
+                                    <td class="text-end fw-bold fs-5 text-success">$@Model.Total.ToString("F2")</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-truck me-2"></i> Shipping Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small mb-1">Full Name</label>
+                            <p class="mb-0 fw-bold">@Model.ShippingAddress.FullName</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small mb-1">Email</label>
+                            <p class="mb-0">@Model.ShippingAddress.Email</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small mb-1">Phone</label>
+                            <p class="mb-0">@(Model.ShippingAddress.Phone ?? "N/A")</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small mb-1">Country</label>
+                            <p class="mb-0">@Model.ShippingAddress.Country</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small mb-1">City</label>
+                            <p class="mb-0">@Model.ShippingAddress.City</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small mb-1">Postal Code</label>
+                            <p class="mb-0">@(Model.ShippingAddress.PostalCode ?? "N/A")</p>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="text-muted small mb-1">Address</label>
+                            <p class="mb-0">@Model.ShippingAddress.Address</p>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-3">
+                    
+                    <div class="row">
+                        <div class="col-md-8 mb-2">
+                            <label class="text-muted small mb-1">Shipping Method</label>
+                            <p class="mb-0 fw-bold">@Model.ShippingMethod.Name</p>
+                            @if (!string.IsNullOrEmpty(Model.ShippingMethod.Description))
+                            {
+                                <p class="text-muted small mb-0">@Model.ShippingMethod.Description</p>
+                            }
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="text-muted small mb-1">Estimated Delivery</label>
+                            <p class="mb-0">@Model.ShippingMethod.EstimatedDays days</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Customer Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-person-circle me-2"></i> Customer Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="text-muted small mb-1">Full Name</label>
+                        <p class="mb-0 fw-bold">@Model.User.FullName</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small mb-1">Email</label>
+                        <p class="mb-0">@Model.User.Email</p>
+                    </div>
+                    <div class="mb-0">
+                        <label class="text-muted small mb-1">User ID</label>
+                        <p class="mb-0"><code>@Model.User.Id</code></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Information -->
+            @if (Model.Payment != null)
+            {
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="bi bi-wallet2 me-2"></i> Payment Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="text-muted small mb-1">Payment Provider</label>
+                            <p class="mb-0 fw-bold">@Model.Payment.Provider</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small mb-1">Transaction ID</label>
+                            <p class="mb-0">
+                                @if (!string.IsNullOrEmpty(Model.Payment.ProviderTransactionId))
+                                {
+                                    <code class="small">@Model.Payment.ProviderTransactionId</code>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">N/A</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small mb-1">Payment Status</label>
+                            <p class="mb-0">
+                                <span class="badge @GetPaymentStatusBadgeClass(Model.Payment.Status)">
+                                    @Model.Payment.Status
+                                </span>
+                            </p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small mb-1">Amount</label>
+                            <p class="mb-0 fw-bold text-success">$@Model.Payment.Amount.ToString("F2") @Model.Payment.Currency</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small mb-1">Fulfilled</label>
+                            <p class="mb-0">
+                                @if (Model.Payment.IsFulfilled)
+                                {
+                                    <span class="badge bg-success">Yes</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger text-dark">No</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="mb-0">
+                            <label class="text-muted small mb-1">Payment Date</label>
+                            <p class="mb-0 small">@Model.Payment.CreatedAt.ToString("MMM dd, yyyy HH:mm")</p>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Coupon Information -->
+            @if (Model.Coupon != null)
+            {
+                <div class="card border-0 shadow-sm mb-4 border-success">
+                    <div class="card-header bg-opacity-10 py-3 bg-white">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="bi bi-tag-fill me-2 text-success"></i> Coupon Applied
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <label class="text-muted small mb-1">Coupon Code</label>
+                            <p class="mb-0 fw-bold">@Model.Coupon.Code</p>
+                        </div>
+                        <div class="mb-0">
+                            <label class="text-muted small mb-1">Discount</label>
+                            <p class="mb-0 fw-bold text-success">@Model.Coupon.DiscountPercentage%</p>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Order Timeline -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-clock-history me-2"></i> Order Timeline
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="text-muted small mb-1">Created At</label>
+                        <p class="mb-0">@Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")</p>
+                    </div>
+                    @if (Model.UpdatedAt.HasValue)
+                    {
+                        <div class="mb-0">
+                            <label class="text-muted small mb-1">Last Updated</label>
+                            <p class="mb-0">@Model.UpdatedAt.Value.ToString("MMM dd, yyyy HH:mm")</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .table td, .table th {
+            vertical-align: middle;
+        }
+        
+        .bg-opacity-10 {
+            --bs-bg-opacity: 0.1;
+        }
+        
+        code {
+            background-color: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.85em;
+        }
+    </style>
+}

@@ -2,6 +2,7 @@
 using KeystoneCommerce.Application.DTOs;
 using KeystoneCommerce.Application.DTOs.Account;
 using KeystoneCommerce.Application.DTOs.Banner;
+using KeystoneCommerce.Application.DTOs.Order;
 using KeystoneCommerce.Application.DTOs.Product;
 using KeystoneCommerce.Application.DTOs.ShippingDetails;
 using KeystoneCommerce.Application.DTOs.ShippingMethod;
@@ -10,7 +11,12 @@ using KeystoneCommerce.Domain.Enums;
 using KeystoneCommerce.WebUI.ViewModels.Account;
 using KeystoneCommerce.WebUI.ViewModels.Banner;
 using KeystoneCommerce.WebUI.ViewModels.Checkout;
+using KeystoneCommerce.WebUI.ViewModels.Coupon;
+using KeystoneCommerce.WebUI.ViewModels.OrderItem;
+using KeystoneCommerce.WebUI.ViewModels.Orders;
+using KeystoneCommerce.WebUI.ViewModels.Payment;
 using KeystoneCommerce.WebUI.ViewModels.Products;
+using KeystoneCommerce.WebUI.ViewModels.ShippingAddress;
 using KeystoneCommerce.WebUI.ViewModels.ShippingMethod;
 using KeystoneCommerce.WebUI.ViewModels.Shop;
 
@@ -25,7 +31,7 @@ namespace KeystoneCommerce.WebUI.Profiles
                 .ForMember(e => e.ImageUrl, e => e.Ignore())
                 .ForMember(e => e.ImageType, e => e.Ignore())
                 .ReverseMap();
-            
+
             CreateMap<UpdateBannerViewModel, UpdateBannerDto>()
                 .ForMember(e => e.Image, e => e.Ignore())
                 .ForMember(e => e.ImageUrl, e => e.Ignore())
@@ -37,8 +43,8 @@ namespace KeystoneCommerce.WebUI.Profiles
 
             CreateMap<BannerDto, UpdateBannerViewModel>()
                 .ForMember(b => b.Image, b => b.Ignore())
-                .ForMember(b=>b.HasNewImage, b=>b.Ignore())
-                .ForMember(b => b.BannerType, e => e.MapFrom(src => 
+                .ForMember(b => b.HasNewImage, b => b.Ignore())
+                .ForMember(b => b.BannerType, e => e.MapFrom(src =>
                     (int)Enum.Parse<BannerType>(src.BannerType)))
                 .ReverseMap();
 
@@ -77,10 +83,32 @@ namespace KeystoneCommerce.WebUI.Profiles
             CreateMap<ResetPasswordViewModel, ResetPasswordDto>()
                 .ReverseMap();
 
-            CreateMap<ShippingMethodDto, ShippingMethodViewModel>()
+            CreateMap<ShippingMethodDto, ViewModels.ShippingMethod.ShippingMethodViewModel>()
                 .ReverseMap();
 
             CreateMap<ShippingDetailsViewModel, CreateShippingDetailsDto>()
+                .ReverseMap();
+
+            // Order Details Mappings
+            CreateMap<OrderDetailsDto, OrderDetailsViewModel>()
+                .ReverseMap();
+
+            CreateMap<OrderItemDetailsDto, OrderItemViewModel>()
+                .ReverseMap();
+
+            CreateMap<ShippingAddressDetailsDto, ShippingAddressViewModel>()
+                .ReverseMap();
+
+            CreateMap<ShippingMethodDetailsDto, OrderShippingMethodViewModel>()
+                .ReverseMap();
+
+            CreateMap<PaymentDetailsDto, PaymentViewModel>()
+                .ReverseMap();
+
+            CreateMap<CouponDetailsDto, CouponViewModel>()
+                .ReverseMap();
+
+            CreateMap<UserBasicInfoDto, UserBasicViewModel>()
                 .ReverseMap();
         }
     }

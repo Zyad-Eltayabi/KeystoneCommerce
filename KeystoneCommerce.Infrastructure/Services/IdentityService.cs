@@ -1,4 +1,5 @@
 ﻿using KeystoneCommerce.Application.DTOs.Account;
+using KeystoneCommerce.Application.DTOs.Order;
 using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.Infrastructure.Persistence.Identity;
 using KeystoneCommerce.Shared.Constants;
@@ -131,6 +132,21 @@ namespace KeystoneCommerce.Infrastructure.Services
             }
             errors.AddRange(result.Errors.Select(e => e.Description));
             return errors;
+        }
+
+        public async Task<UserBasicInfoDto?> GetUserBasicInfoByIdAsync(string userId)
+        {
+            var user = await _userManager.Users
+                .Where(u => u.Id == userId)
+                .Select(u => new UserBasicInfoDto
+                {
+                    Id = u.Id,
+                    FullName = u.FullName,
+                    Email = u.Email ?? string.Empty
+                })
+                .FirstOrDefaultAsync();
+
+            return user;
         }
     }
 }

@@ -1,24 +1,39 @@
 using KeystoneCommerce.Application.Common.Pagination;
-using KeystoneCommerce.Application.Interfaces.Services;
-using Microsoft.AspNetCore.Mvc;
+using KeystoneCommerce.WebUI.ViewModels.Orders;
 
-namespace KeystoneCommerce.WebUI.Controllers
+namespace KeystoneCommerce.WebUI.Controllers;
+
+[Route("Admin/[controller]")]
+public class OrdersController : Controller
 {
-    [Route("Admin/[controller]")]
-    public class OrdersController : Controller
+    private readonly IOrderService _orderService;
+    private readonly IMapper _mapper;
+
+    public OrdersController(IOrderService orderService, IMapper mapper)
     {
-        private readonly IOrderService _orderService;
+        _orderService = orderService;
+        _mapper = mapper;
+    }
 
-        public OrdersController(IOrderService orderService)
+    [HttpGet]
+    public async Task<IActionResult> Index([FromQuery] OrderPaginationParameters parameters)
+    {
+        var paginatedOrders = await _orderService.GetAllOrdersPaginatedAsync(parameters);
+        return View(paginatedOrders);
+    }
+
+    [HttpGet]
+    [Route("Details/{id}")]
+    public async Task<IActionResult> Details(int id)
+    {
+        var result = await _orderService.GetOrderDetailsByIdAsync(id);
+        if (!result.IsSuccess)
         {
-            _orderService = orderService;
+            TempData["ErrorMessage"] = result.Errors.FirstOrDefault() ?? "Order not found.";
+            return RedirectToAction("Index");
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Index([FromQuery] OrderPaginationParameters parameters)
-        {
-            var paginatedOrders = await _orderService.GetAllOrdersPaginatedAsync(parameters);
-            return View(paginatedOrders);
-        }
+        var orderDetailsViewModel = _mapper.Map<OrderDetailsViewModel>(result.Data);
+        return View(orderDetailsViewModel);
     }
 }

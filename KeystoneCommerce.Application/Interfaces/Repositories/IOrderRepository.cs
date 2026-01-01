@@ -8,5 +8,6 @@ namespace KeystoneCommerce.Application.Interfaces.Repositories
         Task ReleaseReservedStock(int orderId);
         Task<string> GetOrderNumberByPaymentId(int paymentId);
         Task<List<Order>> GetOrdersPagedAsync(OrderPaginationParameters parameters);
+        Task<Order?> GetOrderDetailsByIdAsync(int orderId);
     }
 }

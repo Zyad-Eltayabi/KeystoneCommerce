@@ -226,6 +226,7 @@
                     <i class="bi bi-funnel-fill"></i> Updated At
                 </a>
             </th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -270,6 +271,14 @@
                     {
                         <span class="text-muted">-</span>
                     }
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@order.Id" 
+                       class="btn btn-sm btn-info" 
+                       data-tippy="View Details" 
+                       data-tippy-placement="top">
+                        <i class="bi bi-eye"></i> Details
+                    </a>
                 </td>
             </tr>
         }

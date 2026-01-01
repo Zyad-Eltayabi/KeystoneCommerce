@@ -63,6 +63,28 @@ namespace KeystoneCommerce.Infrastructure.Profiles
 
             CreateMap<Order, OrderDto>()
                 .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => src.Payment != null ? src.Payment.Id : 0));
+
+            // Order Details Mappings
+            CreateMap<Order, OrderDetailsDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.User, opt => opt.Ignore())
+                .ForMember(dest => dest.ShippingAddress, opt => opt.MapFrom(src => src.ShippingAddress))
+                .ForMember(dest => dest.ShippingMethod, opt => opt.MapFrom(src => src.ShippingMethod))
+                .ForMember(dest => dest.Payment, opt => opt.MapFrom(src => src.Payment))
+                .ForMember(dest => dest.Coupon, opt => opt.MapFrom(src => src.Coupon))
+                .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.OrderItems));
+
+            CreateMap<OrderItem, OrderItemDetailsDto>();
+
+            CreateMap<ShippingAddress, ShippingAddressDetailsDto>();
+
+            CreateMap<ShippingMethod, ShippingMethodDetailsDto>();
+
+            CreateMap<Payment, PaymentDetailsDto>()
+                .ForMember(dest => dest.Provider, opt => opt.MapFrom(src => src.Provider.ToString()))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+
+            CreateMap<Coupon, CouponDetailsDto>();
         }
     }
 }

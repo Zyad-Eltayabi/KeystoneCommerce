@@ -48,5 +48,17 @@ namespace KeystoneCommerce.Infrastructure.Repositories
                     .Take(parameters.PageSize)
                     .ToListAsync();
         }
+
+        public async Task<Order?> GetOrderDetailsByIdAsync(int orderId)
+        {
+            return await _context.Orders
+                .Include(o => o.OrderItems)
+                .Include(o => o.ShippingAddress)
+                .Include(o => o.ShippingMethod)
+                .Include(o => o.Payment)
+                .Include(o => o.Coupon)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+        }
     }
 }

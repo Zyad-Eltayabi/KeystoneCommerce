@@ -1,5 +1,6 @@
 ﻿using KeystoneCommerce.Application.Common.Result_Pattern;
 using KeystoneCommerce.Application.DTOs.Account;
+using KeystoneCommerce.Application.DTOs.Order;
 
 namespace KeystoneCommerce.Application.Interfaces.Services
 {
@@ -11,5 +12,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
         Task<bool> IsUserExists(string email);
         Task<bool> IsUserExistsById(string userId);
         Task<List<string>> ResetPasswordAsync(string email, string token, string newPassword);
+        Task<UserBasicInfoDto?> GetUserBasicInfoByIdAsync(string userId);
     }
 }
