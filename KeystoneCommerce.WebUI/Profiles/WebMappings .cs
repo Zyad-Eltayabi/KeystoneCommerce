@@ -110,6 +110,13 @@ namespace KeystoneCommerce.WebUI.Profiles
 
             CreateMap<UserBasicInfoDto, UserBasicViewModel>()
                 .ReverseMap();
+
+            // Order Analytics Mappings
+            CreateMap<OrderAnalyticsDto, OrderAnalyticsViewModel>()
+                .ReverseMap();
+
+            CreateMap<OrderDashboardDto, OrderDashboardViewModel>()
+                .ReverseMap();
         }
     }
 }

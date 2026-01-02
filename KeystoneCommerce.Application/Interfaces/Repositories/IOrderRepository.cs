@@ -1,3 +1,5 @@
+using KeystoneCommerce.Application.DTOs.Order;
+
 namespace KeystoneCommerce.Application.Interfaces.Repositories
 {
     public interface IOrderRepository : IGenericRepository<Order>
@@ -6,5 +8,7 @@ namespace KeystoneCommerce.Application.Interfaces.Repositories
         Task<string> GetOrderNumberByPaymentId(int paymentId);
         Task<List<Order>> GetOrdersPagedAsync(OrderPaginationParameters parameters);
         Task<Order?> GetOrderDetailsByIdAsync(int orderId);
+        Task<OrderAnalyticsDto> GetMonthlyAnalyticsAsync();
+        Task<OrderAnalyticsDto> GetTodayAnalyticsAsync();
     }
 }

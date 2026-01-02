@@ -12,5 +12,6 @@ namespace KeystoneCommerce.Application.Interfaces.Services
         Task<string> GetOrderNumberByPaymentId(int paymentId);
         Task<OrderPaginatedResult<OrderDto>> GetAllOrdersPaginatedAsync(OrderPaginationParameters parameters);
         Task<Result<OrderDetailsDto>> GetOrderDetailsByIdAsync(int orderId);
+        Task<OrderDashboardDto> GetOrderDashboardDataAsync(OrderPaginationParameters parameters);
     }
 }

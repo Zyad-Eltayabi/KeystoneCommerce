@@ -1,5 +1,8 @@
+using AutoMapper;
 using KeystoneCommerce.Application.Common.Pagination;
+using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.WebUI.ViewModels.Orders;
+using Microsoft.AspNetCore.Mvc;
 
 namespace KeystoneCommerce.WebUI.Controllers;
 
@@ -18,8 +21,9 @@ public class OrdersController : Controller
     [HttpGet]
     public async Task<IActionResult> Index([FromQuery] OrderPaginationParameters parameters)
     {
-        var paginatedOrders = await _orderService.GetAllOrdersPaginatedAsync(parameters);
-        return View(paginatedOrders);
+        var dashboardData = await _orderService.GetOrderDashboardDataAsync(parameters);
+        var viewModel = _mapper.Map<OrderDashboardViewModel>(dashboardData);
+        return View(viewModel);
     }
 
     [HttpGet]

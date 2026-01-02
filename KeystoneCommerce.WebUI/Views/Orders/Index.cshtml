@@ -1,4 +1,4 @@
-@model OrderPaginatedResult<OrderDto>
+@model OrderDashboardViewModel
 @{
     Layout = "_AdminLayout";
     ViewData["Title"] = "Orders";
@@ -6,18 +6,123 @@
 
 @functions {
     private string GetOrdering()
-        => (Model.SortOrder == Sorting.Ascending|| Model.SortOrder == "") ? Sorting.Descending : Sorting.Ascending;
+        => (Model.PaginatedOrders.SortOrder == Sorting.Ascending|| Model.PaginatedOrders.SortOrder == "") ? Sorting.Descending : Sorting.Ascending;
     
     private bool IsStatusSelected(int statusValue)
-        => Model.Status.HasValue && Model.Status.Value == statusValue;
+        => Model.PaginatedOrders.Status.HasValue && Model.PaginatedOrders.Status.Value == statusValue;
 }
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="mb-4">Orders</h1>
+    <h1 class="mb-4">Orders Dashboard</h1>
+</div>
+
+@* Analytics Widgets *@
+<div class="row mb-4">
+    @* Monthly Analytics Widget *@
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-calendar-month"></i> Monthly Analytics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Total Orders</h6>
+                            <h3 class="mb-0 text-primary">@Model.MonthlyAnalytics.OrderCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Revenue</h6>
+                            <h3 class="mb-0 text-success">$@Model.MonthlyAnalytics.OrdersRevenue.ToString("N2")</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Pending Orders</h6>
+                            <h3 class="mb-0 text-warning">@Model.MonthlyAnalytics.PendingOrdersCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Average Order Value</h6>
+                            <h3 class="mb-0 text-info">$@Model.MonthlyAnalytics.AverageOrderValue.ToString("N2")</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Failed Orders</h6>
+                            <h3 class="mb-0 text-dark">@Model.MonthlyAnalytics.FailedOrdersCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Cancelled Orders</h6>
+                            <h3 class="mb-0 text-danger">@Model.MonthlyAnalytics.CancellationOrdersCount</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Today Analytics Widget *@
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-calendar-day"></i> Today's Analytics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Total Orders</h6>
+                            <h3 class="mb-0 text-primary">@Model.TodayAnalytics.OrderCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Revenue</h6>
+                            <h3 class="mb-0 text-success">$@Model.TodayAnalytics.OrdersRevenue.ToString("N2")</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Pending Orders</h6>
+                            <h3 class="mb-0 text-warning">@Model.TodayAnalytics.PendingOrdersCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Average Order Value</h6>
+                            <h3 class="mb-0 text-info">$@Model.TodayAnalytics.AverageOrderValue.ToString("N2")</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Failed Orders</h6>
+                            <h3 class="mb-0 text-dark">@Model.TodayAnalytics.FailedOrdersCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Cancelled Orders</h6>
+                            <h3 class="mb-0 text-danger">@Model.TodayAnalytics.CancellationOrdersCount</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @* Page Size Selector *@
-@await Html.PartialAsync("_PageSizeSelectorPartial", model: @Model.PageSize)
+@await Html.PartialAsync("_PageSizeSelectorPartial", model: @Model.PaginatedOrders.PageSize)
 
 @* Filter and Search Form *@
 <form method="get" asp-action="Index"
@@ -42,7 +147,7 @@
 
     @* Search Form - Right Side *@
     <div class="input-group input-group-md" style="width: auto">
-        <select asp-for="SearchBy" class="form-select m-1"
+        <select asp-for="PaginatedOrders.SearchBy" class="form-select m-1"
                 style="border-radius:20px; min-width: 150px;">
             <option value="Id">Id</option>
             <option value="OrderNumber">Order Number</option>
@@ -53,7 +158,7 @@
             <option value="Currency">Currency</option>
         </select>
 
-        <input asp-for="SearchValue" type="text" class="form-control me-1 rounded-pill m-1"
+        <input asp-for="PaginatedOrders.SearchValue" type="text" class="form-control me-1 rounded-pill m-1"
                placeholder="Search" style="min-width: 200px;">
 
         <button type="submit" class="btn btn-outline-success rounded-pill m-1">
@@ -63,9 +168,9 @@
 
     <!-- hidden fields -->
     <input type="hidden" name="pageNumber" value="1"/>
-    <input type="hidden" name="pageSize" value="@Model.PageSize"/>
-    <input type="hidden" name="sortBy" value="@Model.SortBy"/>
-    <input type="hidden" name="sortOrder" value="@Model.SortOrder"/>
+    <input type="hidden" name="pageSize" value="@Model.PaginatedOrders.PageSize"/>
+    <input type="hidden" name="sortBy" value="@Model.PaginatedOrders.SortBy"/>
+    <input type="hidden" name="sortOrder" value="@Model.PaginatedOrders.SortOrder"/>
 </form>
 
 <div class="table-responsive">
@@ -75,13 +180,13 @@
             <th>
                 <a
                     asp-action="Index"
-                    asp-route-pageNumber="@Model.PageNumber"
-                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-pageNumber="@Model.PaginatedOrders.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedOrders.PageSize"
                     asp-route-sortBy="Id"
                     asp-route-sortOrder=@GetOrdering()
-                    asp-route-searchBy="@Model.SearchBy"
-                    asp-route-searchValue="@Model.SearchValue"
-                    asp-route-status="@Model.Status"
+                    asp-route-searchBy="@Model.PaginatedOrders.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedOrders.SearchValue"
+                    asp-route-status="@Model.PaginatedOrders.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> ID
                 </a>
@@ -89,13 +194,13 @@
             <th>
                 <a
                     asp-action="Index"
-                    asp-route-pageNumber="@Model.PageNumber"
-                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-pageNumber="@Model.PaginatedOrders.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedOrders.PageSize"
                     asp-route-sortBy="OrderNumber"
                     asp-route-sortOrder=@GetOrdering()
-                    asp-route-searchBy="@Model.SearchBy"
-                    asp-route-searchValue="@Model.SearchValue"
-                    asp-route-status="@Model.Status"
+                    asp-route-searchBy="@Model.PaginatedOrders.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedOrders.SearchValue"
+                    asp-route-status="@Model.PaginatedOrders.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Order Number
                 </a>
@@ -103,13 +208,13 @@
             <th>
                 <a
                     asp-action="Index"
-                    asp-route-pageNumber="@Model.PageNumber"
-                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-pageNumber="@Model.PaginatedOrders.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedOrders.PageSize"
                     asp-route-sortBy="Status"
                     asp-route-sortOrder=@GetOrdering()
-                    asp-route-searchBy="@Model.SearchBy"
-                    asp-route-searchValue="@Model.SearchValue"
-                    asp-route-status="@Model.Status"
+                    asp-route-searchBy="@Model.PaginatedOrders.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedOrders.SearchValue"
+                    asp-route-status="@Model.PaginatedOrders.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Status
                 </a>
@@ -117,13 +222,13 @@
             <th>
                 <a
                     asp-action="Index"
-                    asp-route-pageNumber="@Model.PageNumber"
-                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-pageNumber="@Model.PaginatedOrders.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedOrders.PageSize"
                     asp-route-sortBy="SubTotal"
                     asp-route-sortOrder=@GetOrdering()
-                    asp-route-searchBy="@Model.SearchBy"
-                    asp-route-searchValue="@Model.SearchValue"
-                    asp-route-status="@Model.Status"
+                    asp-route-searchBy="@Model.PaginatedOrders.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedOrders.SearchValue"
+                    asp-route-status="@Model.PaginatedOrders.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> SubTotal
                 </a>
@@ -131,13 +236,13 @@
             <th>
                 <a
                     asp-action="Index"
-                    asp-route-pageNumber="@Model.PageNumber"
-                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-pageNumber="@Model.PaginatedOrders.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedOrders.PageSize"
                     asp-route-sortBy="Shipping"
                     asp-route-sortOrder=@GetOrdering()
-                    asp-route-searchBy="@Model.SearchBy"
-                    asp-route-searchValue="@Model.SearchValue"
-                    asp-route-status="@Model.Status"
+                    asp-route-searchBy="@Model.PaginatedOrders.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedOrders.SearchValue"
+                    asp-route-status="@Model.PaginatedOrders.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Shipping
                 </a>
@@ -145,13 +250,13 @@
             <th>
                 <a
                     asp-action="Index"
-                    asp-route-pageNumber="@Model.PageNumber"
-                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-pageNumber="@Model.PaginatedOrders.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedOrders.PageSize"
                     asp-route-sortBy="Discount"
                     asp-route-sortOrder=@GetOrdering()
-                    asp-route-searchBy="@Model.SearchBy"
-                    asp-route-searchValue="@Model.SearchValue"
-                    asp-route-status="@Model.Status"
+                    asp-route-searchBy="@Model.PaginatedOrders.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedOrders.SearchValue"
+                    asp-route-status="@Model.PaginatedOrders.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Discount
                 </a>
@@ -159,13 +264,13 @@
             <th>
                 <a
                     asp-action="Index"
-                    asp-route-pageNumber="@Model.PageNumber"
-                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-pageNumber="@Model.PaginatedOrders.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedOrders.PageSize"
                     asp-route-sortBy="Total"
                     asp-route-sortOrder=@GetOrdering()
-                    asp-route-searchBy="@Model.SearchBy"
-                    asp-route-searchValue="@Model.SearchValue"
-                    asp-route-status="@Model.Status"
+                    asp-route-searchBy="@Model.PaginatedOrders.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedOrders.SearchValue"
+                    asp-route-status="@Model.PaginatedOrders.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Total
                 </a>
@@ -173,13 +278,13 @@
             <th>
                 <a
                     asp-action="Index"
-                    asp-route-pageNumber="@Model.PageNumber"
-                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-pageNumber="@Model.PaginatedOrders.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedOrders.PageSize"
                     asp-route-sortBy="Currency"
                     asp-route-sortOrder=@GetOrdering()
-                    asp-route-searchBy="@Model.SearchBy"
-                    asp-route-searchValue="@Model.SearchValue"
-                    asp-route-status="@Model.Status"
+                    asp-route-searchBy="@Model.PaginatedOrders.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedOrders.SearchValue"
+                    asp-route-status="@Model.PaginatedOrders.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Currency
                 </a>
@@ -187,13 +292,13 @@
             <th>
                 <a
                     asp-action="Index"
-                    asp-route-pageNumber="@Model.PageNumber"
-                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-pageNumber="@Model.PaginatedOrders.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedOrders.PageSize"
                     asp-route-sortBy="IsPaid"
                     asp-route-sortOrder=@GetOrdering()
-                    asp-route-searchBy="@Model.SearchBy"
-                    asp-route-searchValue="@Model.SearchValue"
-                    asp-route-status="@Model.Status"
+                    asp-route-searchBy="@Model.PaginatedOrders.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedOrders.SearchValue"
+                    asp-route-status="@Model.PaginatedOrders.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Paid
                 </a>
@@ -201,13 +306,13 @@
             <th>
                 <a
                     asp-action="Index"
-                    asp-route-pageNumber="@Model.PageNumber"
-                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-pageNumber="@Model.PaginatedOrders.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedOrders.PageSize"
                     asp-route-sortBy="CreatedAt"
                     asp-route-sortOrder=@GetOrdering()
-                    asp-route-searchBy="@Model.SearchBy"
-                    asp-route-searchValue="@Model.SearchValue"
-                    asp-route-status="@Model.Status"
+                    asp-route-searchBy="@Model.PaginatedOrders.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedOrders.SearchValue"
+                    asp-route-status="@Model.PaginatedOrders.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Created At
                 </a>
@@ -215,13 +320,13 @@
             <th>
                 <a
                     asp-action="Index"
-                    asp-route-pageNumber="@Model.PageNumber"
-                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-pageNumber="@Model.PaginatedOrders.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedOrders.PageSize"
                     asp-route-sortBy="UpdatedAt"
                     asp-route-sortOrder=@GetOrdering()
-                    asp-route-searchBy="@Model.SearchBy"
-                    asp-route-searchValue="@Model.SearchValue"
-                    asp-route-status="@Model.Status"
+                    asp-route-searchBy="@Model.PaginatedOrders.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedOrders.SearchValue"
+                    asp-route-status="@Model.PaginatedOrders.Status"
                     class="link-underline text-decoration-none">
                     <i class="bi bi-funnel-fill"></i> Updated At
                 </a>
@@ -230,7 +335,7 @@
         </tr>
         </thead>
         <tbody>
-        @foreach (var order in Model.Items)
+        @foreach (var order in Model.PaginatedOrders.Items)
         {
             <tr>
                 <td>@order.Id</td>
@@ -286,12 +391,12 @@
     </table>
 </div>
 
-@await Html.PartialAsync("_PageNavigatorPartial");
+@await Html.PartialAsync("_PageNavigatorPartial", Model.PaginatedOrders);
 
 @* Custom Pagination Script to Add Status Parameter *@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const statusFilter = '@Model.Status';
+        const statusFilter = '@Model.PaginatedOrders.Status';
         if (statusFilter) {
             const paginationLinks = document.querySelectorAll('.pagination a.page-link');
             paginationLinks.forEach(link => {
@@ -311,6 +416,14 @@
         }
         .table-responsive .table th a:hover {
             color: #3939a9;
+        }
+        
+        .card {
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
         }
     </style>
 }

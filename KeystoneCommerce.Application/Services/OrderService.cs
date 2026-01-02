@@ -295,6 +295,25 @@ public class OrderService : IOrderService
         return Result<OrderDetailsDto>.Success(orderDetailsDto);
     }
 
+    public async Task<OrderDashboardDto> GetOrderDashboardDataAsync(OrderPaginationParameters parameters)
+    {
+        _logger.LogInformation("Fetching order dashboard data. PageNumber: {PageNumber}, PageSize: {PageSize}, Status: {Status}", 
+            parameters.PageNumber, parameters.PageSize, parameters.Status);
+
+        var paginatedOrders = await GetAllOrdersPaginatedAsync(parameters);
+        var monthlyAnalytics = await _orderRepository.GetMonthlyAnalyticsAsync();
+        var todayAnalytics = await _orderRepository.GetTodayAnalyticsAsync();
+
+        _logger.LogInformation("Successfully retrieved order dashboard data");
+
+        return new OrderDashboardDto
+        {
+            PaginatedOrders = paginatedOrders,
+            MonthlyAnalytics = monthlyAnalytics,
+            TodayAnalytics = todayAnalytics
+        };
+    }
+
     #region private methods
 
     private static OrderDto CreateOrderDto(Order createNewOrder)

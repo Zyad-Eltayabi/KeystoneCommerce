@@ -1,0 +1,11 @@
+namespace KeystoneCommerce.Application.DTOs.Order;
+
+public class OrderAnalyticsDto
+{
+    public int OrderCount { get; set; }
+    public decimal OrdersRevenue { get; set; }
+    public int PendingOrdersCount { get; set; }
+    public int FailedOrdersCount { get; set; }
+    public int CancellationOrdersCount { get; set; }
+    public decimal? AverageOrderValue { get; set; }
+}
