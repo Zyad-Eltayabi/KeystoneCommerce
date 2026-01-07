@@ -9,6 +9,8 @@ namespace KeystoneCommerce.WebUI.ViewModels.Payment
         public string Currency { get; set; } = null!;
         public string Status { get; set; } = null!;
         public bool IsFulfilled { get; set; }
+        public string UserId { get; set; } = null!;
+        public int OrderId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }

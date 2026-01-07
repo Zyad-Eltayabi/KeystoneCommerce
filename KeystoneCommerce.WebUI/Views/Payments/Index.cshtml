@@ -1,0 +1,356 @@
+@model PaymentDashboardViewModel
+@using KeystoneCommerce.Application.DTOs.Payment
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Payments";
+}
+
+@functions {
+    private string GetOrdering()
+        => (Model.PaginatedPayments.SortOrder == Sorting.Ascending|| Model.PaginatedPayments.SortOrder == "") ? Sorting.Descending : Sorting.Ascending;
+    
+    private bool IsStatusSelected(int statusValue)
+        => Model.PaginatedPayments.Status.HasValue && Model.PaginatedPayments.Status.Value == statusValue;
+    
+    private bool IsProviderSelected(int providerValue)
+        => Model.PaginatedPayments.Provider.HasValue && Model.PaginatedPayments.Provider.Value == providerValue;
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="mb-4">Payments Dashboard</h1>
+</div>
+
+@* Page Size Selector *@
+@await Html.PartialAsync("_PageSizeSelectorPartial", model: @Model.PaginatedPayments.PageSize)
+
+@* Filter and Search Form *@
+<form method="get" asp-action="Index"
+      class="d-flex justify-content-between align-items-center flex-wrap my-3">
+
+    <div class="d-flex flex-wrap gap-2">
+        @* Status Filter *@
+        <div class="input-group input-group-md" style="width: auto">
+            <label for="statusFilter" class="form-label me-2 mb-0 d-flex align-items-center">
+                <i class="bi bi-funnel me-1"></i>
+                <span class="fw-semibold">Filter by Status:</span>
+            </label>
+            <select id="statusFilter" name="status" class="form-select m-1"
+                    style="border-radius:20px; min-width: 150px;"
+                    onchange="this.form.submit()">
+                <option value="">All Statuses</option>
+                <option value="1" selected="@IsStatusSelected(1)">Processing</option>
+                <option value="4" selected="@IsStatusSelected(4)">Successful</option>
+                <option value="2" selected="@IsStatusSelected(2)">Failed</option>
+                <option value="3" selected="@IsStatusSelected(3)">Canceled</option>
+            </select>
+        </div>
+
+        @* Provider Filter *@
+        <div class="input-group input-group-md" style="width: auto">
+            <label for="providerFilter" class="form-label me-2 mb-0 d-flex align-items-center">
+                <i class="bi bi-credit-card me-1"> </i>
+                <span class="fw-semibold ml-1">Filter by Provider:</span>
+            </label>
+            <select id="providerFilter" name="provider" class="form-select m-1"
+                    style="border-radius:20px; min-width: 150px;"
+                    onchange="this.form.submit()">
+                <option value="">All Providers</option>
+                <option value="1" selected="@IsProviderSelected(1)">Stripe</option>
+                <option value="2" selected="@IsProviderSelected(2)">Cash On Delivery</option>
+            </select>
+        </div>
+    </div>
+
+    @* Search Form - Right Side *@
+    <div class="input-group input-group-md" style="width: auto">
+        <select asp-for="PaginatedPayments.SearchBy" class="form-select m-1"
+                style="border-radius:20px; min-width: 150px;">
+            <option value="Id">Id</option>
+            <option value="ProviderTransactionId">Transaction ID</option>
+            <option value="Amount">Amount</option>
+            <option value="Currency">Currency</option>
+            <option value="UserId">User ID</option>
+            <option value="OrderId">Order ID</option>
+        </select>
+
+        <input asp-for="PaginatedPayments.SearchValue" type="text" class="form-control me-1 rounded-pill m-1"
+               placeholder="Search" style="min-width: 200px;">
+
+        <button type="submit" class="btn btn-outline-success rounded-pill m-1">
+            Search
+        </button>
+    </div>
+
+    <!-- hidden fields -->
+    <input type="hidden" name="pageNumber" value="1"/>
+    <input type="hidden" name="pageSize" value="@Model.PaginatedPayments.PageSize"/>
+    <input type="hidden" name="sortBy" value="@Model.PaginatedPayments.SortBy"/>
+    <input type="hidden" name="sortOrder" value="@Model.PaginatedPayments.SortOrder"/>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+        <tr>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PaginatedPayments.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedPayments.PageSize"
+                    asp-route-sortBy="Id"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.PaginatedPayments.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedPayments.SearchValue"
+                    asp-route-status="@Model.PaginatedPayments.Status"
+                    asp-route-provider="@Model.PaginatedPayments.Provider"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> ID
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PaginatedPayments.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedPayments.PageSize"
+                    asp-route-sortBy="Provider"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.PaginatedPayments.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedPayments.SearchValue"
+                    asp-route-status="@Model.PaginatedPayments.Status"
+                    asp-route-provider="@Model.PaginatedPayments.Provider"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Provider
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PaginatedPayments.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedPayments.PageSize"
+                    asp-route-sortBy="ProviderTransactionId"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.PaginatedPayments.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedPayments.SearchValue"
+                    asp-route-status="@Model.PaginatedPayments.Status"
+                    asp-route-provider="@Model.PaginatedPayments.Provider"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Transaction ID
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PaginatedPayments.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedPayments.PageSize"
+                    asp-route-sortBy="Status"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.PaginatedPayments.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedPayments.SearchValue"
+                    asp-route-status="@Model.PaginatedPayments.Status"
+                    asp-route-provider="@Model.PaginatedPayments.Provider"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Status
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PaginatedPayments.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedPayments.PageSize"
+                    asp-route-sortBy="Amount"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.PaginatedPayments.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedPayments.SearchValue"
+                    asp-route-status="@Model.PaginatedPayments.Status"
+                    asp-route-provider="@Model.PaginatedPayments.Provider"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Amount
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PaginatedPayments.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedPayments.PageSize"
+                    asp-route-sortBy="Currency"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.PaginatedPayments.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedPayments.SearchValue"
+                    asp-route-status="@Model.PaginatedPayments.Status"
+                    asp-route-provider="@Model.PaginatedPayments.Provider"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Currency
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PaginatedPayments.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedPayments.PageSize"
+                    asp-route-sortBy="OrderId"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.PaginatedPayments.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedPayments.SearchValue"
+                    asp-route-status="@Model.PaginatedPayments.Status"
+                    asp-route-provider="@Model.PaginatedPayments.Provider"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Order ID
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PaginatedPayments.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedPayments.PageSize"
+                    asp-route-sortBy="IsFulfilled"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.PaginatedPayments.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedPayments.SearchValue"
+                    asp-route-status="@Model.PaginatedPayments.Status"
+                    asp-route-provider="@Model.PaginatedPayments.Provider"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Fulfilled
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PaginatedPayments.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedPayments.PageSize"
+                    asp-route-sortBy="CreatedAt"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.PaginatedPayments.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedPayments.SearchValue"
+                    asp-route-status="@Model.PaginatedPayments.Status"
+                    asp-route-provider="@Model.PaginatedPayments.Provider"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Created At
+                </a>
+            </th>
+            <th>
+                <a
+                    asp-action="Index"
+                    asp-route-pageNumber="@Model.PaginatedPayments.PageNumber"
+                    asp-route-pageSize="@Model.PaginatedPayments.PageSize"
+                    asp-route-sortBy="UpdatedAt"
+                    asp-route-sortOrder=@GetOrdering()
+                    asp-route-searchBy="@Model.PaginatedPayments.SearchBy"
+                    asp-route-searchValue="@Model.PaginatedPayments.SearchValue"
+                    asp-route-status="@Model.PaginatedPayments.Status"
+                    asp-route-provider="@Model.PaginatedPayments.Provider"
+                    class="link-underline text-decoration-none">
+                    <i class="bi bi-funnel-fill"></i> Updated At
+                </a>
+            </th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var payment in Model.PaginatedPayments.Items)
+        {
+            <tr>
+                <td>@payment.Id</td>
+                <td>
+                    <span class="badge @(payment.Provider == "Stripe" ? "bg-primary" : "bg-secondary")">
+                        @payment.Provider
+                    </span>
+                </td>
+                <td>
+                    @if (!string.IsNullOrEmpty(payment.ProviderTransactionId))
+                    {
+                        <code class="small">@payment.ProviderTransactionId</code>
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </td>
+                <td>
+                    <span class="badge @(payment.Status switch {
+                        "Processing" => "bg-warning text-dark",
+                        "Successful" => "bg-success",
+                        "Failed" => "bg-danger",
+                        "Canceled" => "bg-secondary",
+                        _ => "bg-secondary"
+                    })">
+                        @payment.Status
+                    </span>
+                </td>
+                <td>$@payment.Amount.ToString("F2")</td>
+                <td>@payment.Currency</td>
+                <td>@payment.OrderId</td>
+                <td>
+                    @if (payment.IsFulfilled)
+                    {
+                        <span class="badge bg-success">Yes</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">No</span>
+                    }
+                </td>
+                <td>@payment.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>
+                    @if (payment.UpdatedAt.HasValue)
+                    {
+                        @payment.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm")
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@payment.Id" 
+                       class="btn btn-sm btn-info" 
+                       data-tippy="View Details" 
+                       data-tippy-placement="top">
+                        <i class="bi bi-eye"></i> Details
+                    </a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@await Html.PartialAsync("_PageNavigatorPartial", Model.PaginatedPayments);
+
+@* Custom Pagination Script to Add Status and Provider Parameters *@
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusFilter = '@Model.PaginatedPayments.Status';
+        const providerFilter = '@Model.PaginatedPayments.Provider';
+        
+        const paginationLinks = document.querySelectorAll('.pagination a.page-link');
+        paginationLinks.forEach(link => {
+            const url = new URL(link.href);
+            if (statusFilter) {
+                url.searchParams.set('status', statusFilter);
+            }
+            if (providerFilter) {
+                url.searchParams.set('provider', providerFilter);
+            }
+            link.href = url.toString();
+        });
+    });
+</script>
+
+@section Styles {
+    <style>
+        .table-responsive .table th a {
+            color: black;
+            white-space: nowrap;
+        }
+        .table-responsive .table th a:hover {
+            color: #3939a9;
+        }
+        
+        code {
+            background-color: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.85em;
+        }
+    </style>
+}

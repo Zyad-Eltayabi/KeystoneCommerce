@@ -1,4 +1,6 @@
+using KeystoneCommerce.Application.Common.Pagination;
 using KeystoneCommerce.Application.DTOs.Payment;
+using KeystoneCommerce.Shared.Constants;
 
 namespace KeystoneCommerce.Application.Services
 {
@@ -9,19 +11,22 @@ namespace KeystoneCommerce.Application.Services
         private readonly IOrderRepository _orderRepository;
         private readonly IMappingService _mappingService;
         private readonly ILogger<PaymentService> _logger;
+        private readonly IIdentityService _identityService;
 
         public PaymentService(
             IApplicationValidator<CreatePaymentDto> validator,
             IPaymentRepository paymentRepository,
             IOrderRepository orderRepository,
             IMappingService mappingService,
-            ILogger<PaymentService> logger)
+            ILogger<PaymentService> logger,
+            IIdentityService identityService)
         {
             _validator = validator;
             _paymentRepository = paymentRepository;
             _orderRepository = orderRepository;
             _mappingService = mappingService;
             _logger = logger;
+            _identityService = identityService;
         }
 
         public async Task<Result<int>> CreatePaymentAsync(CreatePaymentDto createPaymentDto)
@@ -184,6 +189,81 @@ namespace KeystoneCommerce.Application.Services
                 paymentId, payment.OrderId, providerTransactionId);
 
             return Result<int>.Success(payment.OrderId);
+        }
+
+        public async Task<PaymentPaginatedResult<PaymentDto>> GetAllPaymentsPaginatedAsync(PaymentPaginationParameters parameters)
+        {
+            _logger.LogInformation("Fetching paginated payments. PageNumber: {PageNumber}, PageSize: {PageSize}, Status: {Status}, Provider: {Provider}", 
+                parameters.PageNumber, parameters.PageSize, parameters.Status, parameters.Provider);
+
+            if (string.IsNullOrEmpty(parameters.SortBy))
+            {
+                parameters.SortBy = "CreatedAt";
+                parameters.SortOrder = Sorting.Descending;
+            }
+
+            var payments = await _paymentRepository.GetPaymentsPagedAsync(parameters);
+            var paymentDtos = _mappingService.Map<List<PaymentDto>>(payments);
+
+            _logger.LogInformation("Retrieved {Count} payments successfully", paymentDtos.Count);
+
+            return new PaymentPaginatedResult<PaymentDto>
+            {
+                Items = paymentDtos,
+                PageNumber = parameters.PageNumber,
+                PageSize = parameters.PageSize,
+                TotalCount = parameters.TotalCount,
+                SortBy = parameters.SortBy,
+                SortOrder = parameters.SortOrder,
+                SearchBy = parameters.SearchBy,
+                SearchValue = parameters.SearchValue,
+                Status = parameters.Status,
+                Provider = parameters.Provider
+            };
+        }
+
+        public async Task<Result<PaymentDetailsDto>> GetPaymentDetailsByIdAsync(int paymentId)
+        {
+            _logger.LogInformation("Fetching payment details for payment ID: {PaymentId}", paymentId);
+
+            var payment = await _paymentRepository.GetPaymentDetailsByIdAsync(paymentId);
+            if (payment is null)
+            {
+                _logger.LogWarning("Payment not found with ID: {PaymentId}", paymentId);
+                return Result<PaymentDetailsDto>.Failure("Payment not found.");
+            }
+
+            var userInfo = await _identityService.GetUserBasicInfoByIdAsync(payment.UserId);
+            if (userInfo is null)
+            {
+                _logger.LogWarning("User not found for payment ID: {PaymentId}, User ID: {UserId}", paymentId, payment.UserId);
+                return Result<PaymentDetailsDto>.Failure("User information not found.");
+            }
+
+            var paymentDetailsDto = _mappingService.Map<PaymentDetailsDto>(payment);
+            paymentDetailsDto.User = userInfo;
+
+            _logger.LogInformation("Successfully retrieved payment details for payment ID: {PaymentId}", paymentId);
+            return Result<PaymentDetailsDto>.Success(paymentDetailsDto);
+        }
+
+        public async Task<PaymentDashboardDto> GetPaymentDashboardDataAsync(PaymentPaginationParameters parameters)
+        {
+            _logger.LogInformation("Fetching payment dashboard data. PageNumber: {PageNumber}, PageSize: {PageSize}, Status: {Status}, Provider: {Provider}", 
+                parameters.PageNumber, parameters.PageSize, parameters.Status, parameters.Provider);
+
+            var paginatedPayments = await GetAllPaymentsPaginatedAsync(parameters);
+            var monthlyAnalytics = new PaymentAnalyticsDto();
+            var todayAnalytics = new PaymentAnalyticsDto();
+
+            _logger.LogInformation("Successfully retrieved payment dashboard data");
+
+            return new PaymentDashboardDto
+            {
+                PaginatedPayments = paginatedPayments,
+                MonthlyAnalytics = monthlyAnalytics,
+                TodayAnalytics = todayAnalytics
+            };
         }
     }
 }

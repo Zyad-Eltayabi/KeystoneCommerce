@@ -3,6 +3,7 @@ using KeystoneCommerce.Application.DTOs;
 using KeystoneCommerce.Application.DTOs.Account;
 using KeystoneCommerce.Application.DTOs.Banner;
 using KeystoneCommerce.Application.DTOs.Order;
+using KeystoneCommerce.Application.DTOs.Payment;
 using KeystoneCommerce.Application.DTOs.Product;
 using KeystoneCommerce.Application.DTOs.ShippingDetails;
 using KeystoneCommerce.Application.DTOs.ShippingMethod;
@@ -102,7 +103,7 @@ namespace KeystoneCommerce.WebUI.Profiles
             CreateMap<ShippingMethodDetailsDto, OrderShippingMethodViewModel>()
                 .ReverseMap();
 
-            CreateMap<PaymentDetailsDto, PaymentViewModel>()
+            CreateMap<Application.DTOs.Order.PaymentDetailsDto, PaymentViewModel>()
                 .ReverseMap();
 
             CreateMap<CouponDetailsDto, CouponViewModel>()
@@ -116,6 +117,20 @@ namespace KeystoneCommerce.WebUI.Profiles
                 .ReverseMap();
 
             CreateMap<OrderDashboardDto, OrderDashboardViewModel>()
+                .ReverseMap();
+
+            // Payment Mappings
+            CreateMap<Application.DTOs.Payment.PaymentDetailsDto, PaymentDetailsViewModel>()
+                .ReverseMap();
+
+            CreateMap<OrderDto, OrderViewModel>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ReverseMap();
+
+            CreateMap<PaymentAnalyticsDto, PaymentAnalyticsViewModel>()
+                .ReverseMap();
+
+            CreateMap<PaymentDashboardDto, PaymentDashboardViewModel>()
                 .ReverseMap();
         }
     }

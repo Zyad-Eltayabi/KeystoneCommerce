@@ -62,6 +62,7 @@ namespace KeystoneCommerce.Infrastructure.Profiles
                 .ForMember(e => e.Order, e => e.Ignore());
 
             CreateMap<Order, OrderDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
                 .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => src.Payment != null ? src.Payment.Id : 0));
 
             // Order Details Mappings
@@ -80,11 +81,22 @@ namespace KeystoneCommerce.Infrastructure.Profiles
 
             CreateMap<ShippingMethod, ShippingMethodDetailsDto>();
 
-            CreateMap<Payment, PaymentDetailsDto>()
+            CreateMap<Payment, Application.DTOs.Order.PaymentDetailsDto>()
                 .ForMember(dest => dest.Provider, opt => opt.MapFrom(src => src.Provider.ToString()))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
 
             CreateMap<Coupon, CouponDetailsDto>();
+
+            // Payment Mappings
+            CreateMap<Payment, PaymentDto>()
+                .ForMember(dest => dest.Provider, opt => opt.MapFrom(src => src.Provider.ToString()))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+
+            CreateMap<Payment, Application.DTOs.Payment.PaymentDetailsDto>()
+                .ForMember(dest => dest.Provider, opt => opt.MapFrom(src => src.Provider.ToString()))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.User, opt => opt.Ignore())
+                .ForMember(dest => dest.Order, opt => opt.MapFrom(src => src.Order));
         }
     }
 }
