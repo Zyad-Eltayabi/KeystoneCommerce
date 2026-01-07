@@ -253,16 +253,18 @@ namespace KeystoneCommerce.Application.Services
                 parameters.PageNumber, parameters.PageSize, parameters.Status, parameters.Provider);
 
             var paginatedPayments = await GetAllPaymentsPaginatedAsync(parameters);
-            var monthlyAnalytics = new PaymentAnalyticsDto();
-            var todayAnalytics = new PaymentAnalyticsDto();
+            var todayAnalytics = await _paymentRepository.GetTodayAnalyticsAsync();
+            var last7DaysAnalytics = await _paymentRepository.GetLast7DaysAnalyticsAsync();
+            var last30DaysAnalytics = await _paymentRepository.GetLast30DaysAnalyticsAsync();
 
             _logger.LogInformation("Successfully retrieved payment dashboard data");
 
             return new PaymentDashboardDto
             {
                 PaginatedPayments = paginatedPayments,
-                MonthlyAnalytics = monthlyAnalytics,
-                TodayAnalytics = todayAnalytics
+                TodayAnalytics = todayAnalytics,
+                Last7DaysAnalytics = last7DaysAnalytics,
+                Last30DaysAnalytics = last30DaysAnalytics
             };
         }
     }

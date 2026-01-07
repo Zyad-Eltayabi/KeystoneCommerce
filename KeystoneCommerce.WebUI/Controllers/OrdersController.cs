@@ -1,12 +1,11 @@
-using AutoMapper;
 using KeystoneCommerce.Application.Common.Pagination;
-using KeystoneCommerce.Application.Interfaces.Services;
 using KeystoneCommerce.WebUI.ViewModels.Orders;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace KeystoneCommerce.WebUI.Controllers;
 
 [Route("Admin/[controller]")]
+[Authorize(Roles = "Admin")]
 public class OrdersController : Controller
 {
     private readonly IOrderService _orderService;

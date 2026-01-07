@@ -1,9 +1,11 @@
 using KeystoneCommerce.Application.Common.Pagination;
 using KeystoneCommerce.WebUI.ViewModels.Payment;
+using Microsoft.AspNetCore.Authorization;
 
 namespace KeystoneCommerce.WebUI.Controllers;
 
 [Route("Admin/[controller]")]
+[Authorize(Roles = "Admin")]
 public class PaymentsController : Controller
 {
     private readonly IPaymentService _paymentService;

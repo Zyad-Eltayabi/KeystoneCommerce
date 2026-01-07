@@ -20,6 +20,198 @@
     <h1 class="mb-4">Payments Dashboard</h1>
 </div>
 
+@* Analytics Widgets *@
+<div class="row mb-4">
+    @* Today Analytics Widget *@
+    <div class="col-lg-6 col-md-6 mb-3">
+        <div class="card shadow-sm border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-calendar-day"></i> Today's Analytics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Total Payments</h6>
+                            <h3 class="mb-0 text-primary">@Model.TodayAnalytics.TotalPayments</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Revenue</h6>
+                            <h3 class="mb-0 text-success">$@Model.TodayAnalytics.TotalRevenue.ToString("N2")</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Successful</h6>
+                            <h3 class="mb-0 text-success">@Model.TodayAnalytics.SuccessfulPaymentsCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Success Rate</h6>
+                            <h3 class="mb-0 text-info">@Model.TodayAnalytics.SuccessRate.ToString("N2")%</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Failed</h6>
+                            <h3 class="mb-0 text-danger">@Model.TodayAnalytics.FailedPaymentsCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Processing</h6>
+                            <h3 class="mb-0 text-warning">@Model.TodayAnalytics.ProcessingPaymentsCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Cancelled</h6>
+                            <h3 class="mb-0 text-secondary">@Model.TodayAnalytics.CancelledPaymentsCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Avg Transaction</h6>
+                            <h3 class="mb-0 text-info">$@Model.TodayAnalytics.AverageTransactionValue.ToString("N2")</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Last 7 Days Analytics Widget *@
+    <div class="col-lg-6 col-md-6 mb-3">
+        <div class="card shadow-sm border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-calendar-week"></i> Last 7 Days Analytics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Total Payments</h6>
+                            <h3 class="mb-0 text-primary">@Model.Last7DaysAnalytics.TotalPayments</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Revenue</h6>
+                            <h3 class="mb-0 text-success">$@Model.Last7DaysAnalytics.TotalRevenue.ToString("N2")</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Successful</h6>
+                            <h3 class="mb-0 text-success">@Model.Last7DaysAnalytics.SuccessfulPaymentsCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Success Rate</h6>
+                            <h3 class="mb-0 text-info">@Model.Last7DaysAnalytics.SuccessRate.ToString("N2")%</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Failed</h6>
+                            <h3 class="mb-0 text-danger">@Model.Last7DaysAnalytics.FailedPaymentsCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Processing</h6>
+                            <h3 class="mb-0 text-warning">@Model.Last7DaysAnalytics.ProcessingPaymentsCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Cancelled</h6>
+                            <h3 class="mb-0 text-secondary">@Model.Last7DaysAnalytics.CancelledPaymentsCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Avg Transaction</h6>
+                            <h3 class="mb-0 text-info">$@Model.Last7DaysAnalytics.AverageTransactionValue.ToString("N2")</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Last 30 Days Analytics Widget *@
+    <div class="col-lg-6 col-md-6 mb-3">
+        <div class="card shadow-sm border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-calendar-month"></i> Last 30 Days Analytics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Total Payments</h6>
+                            <h3 class="mb-0 text-primary">@Model.Last30DaysAnalytics.TotalPayments</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Revenue</h6>
+                            <h3 class="mb-0 text-success">$@Model.Last30DaysAnalytics.TotalRevenue.ToString("N2")</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Successful</h6>
+                            <h3 class="mb-0 text-success">@Model.Last30DaysAnalytics.SuccessfulPaymentsCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Success Rate</h6>
+                            <h3 class="mb-0 text-info">@Model.Last30DaysAnalytics.SuccessRate.ToString("N2")%</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Failed</h6>
+                            <h3 class="mb-0 text-danger">@Model.Last30DaysAnalytics.FailedPaymentsCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Processing</h6>
+                            <h3 class="mb-0 text-warning">@Model.Last30DaysAnalytics.ProcessingPaymentsCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Cancelled</h6>
+                            <h3 class="mb-0 text-secondary">@Model.Last30DaysAnalytics.CancelledPaymentsCount</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted mb-2">Avg Transaction</h6>
+                            <h3 class="mb-0 text-info">$@Model.Last30DaysAnalytics.AverageTransactionValue.ToString("N2")</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @* Page Size Selector *@
 @await Html.PartialAsync("_PageSizeSelectorPartial", model: @Model.PaginatedPayments.PageSize)
 
@@ -48,8 +240,8 @@
         @* Provider Filter *@
         <div class="input-group input-group-md" style="width: auto">
             <label for="providerFilter" class="form-label me-2 mb-0 d-flex align-items-center">
-                <i class="bi bi-credit-card me-1"> </i>
-                <span class="fw-semibold ml-1">Filter by Provider:</span>
+                <i class="bi bi-credit-card me-1"></i>
+                <span class="fw-semibold">Filter by Provider:</span>
             </label>
             <select id="providerFilter" name="provider" class="form-select m-1"
                     style="border-radius:20px; min-width: 150px;"
@@ -344,6 +536,14 @@
         }
         .table-responsive .table th a:hover {
             color: #3939a9;
+        }
+        
+        .card {
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
         }
         
         code {
