@@ -1,4 +1,5 @@
 ﻿using KeystoneCommerce.Application.DTOs.Product;
+using KeystoneCommerce.Application.DTOs.Shop;
 
 namespace KeystoneCommerce.Application.Interfaces.Repositories
 {
@@ -8,5 +9,6 @@ namespace KeystoneCommerce.Application.Interfaces.Repositories
         Task<bool> AreAllProductIdsExistAsync(List<int> productIds);
         Task<List<ProductDetailsForOrderCreationDto>> GetProductsForOrderCreationAsync(List<int> productIds);
         Task DecreaseProductStock(int productId, int quantityNumberToDecrease);
+        Task<List<ProductCardDto>> GetTopNewArrivalsAsync();
     }
 }

@@ -22,6 +22,7 @@ namespace KeystoneCommerce.WebUI.Extensions
         private static void ConfigureApplicationServices(IServiceCollection services)
         {
             // Register Application Services
+            services.AddScoped<IHomeService, HomeService>();
             services.AddScoped<IBannerService, BannerService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IShopService, ShopService>();

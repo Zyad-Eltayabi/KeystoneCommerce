@@ -1,4 +1,6 @@
 ﻿using KeystoneCommerce.Application.DTOs.Product;
+using KeystoneCommerce.Application.DTOs.Shop;
+using KeystoneCommerce.Shared.Constants;
 
 namespace KeystoneCommerce.Infrastructure.Repositories
 {
@@ -46,6 +48,23 @@ namespace KeystoneCommerce.Infrastructure.Repositories
         {
             await _context.Database.ExecuteSqlInterpolatedAsync($@"
                 EXEC SP_DecreaseProductQty @ProductId = {productId}, @ProductQty = {quantityNumberToDecrease};");
+        }
+
+        public async Task<List<ProductCardDto>> GetTopNewArrivalsAsync()
+        {
+            var newArrivals = await _context.Products
+                .Take(Products.CountOfNewArrivalsToShow)
+                .OrderByDescending(p => p.CreatedAt)
+                .Select(p => new ProductCardDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Price = p.Price,
+                    ImageName = p.ImageName,
+                    Discount = p.Discount
+                })
+                .ToListAsync();
+            return newArrivals ?? [];
         }
     }
 }

@@ -1,25 +1,17 @@
-using System.Diagnostics;
-using KeystoneCommerce.Application.Interfaces.Services;
+using KeystoneCommerce.Application.DTOs.Home;
 using KeystoneCommerce.WebUI.ViewModels;
-using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace KeystoneCommerce.WebUI.Controllers;
 
-public class HomeController : Controller
+public class HomeController(IHomeService homeService) : Controller
 {
-    private readonly ILogger<HomeController> _logger;
-    private readonly IBannerService _bannerService;
-
-    public HomeController(ILogger<HomeController> logger, IBannerService bannerService)
-    {
-        _logger = logger;
-        _bannerService = bannerService;
-    }
+    private readonly IHomeService _homeService = homeService;
 
     public async Task<IActionResult> Index()
     {
-        var homeBanners = await _bannerService.PrepareBannersForHomePage();
-        return View("index", homeBanners);
+        HomePageDto model = await _homeService.GetHomePageDataAsync();
+        return View("index", model);
     }
 
     public IActionResult Privacy()
@@ -31,6 +23,6 @@ public class HomeController : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel
-            { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

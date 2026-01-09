@@ -1,4 +1,4 @@
-﻿@model HomeBannersDto
+﻿@model HomePageDto
 @{
     ViewData["Title"] = "Home Page";
     Layout = "_Layout";
@@ -15,7 +15,7 @@
             "speed": 300,
             "infinite": true
         }'>
-        @foreach (var homePage in @Model.HomePage)
+        @foreach (var homePage in @Model.bannersDto.HomePage)
         {
             <div class="single_slider d-flex align-items-center"
                  data-bgimg="@FilePaths.WebBannerPath/@homePage.ImageName">
@@ -36,7 +36,6 @@
     </div>
 </section>
 <!--slider area end-->
-
 <!--shipping section start-->
 <section class="shipping_section mb-102">
     <div class="container">
@@ -85,7 +84,6 @@
     </div>
 </section>
 <!--shipping section end-->
-
 <!-- banner section start -->
 <section class="banner_section mb-109">
     <div class="container">
@@ -93,10 +91,9 @@
             <h2>featured collections</h2>
         </div>
         <div class="banner_container row" style="gap: 25px;">
-            @foreach (var item in Model.Featured)
+            @foreach (var item in Model.bannersDto.Featured)
             {
-                <figure
-                    class="single_banner position-relative @(item.Priority == 1 ? "col col-md-7" : "col-md-4")">
+                <figure class="single_banner position-relative @(item.Priority == 1 ? "col col-md-7" : "col-md-4")">
                     <img src="@FilePaths.WebBannerPath/@item.ImageName" alt=""
                          class="w-100 object-fit-fill h-100">
                     <figcaption class="banner_text position-absolute p-3">
@@ -113,16 +110,14 @@
     </div>
 </section>
 <!-- banner section end -->
-
 <!-- product section start -->
 @* To DO *@
 <!-- product section end -->
-
 <!-- banner section start -->
 <section class="banner_section banner_style2 mb-109">
     <div class="container-fluid">
         <div class="row">
-            @foreach (var item in Model.TopProducts)
+            @foreach (var item in Model.bannersDto.TopProducts)
             {
                 <div class="col-lg-6 col-md-6 col-sm-6 top-product">
                     <figure class="single_banner position-relative">
@@ -139,10 +134,147 @@
     </div>
 </section>
 <!-- banner section end -->
-
 <!-- product section start -->
-@* TO DO *@
+@if (Model.NewArrivals is not null && Model.NewArrivals.Any())
+{
+    <section class="product_section mb-80">
+        <div class="container">
+            <div class="product_header d-flex justify-content-between  mb-60">
+                <div class="section_title">
+                    <h2>new arrivals</h2>
+                </div>
+                <div class="product_tab_btn d-flex">
+
+                    <div class="all_product">
+                        <a asp-action="Index" asp-controller="Shop">All Product</a>
+                    </div>
+                </div>
+            </div>
+            <div class="product_container row">
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="all2" role="tabpanel">
+                        <div class="product_slick slick_slider_activation" data-slick='{
+                                        "slidesToShow": 4,
+                                        "slidesToScroll": 1,
+                                        "arrows": true,
+                                        "dots": false,
+                                        "autoplay": false,
+                                        "speed": 300,
+                                        "infinite": true,
+                                        "responsive":[
+                                          {"breakpoint":992, "settings": { "slidesToShow": 3 } },
+                                          {"breakpoint":768, "settings": { "slidesToShow": 2 } },
+                                          {"breakpoint":300, "settings": { "slidesToShow": 1 } }
+                                         ]
+                                    }'>
+                            @foreach (var product in Model.NewArrivals)
+                            {
+                                <div class="single_product">
+                                    <div class="product_thumb">
+                                        <a asp-controller="ProductDetails"
+                                           asp-action="Index"
+                                           asp-route-id="@product.Id">
+                                            <img class="primary_img"
+                                                 src="@FilePaths.WebProductPath/@product.ImageName"
+                                                 alt="consectetur">
+                                        </a>
+                                        @*product actions*@
+                                        @if (product.Discount is > 0)
+                                        {
+                                            var discountPercentage = (int)((product.Discount.Value / product.Price) * 100);
+                                            <div class="product_label">
+                                                <span>-@(discountPercentage)%</span>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="product_content grid_content text-center">
+                                        <div class="product_ratting">
+                                            <ul class="d-flex justify-content-center">
+                                                <li>
+                                                    <a href="#"><i class="ion-android-star"></i></a>
+                                                </li>
+                                                <li>
+                                                    <a href="#"><i class="ion-android-star"></i></a>
+                                                </li>
+                                                <li>
+                                                    <a href="#"><i class="ion-android-star"></i></a>
+                                                </li>
+                                                <li>
+                                                    <a href="#"><i class="ion-android-star"></i></a>
+                                                </li>
+                                                <li>
+                                                    <a href="#"><i class="ion-android-star"></i></a>
+                                                </li>
+                                                <li><span>(2)</span></li>
+                                            </ul>
+                                        </div>
+                                        <h4 class="product_name">
+                                            <a asp-controller="ProductDetails"
+                                               asp-action="Index"
+                                               asp-route-id="@product.Id">
+                                                @product.Title
+                                            </a>
+                                        </h4>
+                                        <div class="price_box">
+                                            @if (product.Discount is > 0)
+                                            {
+                                                var discountedPrice = product.Price - product.Discount;
+                                                <span class="current_price">@discountedPrice</span>
+                                                <span class="old_price">$@product.Price</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="current_price">$@product.Price</span>
+                                            }
+                                        </div>
+                                        <div class="add_to_cart">
+                                            <a onclick="updateCart(@product.Id,1)"
+                                               class="btn btn-primary" href="#" data-tippy="Add To Cart"
+                                               data-tippy-inertia="true" data-tippy-delay="50"
+                                               data-tippy-arrow="true" data-tippy-placement="top">
+                                                Add To
+                                                Cart
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="product_list_content">
+                                        <h4 class="product_name"><a href="#">@product.Title</a></h4>
+                                        <p><a href="#">shows</a></p>
+                                        <div class="price_box">
+                                            @if (product.Discount is > 0)
+                                            {
+                                                var discountedPrice = product.Price - product.Discount;
+                                                <span class="current_price">@discountedPrice</span>
+                                                <span class="old_price">$@product.Price</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="current_price">$@product.Price</span>
+                                            }
+                                        </div>
+                                        <div class="product_desc">
+                                            <p>@product.Description</p>
+                                        </div>
+                                        <div class="add_to_cart">
+                                            <a class="btn btn-primary" href="#" data-tippy="Add To Cart"
+                                               data-tippy-inertia="true" data-tippy-delay="50"
+                                               data-tippy-arrow="true" data-tippy-placement="top">
+                                                Add To
+                                                Cart
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
 <!-- product section end -->
+
 
 @section Scripts {
     <script>
