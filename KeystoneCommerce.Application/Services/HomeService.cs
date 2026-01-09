@@ -23,6 +23,7 @@ public class HomeService : IHomeService
         {
             bannersDto = await _bannerService.PrepareBannersForHomePage(),
             NewArrivals = await _productRepository.GetTopNewArrivalsAsync(),
+            TopSellingProducts = await _productRepository.GetTopSellingProductsAsync()
         };
 
         _logger.LogInformation(

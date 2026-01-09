@@ -7,4 +7,5 @@ public class HomePageDto
 {
     public HomeBannersDto bannersDto { get; set; } = null!;
     public List<ProductCardDto> NewArrivals { get; set; } = null!;
+    public List<ProductCardDto> TopSellingProducts { get; set; } = null!;
 }

@@ -13,6 +13,7 @@ using KeystoneCommerce.WebUI.ViewModels.Account;
 using KeystoneCommerce.WebUI.ViewModels.Banner;
 using KeystoneCommerce.WebUI.ViewModels.Checkout;
 using KeystoneCommerce.WebUI.ViewModels.Coupon;
+using KeystoneCommerce.WebUI.ViewModels.Home;
 using KeystoneCommerce.WebUI.ViewModels.OrderItem;
 using KeystoneCommerce.WebUI.ViewModels.Orders;
 using KeystoneCommerce.WebUI.ViewModels.Payment;
@@ -132,6 +133,11 @@ namespace KeystoneCommerce.WebUI.Profiles
 
             CreateMap<PaymentDashboardDto, PaymentDashboardViewModel>()
                 .ReverseMap();
+
+            CreateMap<HomeBannersDto, HomeBannersViewModel>()
+              .ForMember(dest => dest.HomePage, opt => opt.MapFrom(src => src.HomePage))
+               .ForMember(dest => dest.Featured, opt => opt.MapFrom(src => src.Featured))
+                .ForMember(dest => dest.TopProducts, opt => opt.MapFrom(src => src.TopProducts));
         }
     }
 }

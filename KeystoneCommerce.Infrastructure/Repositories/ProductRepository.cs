@@ -1,6 +1,7 @@
 ﻿using KeystoneCommerce.Application.DTOs.Product;
 using KeystoneCommerce.Application.DTOs.Shop;
 using KeystoneCommerce.Shared.Constants;
+using System.Text.RegularExpressions;
 
 namespace KeystoneCommerce.Infrastructure.Repositories
 {
@@ -65,6 +66,45 @@ namespace KeystoneCommerce.Infrastructure.Repositories
                 })
                 .ToListAsync();
             return newArrivals ?? [];
+        }
+
+        public async Task<List<ProductCardDto>> GetTopSellingProductsAsync()
+        {
+            var topSellingProducts = await
+                (from products in _context.Products
+                 join orders in _context.OrderItems
+                     on products.Id equals orders.ProductId
+                 into productsWithOrders
+                 from productOrderPair in productsWithOrders.DefaultIfEmpty()
+                 group productOrderPair by new
+                 {
+                     products.Id,
+                     products.Title,
+                     products.Price,
+                     products.ImageName,
+                     products.Discount,
+                 } into grouped
+                 select new
+                 {
+                     Title = grouped.Key.Title,
+                     Price = grouped.Key.Price,
+                     Id = grouped.Key.Id,
+                     ImageName = grouped.Key.ImageName,
+                     Discount = grouped.Key.Discount,
+                     TotalSum = grouped.Sum(pwo => pwo != null ? pwo.Quantity : 0)
+                 } into result
+                 orderby result.TotalSum descending, result.Price descending
+                 select new ProductCardDto
+                 {
+                     Id = result.Id,
+                     Title = result.Title,
+                     Price = result.Price,
+                     ImageName = result.ImageName,
+                     Discount = result.Discount
+                 })
+                .Take(Products.CountOfTopSellingProductsToShow)
+                .ToListAsync() ?? [];
+            return topSellingProducts;
         }
     }
 }
