@@ -88,6 +88,7 @@ namespace KeystoneCommerce.Infrastructure
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<IInventoryReservationRepository, InventoryReservationRepository>();
+            services.AddScoped<IDashboardRepository, DashboardRepository>();
         }
 
         private static void AddFluentValidationServices(IServiceCollection services)

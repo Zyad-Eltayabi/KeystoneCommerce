@@ -1,7 +1,6 @@
-﻿using AutoMapper;
-using KeystoneCommerce.Application.DTOs;
-using KeystoneCommerce.Application.DTOs.Account;
+﻿using KeystoneCommerce.Application.DTOs.Account;
 using KeystoneCommerce.Application.DTOs.Banner;
+using KeystoneCommerce.Application.DTOs.Dashboard;
 using KeystoneCommerce.Application.DTOs.Order;
 using KeystoneCommerce.Application.DTOs.Payment;
 using KeystoneCommerce.Application.DTOs.Product;
@@ -13,6 +12,7 @@ using KeystoneCommerce.WebUI.ViewModels.Account;
 using KeystoneCommerce.WebUI.ViewModels.Banner;
 using KeystoneCommerce.WebUI.ViewModels.Checkout;
 using KeystoneCommerce.WebUI.ViewModels.Coupon;
+using KeystoneCommerce.WebUI.ViewModels.Dashboard;
 using KeystoneCommerce.WebUI.ViewModels.Home;
 using KeystoneCommerce.WebUI.ViewModels.OrderItem;
 using KeystoneCommerce.WebUI.ViewModels.Orders;
@@ -138,6 +138,38 @@ namespace KeystoneCommerce.WebUI.Profiles
               .ForMember(dest => dest.HomePage, opt => opt.MapFrom(src => src.HomePage))
                .ForMember(dest => dest.Featured, opt => opt.MapFrom(src => src.Featured))
                 .ForMember(dest => dest.TopProducts, opt => opt.MapFrom(src => src.TopProducts));
+
+            // Dashboard Mappings
+            CreateMap<DashboardSummaryDto, DashboardViewModel>()
+                .ReverseMap();
+
+            CreateMap<SalesMetricsDto, SalesMetricsViewModel>()
+                .ReverseMap();
+
+            CreateMap<InventoryMetricsDto, InventoryMetricsViewModel>()
+                .ReverseMap();
+
+            CreateMap<LowStockProductDto, LowStockProductViewModel>()
+                .ForMember(dest => dest.StockLevel, opt => opt.MapFrom(src => src.StockLevel.ToString()))
+                .ReverseMap();
+
+            CreateMap<RevenueTrendDto, RevenueTrendViewModel>()
+                .ReverseMap();
+
+            CreateMap<TopSellingProductDto, TopSellingProductViewModel>()
+                .ReverseMap();
+
+            CreateMap<CouponPerformanceDto, CouponPerformanceViewModel>()
+                .ReverseMap();
+
+            CreateMap<SystemHealthDto, SystemHealthViewModel>()
+                .ReverseMap();
+
+            CreateMap<OperationalAlertsDto, OperationalAlertsViewModel>()
+                .ReverseMap();
+
+            CreateMap<RecentActivityDto, RecentOrderViewModel>()
+                .ReverseMap();
         }
     }
 }

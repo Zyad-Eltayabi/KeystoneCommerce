@@ -1,0 +1,587 @@
+@model DashboardViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+@functions {
+    private string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Processing" => "bg-warning text-dark",
+            "Paid" => "bg-success",
+            "Cancelled" => "bg-danger",
+            "Failed" => "bg-dark",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetStockLevelBadgeClass(string level)
+    {
+        return level switch
+        {
+            "Critical" => "bg-danger",
+            "Low" => "bg-warning",
+            "Warning" => "bg-info",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+<div class="container-fluid px-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4 border-bottom">
+        <h1 class="h3 mb-0"><i class="bi bi-speedometer2 me-2"></i>Dashboard Overview</h1>
+        <div class="text-muted">
+            <small><i class="bi bi-clock me-1"></i> Last updated: @DateTime.Now.ToString("MMM dd, yyyy HH:mm")</small>
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Sales KPI Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Today's Revenue
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                $@Model.SalesMetrics.TodayRevenue.ToString("N2")
+                            </div>
+                            <small class="text-muted">@Model.SalesMetrics.TodayOrdersCount orders</small>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-currency-dollar text-gray-300" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Monthly Revenue
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                $@Model.SalesMetrics.MonthlyRevenue.ToString("N2")
+                            </div>
+                            <small class="text-muted">@Model.SalesMetrics.MonthlyOrdersCount orders</small>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-graph-up text-gray-300" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Average Order Value
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                $@Model.SalesMetrics.AverageOrderValue.ToString("N2")
+                            </div>
+                            <small class="text-muted">Per order</small>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-cart-check text-gray-300" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Low Stock Products
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.InventoryMetrics.LowStockProductsCount
+                            </div>
+                            <small class="text-muted">Out of @Model.InventoryMetrics.TotalProducts total</small>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-exclamation-triangle text-gray-300" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operational Alerts Section -->
+    @if (Model.OperationalAlerts.CriticalStockAlerts.Any() || 
+         Model.OperationalAlerts.FailedOrdersLast24Hours > 0 || 
+         Model.OperationalAlerts.PendingPaymentsCount > 0)
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-danger shadow">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-exclamation-circle me-2"></i>Operational Alerts
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @if (Model.OperationalAlerts.CriticalStockAlerts.Any())
+                            {
+                                <div class="col-md-4 mb-3">
+                                    <div class="alert alert-danger mb-0">
+                                        <h6 class="alert-heading"><i class="bi bi-box-seam me-1"></i>Critical Stock Alert</h6>
+                                        <p class="mb-0">@Model.OperationalAlerts.CriticalStockAlerts.Count products are critically low in stock!</p>
+                                    </div>
+                                </div>
+                            }
+                            @if (Model.OperationalAlerts.FailedOrdersLast24Hours > 0)
+                            {
+                                <div class="col-md-4 mb-3">
+                                    <div class="alert alert-warning mb-0">
+                                        <h6 class="alert-heading"><i class="bi bi-x-circle me-1"></i>Failed Orders</h6>
+                                        <p class="mb-0">@Model.OperationalAlerts.FailedOrdersLast24Hours orders failed in last 24 hours</p>
+                                    </div>
+                                </div>
+                            }
+                            @if (Model.OperationalAlerts.PendingPaymentsCount > 0)
+                            {
+                                <div class="col-md-4 mb-3">
+                                    <div class="alert alert-info mb-0">
+                                        <h6 class="alert-heading"><i class="bi bi-credit-card me-1"></i>Pending Payments</h6>
+                                        <p class="mb-0">@Model.OperationalAlerts.PendingPaymentsCount payments awaiting confirmation</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row mb-4">
+        <!-- Orders Status Overview -->
+        <div class="col-xl-6 col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Orders Status Distribution</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height: 280px;">
+                        <canvas id="orderStatusChart"
+                                data-pending="@Model.SalesMetrics.PendingOrdersCount"
+                                data-paid="@Model.SalesMetrics.PaidOrdersCount"
+                                data-cancelled="@Model.SalesMetrics.CancelledOrdersCount"
+                                data-failed="@Model.SalesMetrics.FailedOrdersCount"></canvas>
+                    </div>
+                    <div class="mt-4">
+                        <div class="row text-center">
+                            <div class="col">
+                                <div class="h6 mb-0">@Model.SalesMetrics.PendingOrdersCount</div>
+                                <small class="text-warning">Pending</small>
+                            </div>
+                            <div class="col">
+                                <div class="h6 mb-0">@Model.SalesMetrics.PaidOrdersCount</div>
+                                <small class="text-success">Paid</small>
+                            </div>
+                            <div class="col">
+                                <div class="h6 mb-0">@Model.SalesMetrics.CancelledOrdersCount</div>
+                                <small class="text-danger">Cancelled</small>
+                            </div>
+                            <div class="col">
+                                <div class="h6 mb-0">@Model.SalesMetrics.FailedOrdersCount</div>
+                                <small class="text-dark">Failed</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Trend (7 Days) -->
+        <div class="col-xl-6 col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Revenue Trend (Last 7 Days)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height: 280px;">
+                        <canvas id="revenueTrendChart"
+                                data-labels='@Json.Serialize(Model.Last7DaysTrend.Select(t => t.Date.ToString("MMM dd")))'
+                                data-revenue='@Json.Serialize(Model.Last7DaysTrend.Select(t => t.Revenue))'></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Trend (30 Days) -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Revenue Trend (Last 30 Days)</h6>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-success">
+                            Total: $@Model.Last30DaysTrend.Sum(t => t.Revenue).ToString("N2")
+                        </span>
+                        <span class="badge bg-info">
+                            Orders: @Model.Last30DaysTrend.Sum(t => t.OrdersCount)
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height: 300px;">
+                        <canvas id="revenue30DaysTrendChart"
+                                data-labels='@Json.Serialize(Model.Last30DaysTrend.Select(t => t.Date.ToString("MMM dd")))'
+                                data-revenue='@Json.Serialize(Model.Last30DaysTrend.Select(t => t.Revenue))'></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Top Selling Products -->
+        <div class="col-xl-6 col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Top Selling Products</h6>
+                    <a asp-controller="Products" asp-action="Index" class="btn btn-sm btn-primary">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Sold</th>
+                                    <th class="text-end">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var product in Model.TopSellingProducts.Take(5))
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="@FilePaths.WebProductPath/@product.ImageName"
+                                                     alt="@product.ProductTitle" 
+                                                     class="rounded me-2" 
+                                                     style="width: 40px; height: 40px; object-fit: cover;">
+                                                <div>
+                                                    <div class="fw-bold px-2">@product.ProductTitle</div>
+                                                    <small class="text-muted">$@product.Price.ToString("F2")</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <span class="badge bg-info">@product.TotalQuantitySold</span>
+                                        </td>
+                                        <td class="text-end align-middle fw-bold text-success">
+                                            $@product.TotalRevenue.ToString("F2")
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Products -->
+        <div class="col-xl-6 col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-warning">Low Stock Alert</h6>
+                    <a asp-controller="Products" asp-action="Index" class="btn btn-sm btn-warning">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Stock</th>
+                                    <th class="text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var product in Model.InventoryMetrics.LowStockProducts.Take(5))
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="@FilePaths.WebProductPath/@product.ImageName"
+                                                     alt="@product.Title" 
+                                                     class="rounded me-2" 
+                                                     style="width: 40px; height: 40px; object-fit: cover;">
+                                                <span class="fw-bold px-2">@product.Title</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <span class="badge bg-secondary">@product.CurrentStock</span>
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <span class="badge @GetStockLevelBadgeClass(product.StockLevel)">
+                                                @product.StockLevel
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Coupon Performance -->
+        @if (Model.TopCoupons.Any())
+        {
+            <div class="col-xl-6 col-lg-6 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-success">Top Performing Coupons</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th class="text-center">Usage</th>
+                                        <th class="text-end">Discount</th>
+                                        <th class="text-end">Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var coupon in Model.TopCoupons)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-success">@coupon.CouponCode</span>
+                                            </td>
+                                            <td class="text-center">@coupon.UsageCount</td>
+                                            <td class="text-end text-danger">-$@coupon.TotalDiscountGiven.ToString("F2")</td>
+                                            <td class="text-end fw-bold">$@coupon.TotalRevenueWithCoupon.ToString("F2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+
+        <!-- System Health -->
+        <div class="col-xl-6 col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-info">System Health</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted"><i class="bi bi-credit-card-2-front me-2"></i>Failed Payments</span>
+                            <span class="badge @(Model.SystemHealth.FailedPaymentsCount > 0 ? "bg-danger" : "bg-success")">
+                                @Model.SystemHealth.FailedPaymentsCount
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted"><i class="bi bi-hourglass-split me-2"></i>Pending Payments</span>
+                            <span class="badge @(Model.SystemHealth.PendingPaymentsCount > 0 ? "bg-warning text-dark" : "bg-success")">
+                                @Model.SystemHealth.PendingPaymentsCount
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted"><i class="bi bi-clock-history me-2"></i>Active Reservations</span>
+                            <span class="badge bg-info">
+                                @Model.SystemHealth.ActiveReservationsCount
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted"><i class="bi bi-clock-history me-2"></i>Expired Reservations</span>
+                            <span class="badge bg-secondary">
+                                @Model.SystemHealth.ExpiredReservationsCount
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Latest Orders</h6>
+                    <a asp-controller="Orders" asp-action="Index" class="btn btn-sm btn-primary">
+                        View All <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Customer</th>
+                                    <th>Total</th>
+                                    <th>Payment</th>
+                                    <th class="text-center">Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var order in Model.RecentOrders)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@order.OrderNumber</td>
+                                        <td>@order.CustomerName</td>
+                                        <td class="fw-bold text-success">$@order.Total.ToString("F2")</td>
+                                        <td>
+                                            <span class="badge bg-secondary">@order.PaymentMethod</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge @GetStatusBadgeClass(order.Status)">
+                                                @order.Status
+                                            </span>
+                                        </td>
+                                        <td>@order.CreatedAt.ToString("MMM dd, HH:mm")</td>
+                                        <td>
+                                            <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.OrderId" 
+                                               class="btn btn-sm btn-info">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="~/assets/js/scripts/dashboard-charts.js"></script>
+}
+
+@section Styles {
+    <style>
+        .border-left-primary {
+            border-left: .25rem solid #4e73df!important;
+        }
+        
+        .border-left-success {
+            border-left: .25rem solid #1cc88a!important;
+        }
+        
+        .border-left-info {
+            border-left: .25rem solid #36b9cc!important;
+        }
+        
+        .border-left-warning {
+            border-left: .25rem solid #f6c23e!important;
+        }
+        
+        .text-gray-300 {
+            color: #dddfeb!important;
+        }
+        
+        .text-gray-800 {
+            color: #5a5c69!important;
+        }
+        
+        .card {
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .text-xs {
+            font-size: .7rem;
+        }
+        
+        .font-weight-bold {
+            font-weight: 700!important;
+        }
+        
+        .shadow {
+            box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15)!important;
+        }
+
+        /* Chart Container Responsive Styles */
+        .chart-container {
+            position: relative;
+            height: 280px;
+            width: 100%;
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @@media (max-width: 768px) {
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .chart-container {
+                height: 220px;
+            }
+        }
+
+        /* Ensure charts fill their containers properly */
+        .chart-container canvas {
+            max-width: 100%;
+            height: 100% !important;
+        }
+    </style>
+}
