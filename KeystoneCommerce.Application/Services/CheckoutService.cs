@@ -30,7 +30,8 @@ public class CheckoutService : ICheckoutService
                 return Result<OrderDto>.Failure("The order must contain at least one product.");
             }
 
-            if (!Enum.TryParse<PaymentType>(order.PaymentProvider, out var paymentType))
+            if (!Enum.TryParse<PaymentType>(order.PaymentProvider, out var paymentType)
+                || !Enum.IsDefined(typeof(PaymentType),paymentType))
             {
                 _logger.LogWarning("Invalid payment type provided: {PaymentType}", order.PaymentProvider);
                 return Result<OrderDto>.Failure("Invalid payment type.");
