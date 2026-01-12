@@ -26,52 +26,27 @@ namespace KeystoneCommerce.Application.Services
 
         public async Task<Result<RegisterDto>> RegisterAsync(RegisterDto registerDto)
         {
-            _logger.LogInformation("Registering user with email: {Email}", registerDto.Email);
+            _logger.LogInformation("Attempting user registration");
             var validationResult = _registerValidator.Validate(registerDto);
             if (!validationResult.IsValid)
             {
-                _logger.LogWarning("Validation failed for user registration with email: {Email}. Errors: {Errors}", registerDto.Email, string.Join(", ", validationResult.Errors));
+                _logger.LogWarning("Validation failed for user registration. Errors: {Errors}", string.Join(", ", validationResult.Errors));
                 return Result<RegisterDto>.Failure(validationResult.Errors);
             }
             return await CompleteRegistrationAsync(registerDto);
         }
 
-        private async Task<Result<RegisterDto>> CompleteRegistrationAsync(RegisterDto registerDto)
-        {
-            List<string> result = await _identityService.CreateUserAsync(registerDto.FullName, registerDto.Email, registerDto.Password);
-            if (result.Any())
-            {
-                _logger.LogWarning("User registration failed for email: {Email}. Errors: {Errors}", registerDto.Email, string.Join(", ", result));
-                return Result<RegisterDto>.Failure(result);
-            }
-            _logger.LogInformation("User registered successfully with email: {Email}", registerDto.Email);
-            return Result<RegisterDto>.Success(registerDto);
-        }
-
         public async Task<Result<RegisterDto>> LoginAsync(LoginDto loginDto)
         {
-            _logger.LogInformation("Login attempt for user with email: {Email}", loginDto.Email);
+            _logger.LogInformation("User login attempt");
             var validationResult = _loginValidator.Validate(loginDto);
             if (!validationResult.IsValid)
             {
-                _logger.LogWarning("Validation failed for user login with email: {Email}. Errors: {Errors}", loginDto.Email, string.Join(", ", validationResult.Errors));
+                _logger.LogWarning("Validation failed for user login. Errors: {Errors}", string.Join(", ", validationResult.Errors));
                 return Result<RegisterDto>.Failure("Invalid email or password.");
             }
             return await CompleteLoginAsync(loginDto);
         }
-
-        private async Task<Result<RegisterDto>> CompleteLoginAsync(LoginDto loginDto)
-        {
-            var result = await _identityService.LoginUserAsync(loginDto.Email, loginDto.Password, loginDto.RememberMe);
-            if (!result)
-            {
-                _logger.LogWarning("User login failed for email: {Email}", loginDto.Email);
-                return Result<RegisterDto>.Failure("Invalid email or password.");
-            }
-            _logger.LogInformation("User logged in successfully with email: {Email}", loginDto.Email);
-            return Result<RegisterDto>.Success();
-        }
-
 
         public async Task<bool> LogoutAsync()
         {
@@ -111,6 +86,30 @@ namespace KeystoneCommerce.Application.Services
             }
             _logger.LogInformation("Password reset workflow completed successfully.");
             return Result<string>.Success();
+        }
+
+        private async Task<Result<RegisterDto>> CompleteLoginAsync(LoginDto loginDto)
+        {
+            var result = await _identityService.LoginUserAsync(loginDto.Email, loginDto.Password, loginDto.RememberMe);
+            if (!result)
+            {
+                _logger.LogWarning("User login failed");
+                return Result<RegisterDto>.Failure("Invalid email or password.");
+            }
+            _logger.LogInformation("User logged in successfully");
+            return Result<RegisterDto>.Success();
+        }
+
+        private async Task<Result<RegisterDto>> CompleteRegistrationAsync(RegisterDto registerDto)
+        {
+            List<string> result = await _identityService.CreateUserAsync(registerDto.FullName, registerDto.Email, registerDto.Password);
+            if (result.Any())
+            {
+                _logger.LogWarning("User registration failed. Errors: {Errors}", string.Join(", ", result));
+                return Result<RegisterDto>.Failure(result);
+            }
+            _logger.LogInformation("User registered successfully");
+            return Result<RegisterDto>.Success(registerDto);
         }
     }
 }
