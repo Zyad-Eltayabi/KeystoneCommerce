@@ -370,7 +370,7 @@ dotnet ef migrations remove --project KeystoneCommerce.Infrastructure --startup-
 - `EmailService`: Email notifications
 - `ImageService`: Image upload and processing
 - `IdentityService`: Authentication and authorization
-- `StripPaymentService`: Stripe payment integration
+- `StripePaymentService`: Stripe payment integration
 - `HangfireService`: Background job scheduling
 
 ## 🤝 Contributing
