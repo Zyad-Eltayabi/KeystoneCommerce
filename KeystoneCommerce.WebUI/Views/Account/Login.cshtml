@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Login";
     Layout = "~/Views/Shared/_SignLayout.cshtml";
+
 }
 
 <div class="login-container">
@@ -13,6 +14,8 @@
 
         <form class="login-form" id="loginForm" asp-action="Login" asp-controller="Account" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
 
             <div class="mb-3">
                 <label asp-for="Email" class="form-label fw-bold d-flex align-items-center">

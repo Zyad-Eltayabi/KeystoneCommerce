@@ -47,8 +47,9 @@ namespace KeystoneCommerce.WebUI.Controllers
 
         [HttpGet]
         [RedirectAuthenticatedUser]
-        public IActionResult Login()
+        public IActionResult Login(string returnUrl = "")
         {
+            ViewData["ReturnUrl"] = returnUrl;
             return View("Login");
         }
 
@@ -64,8 +65,11 @@ namespace KeystoneCommerce.WebUI.Controllers
                 if (result.IsSuccess)
                 {
                     TempData["SuccessMessage"] = "Login successful!, Welcome Back.";
+                    if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                        return Redirect(model.ReturnUrl);
                     return RedirectToAction("Index", "Home");
                 }
+
                 result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
             }
             return View("Login", model);
