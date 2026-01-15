@@ -5,10 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace KeystoneCommerce.WebUI.Controllers;
 
-public class ShopController(IShopService shopService,IMappingService mappingService) : Controller
+public class ShopController(IShopService shopService, IMappingService mappingService) : Controller
 {
-    
-    public async Task<IActionResult> Index([FromQuery]PaginationParameters parameters)
+
+    [HttpGet]
+    public async Task<IActionResult> Index([FromQuery] PaginationParameters parameters)
     {
         var productsDto = await shopService.GetAvailableProducts(parameters);
         var productsCardsViewModel = mappingService.Map<List<ProductCardViewModel>>(productsDto);

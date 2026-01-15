@@ -19,11 +19,45 @@
                     </ul>
                 </div>
                 <!--breadcrumbs area end-->
+
+                <div class="shop_banner d-flex align-items-center" data-bgimg="@FilePaths.WebProductPath/shop-photo.png">
+                    <div class="shop_banner_text">
+                        <h2>essential <br> wears</h2>
+                        <p>The collections basic items <br> essential for all lovers</p>
+                    </div>
+                </div>
+
                 <!--shop toolbar start-->
                 <div class="shop_toolbar_wrapper d-flex justify-content-between align-items-center">
                     <div class="page_amount">
                         <p><span>@Model.TotalCount</span> Products Found</p>
                     </div>
+
+                    <div class=" sorting_by d-flex align-items-center">
+                        <span>SORT BY :</span>
+                        <form method="get" asp-action="Index" class="select_option d-flex align-items-center">
+                            <select  asp-for="SortBy" id="sortOption" class="form-select m-1"
+                                    style="border-radius:20px; min-width: 200px;"
+                                    >
+                                <option value="" selected="@(string.IsNullOrEmpty(Model.SortBy))">None</option>
+                                <option value="Price-Desc" selected="@(Model.SortBy == "Price" && Model.SortOrder == "Descending")">Highest Price</option>
+                                <option value="Price-Asc" selected="@(Model.SortBy == "Price" && Model.SortOrder == "Ascending")">Lowest Price</option>
+                                <option value="Title-Asc" selected="@(Model.SortBy == "Title" && Model.SortOrder == "Ascending")">Title (A-Z)</option>
+                                <option value="Title-Desc" selected="@(Model.SortBy == "Title" && Model.SortOrder == "Descending")">Title (Z-A)</option>
+                                <option value="Id-Desc" selected="@(Model.SortBy == "Id" && Model.SortOrder == "Descending")">Newest Products</option>
+                            </select>
+                            <button  type="submit" class="btn btn-outline-primary btn-sm rounded-pill m-1" style="white-space: nowrap;">
+                                Apply
+                            </button>
+                            
+                            <!-- Hidden fields to maintain current state -->
+                            <input type="hidden" name="pageNumber" value="1" />
+                            <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                            <input type="hidden" name="searchBy" value="@Model.SearchBy" />
+                            <input type="hidden" name="searchValue" value="@Model.SearchValue" />
+                        </form>
+                    </div>
+
                     <div class="toolbar_btn_wrapper d-flex align-items-center">
                         <div class="view_btn">
                             <a class="view" href="#">
@@ -67,7 +101,7 @@
                         <input asp-for="SearchValue" type="text" class="form-control me-1 rounded-pill m-1"
                                placeholder="Search" style="min-width: 200px;">
 
-                        <button type="submit" class="btn btn-outline-success rounded-pill m-1">
+                        <button type="submit" class="btn btn-outline-primary rounded-pill m-1">
                             Search
                         </button>
                     </div>
@@ -143,7 +177,7 @@
                                     </div>
                                     <div class="add_to_cart">
                                         <a onclick="updateCart(@product.Id,1)"
-                                            class="btn btn-primary" href="#" data-tippy="Add To Cart"
+                                           class="btn btn-primary" href="#" data-tippy="Add To Cart"
                                            data-tippy-inertia="true" data-tippy-delay="50"
                                            data-tippy-arrow="true" data-tippy-placement="top">
                                             Add To

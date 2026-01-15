@@ -7,12 +7,14 @@ using KeystoneCommerce.WebUI.Services;
 using KeystoneCommerce.WebUI.ViewModels.Cart;
 using KeystoneCommerce.WebUI.ViewModels.Checkout;
 using KeystoneCommerce.WebUI.ViewModels.ShippingMethod;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace KeystoneCommerce.WebUI.Controllers;
 
+[Authorize]
 public class CheckoutController(CartService cartService, ICouponService couponService, IShippingMethodService shippingMethodService, IMapper mapper, ICheckoutService checkoutService) : Controller
 {
     [HttpGet]
