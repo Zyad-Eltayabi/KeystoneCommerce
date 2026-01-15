@@ -119,82 +119,6 @@
 <!--mini cart end-->
 <!--header area start-->
 <header class="header_section header_transparent">
-    <div class="header_top">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12">
-                    <div class="header_top_inner d-flex justify-content-between align-items-center">
-                        <div class="header_contact_info">
-                            <ul class="d-flex">
-                                <li class="text-white">
-                                    <i class="icons icon-phone"></i> <a href="tel:+05483716566">+054
-                                        8371 65 66</a>
-                                </li>
-                                <li class="text-white">
-                                    <i class="icon-envelope-letter icons"></i> <a href="#">uthrstore@domain.com</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="free_shipping_text">
-                            <p class="text-white">
-                                Free shipping worldwide for orders over $99 <a href="#">
-                                    Learn
-                                    More
-                                </a>
-                            </p>
-                        </div>
-                        <div class="header_top_sidebar d-flex align-items-center">
-                            <div class="header_social d-flex">
-                                <span>Follow us</span>
-                                <ul class="d-flex">
-                                    <li>
-                                        <a href="#"><i class="icon-social-twitter icons"></i></a>
-                                    </li>
-                                    <li>
-                                        <a href="#"><i class="icon-social-facebook icons"></i></a>
-                                    </li>
-                                    <li>
-                                        <a href="#"><i class="icon-social-instagram icons"></i></a>
-                                    </li>
-                                    <li>
-                                        <a href="#"><i class="icon-social-youtube icons"></i></a>
-                                    </li>
-                                    <li>
-                                        <a href="#"><i class="icon-social-pinterest icons"></i></a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="language_currency">
-                                <ul class="d-flex">
-                                    <li class="language">
-                                        <a href="#">
-                                            Eng <i class="icon-right ion-ios-arrow-down"></i>
-                                        </a>
-                                        <ul class="dropdown_language">
-                                            <li><a href="#">French</a></li>
-                                            <li><a href="#">Spanish</a></li>
-                                            <li><a href="#">Russian</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="currency">
-                                        <a href="#">
-                                            USd <i class="icon-right ion-ios-arrow-down"></i>
-                                        </a>
-                                        <ul class="dropdown_currency">
-                                            <li><a href="#">€ Euro</a></li>
-                                            <li><a href="#">£ Pound Sterling</a></li>
-                                            <li><a href="#">$ US Dollar</a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="main_header">
         <div class="container-fluid">
             <div class="row">
@@ -241,12 +165,6 @@
                                                 <li><a asp-controller="Dashboard"
                                                        asp-action="Index">Dashboard</a></li>
                                             }
-                                            else
-                                            {
-                                                <li><a href="#">My Account</a></li>
-                                                <li><a href="#">Order list</a></li>
-                                            }
-
                                             <li><a asp-action="Logout" asp-controller="Account">Log
                                                     out</a></li>
                                         }
@@ -320,15 +238,15 @@
                     <div class="footer_menu">
                         <ul class="d-flex justify-content-end">
                             <li><a class="active" asp-controller="Home">Home</a></li>
-                            <li><a asp-controller="Shop">Shop</a></li>
-                            <li><a asp-controller="About">About</a></li>
-                            <li><a asp-controller="Blog">Blog</a></li>
+                            <li><a asp-controller="Shop" asp-action="Index">Shop</a></li>
+                                <li><a asp-controller="Cart" asp-action="Index">Cart</a></li>
+                                <li><a asp-controller="Checkout" asp-action="Index">Checkout</a></li>
                         </ul>
                     </div>
                     <div class="footer_social">
                         <ul class="d-flex justify-content-end">
                             <li>
-                                <a href="https://twitter.com" data-tippy="Twitter"
+                                <a href="#" data-tippy="Twitter"
                                    data-tippy-inertia="true"
                                    data-tippy-delay="50" data-tippy-arrow="true"
                                    data-tippy-placement="top">
@@ -336,7 +254,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="https://www.facebook.com" data-tippy="Facebook"
+                                <a href="#" data-tippy="Facebook"
                                    data-tippy-inertia="true"
                                    data-tippy-delay="50" data-tippy-arrow="true"
                                    data-tippy-placement="top">
@@ -344,7 +262,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="https://www.google.com" data-tippy="googleplus"
+                                <a href="#" data-tippy="googleplus"
                                    data-tippy-inertia="true"
                                    data-tippy-delay="50" data-tippy-arrow="true"
                                    data-tippy-placement="top">
@@ -352,7 +270,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="https://www.instagram.com" data-tippy="Instagram"
+                                <a href="#" data-tippy="Instagram"
                                    data-tippy-inertia="true"
                                    data-tippy-delay="50" data-tippy-arrow="true"
                                    data-tippy-placement="top">
@@ -360,7 +278,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="https://www.youtube.com" data-tippy="Youtube"
+                                <a href="#" data-tippy="Youtube"
                                    data-tippy-inertia="true"
                                    data-tippy-delay="50" data-tippy-arrow="true"
                                    data-tippy-placement="top">

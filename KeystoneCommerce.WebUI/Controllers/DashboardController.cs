@@ -25,6 +25,8 @@ public class DashboardController : Controller
     }
 
     [HttpGet]
+    [Route("/Admin")]
+    [Route("")]
     public async Task<IActionResult> Index()
     {
         try
