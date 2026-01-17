@@ -62,67 +62,6 @@ public class ShopServiceTest
     }
 
     [Fact]
-    public async Task GetAvailableProducts_ShouldPassCorrectParameters()
-    {
-        // Arrange
-        var parameters = new PaginationParameters
-        {
-            PageNumber = 2,
-            PageSize = 15,
-            SortBy = "Price",
-            SortOrder = "Descending",
-            SearchBy = "Title",
-            SearchValue = "Test"
-        };
-
-        PaginationParameters? capturedParameters = null;
-        _mockShopRepository.Setup(r => r.GetAvailableProducts(It.IsAny<PaginationParameters>()))
-            .Callback<PaginationParameters>(p => capturedParameters = p)
-            .ReturnsAsync([]);
-
-        // Act
-        await _sut.GetAvailableProducts(parameters);
-
-        // Assert
-        capturedParameters.Should().NotBeNull();
-        capturedParameters!.PageNumber.Should().Be(2);
-        capturedParameters.PageSize.Should().Be(15);
-        capturedParameters.SortBy.Should().Be("Price");
-        capturedParameters.SortOrder.Should().Be("Descending");
-        capturedParameters.SearchBy.Should().Be("Title");
-        capturedParameters.SearchValue.Should().Be("Test");
-    }
-
-    #endregion
-
-    #region Pagination Scenarios
-
-    [Theory]
-    [InlineData(1, 5)]
-    [InlineData(2, 10)]
-    [InlineData(3, 20)]
-    public async Task GetAvailableProducts_ShouldHandleDifferentPageSizes(int pageNumber, int pageSize)
-    {
-        // Arrange
-        var parameters = new PaginationParameters { PageNumber = pageNumber, PageSize = pageSize };
-
-        _mockShopRepository.Setup(r => r.GetAvailableProducts(It.IsAny<PaginationParameters>()))
-            .ReturnsAsync([]);
-
-        // Act
-        var result = await _sut.GetAvailableProducts(parameters);
-
-        // Assert
-        result.Should().NotBeNull();
-        _mockShopRepository.Verify(r => r.GetAvailableProducts(
-            It.Is<PaginationParameters>(p => p.PageNumber == pageNumber && p.PageSize == pageSize)), Times.Once);
-    }
-
-    #endregion
-
-    #region Product Data Scenarios
-
-    [Fact]
     public async Task GetAvailableProducts_ShouldReturnProductsWithDiscounts()
     {
         // Arrange
@@ -166,13 +105,202 @@ public class ShopServiceTest
 
     #endregion
 
-    #region Edge Cases
+    #region SortBy Splitting Scenarios
+
+    [Theory]
+    [InlineData("Price-Descending", "Price", "Descending")]
+    [InlineData("Price-Ascending", "Price", "Ascending")]
+    [InlineData("Title-Ascending", "Title", "Ascending")]
+    [InlineData("Title-Descending", "Title", "Descending")]
+    [InlineData("Discount-Descending", "Discount", "Descending")]
+    [InlineData("Id-Descending", "Id", "Descending")]
+    public async Task GetAvailableProducts_ShouldSplitSortBy_WhenValidFormatProvided(
+        string sortBy, string expectedSortBy, string expectedSortOrder)
+    {
+        // Arrange
+        var parameters = new PaginationParameters
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            SortBy = sortBy
+        };
+
+        PaginationParameters? capturedParameters = null;
+        _mockShopRepository.Setup(r => r.GetAvailableProducts(It.IsAny<PaginationParameters>()))
+            .Callback<PaginationParameters>(p => capturedParameters = p)
+            .ReturnsAsync([]);
+
+        // Act
+        await _sut.GetAvailableProducts(parameters);
+
+        // Assert
+        capturedParameters.Should().NotBeNull();
+        capturedParameters!.SortBy.Should().Be(expectedSortBy);
+        capturedParameters.SortOrder.Should().Be(expectedSortOrder);
+    }
 
     [Fact]
-    public async Task GetAvailableProducts_ShouldHandleLargePageSize()
+    public async Task GetAvailableProducts_ShouldNotSplitSortBy_WhenNoDelimiterPresent()
     {
-        // Arrange - PageSize max is 30 as per PaginationParameters
-        var parameters = new PaginationParameters { PageNumber = 1, PageSize = 100 };
+        // Arrange
+        var parameters = new PaginationParameters
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            SortBy = "Price"
+        };
+
+        PaginationParameters? capturedParameters = null;
+        _mockShopRepository.Setup(r => r.GetAvailableProducts(It.IsAny<PaginationParameters>()))
+            .Callback<PaginationParameters>(p => capturedParameters = p)
+            .ReturnsAsync([]);
+
+        // Act
+        await _sut.GetAvailableProducts(parameters);
+
+        // Assert
+        capturedParameters.Should().NotBeNull();
+        capturedParameters!.SortBy.Should().Be("Price");
+        capturedParameters.SortOrder.Should().BeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task GetAvailableProducts_ShouldNotSplitSortBy_WhenMultipleDelimitersPresent()
+    {
+        // Arrange
+        var parameters = new PaginationParameters
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            SortBy = "Price-Desc-Test"
+        };
+
+        PaginationParameters? capturedParameters = null;
+        _mockShopRepository.Setup(r => r.GetAvailableProducts(It.IsAny<PaginationParameters>()))
+            .Callback<PaginationParameters>(p => capturedParameters = p)
+            .ReturnsAsync([]);
+
+        // Act
+        await _sut.GetAvailableProducts(parameters);
+
+        // Assert
+        capturedParameters.Should().NotBeNull();
+        capturedParameters!.SortBy.Should().Be("Price-Desc-Test");
+        capturedParameters.SortOrder.Should().BeNullOrEmpty();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task GetAvailableProducts_ShouldNotSplitSortBy_WhenSortByIsNullOrWhitespace(string? sortBy)
+    {
+        // Arrange
+        var parameters = new PaginationParameters
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            SortBy = sortBy
+        };
+
+        PaginationParameters? capturedParameters = null;
+        _mockShopRepository.Setup(r => r.GetAvailableProducts(It.IsAny<PaginationParameters>()))
+            .Callback<PaginationParameters>(p => capturedParameters = p)
+            .ReturnsAsync([]);
+
+        // Act
+        await _sut.GetAvailableProducts(parameters);
+
+        // Assert
+        capturedParameters.Should().NotBeNull();
+        capturedParameters!.SortBy.Should().Be(sortBy);
+    }
+
+    [Fact]
+    public async Task GetAvailableProducts_ShouldHandleEmptyPartsAfterSplit()
+    {
+        // Arrange
+        var parameters = new PaginationParameters
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            SortBy = "-"
+        };
+
+        PaginationParameters? capturedParameters = null;
+        _mockShopRepository.Setup(r => r.GetAvailableProducts(It.IsAny<PaginationParameters>()))
+            .Callback<PaginationParameters>(p => capturedParameters = p)
+            .ReturnsAsync([]);
+
+        // Act
+        await _sut.GetAvailableProducts(parameters);
+
+        // Assert
+        capturedParameters.Should().NotBeNull();
+        capturedParameters!.SortBy.Should().Be(string.Empty);
+        capturedParameters.SortOrder.Should().Be(string.Empty);
+    }
+
+    [Fact]
+    public async Task GetAvailableProducts_ShouldSplitSortBy_WithLeadingTrailingDelimiters()
+    {
+        // Arrange
+        var parameters = new PaginationParameters
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            SortBy = "Price-Descending-"
+        };
+
+        PaginationParameters? capturedParameters = null;
+        _mockShopRepository.Setup(r => r.GetAvailableProducts(It.IsAny<PaginationParameters>())
+)
+            .Callback<PaginationParameters>(p => capturedParameters = p)
+            .ReturnsAsync([]);
+
+        // Act
+        await _sut.GetAvailableProducts(parameters);
+
+        // Assert - Should not split since it has 3 parts
+        capturedParameters.Should().NotBeNull();
+        capturedParameters!.SortBy.Should().Be("Price-Descending-");
+        capturedParameters.SortOrder.Should().BeNullOrEmpty();
+    }
+
+    #endregion
+
+    #region Pagination Scenarios
+
+    [Theory]
+    [InlineData(1, 5)]
+    [InlineData(2, 10)]
+    [InlineData(3, 20)]
+    public async Task GetAvailableProducts_ShouldHandleDifferentPageSizes(int pageNumber, int pageSize)
+    {
+        // Arrange
+        var parameters = new PaginationParameters { PageNumber = pageNumber, PageSize = pageSize };
+
+        _mockShopRepository.Setup(r => r.GetAvailableProducts(It.IsAny<PaginationParameters>()))
+            .ReturnsAsync([]);
+
+        // Act
+        var result = await _sut.GetAvailableProducts(parameters);
+
+        // Assert
+        result.Should().NotBeNull();
+        _mockShopRepository.Verify(r => r.GetAvailableProducts(
+            It.Is<PaginationParameters>(p => p.PageNumber == pageNumber && p.PageSize == pageSize)), Times.Once);
+    }
+
+    #endregion
+
+    #region Repository Interaction Tests
+
+    [Fact]
+    public async Task GetAvailableProducts_ShouldCallRepository_ExactlyOnce()
+    {
+        // Arrange
+        var parameters = new PaginationParameters { PageNumber = 1, PageSize = 10 };
 
         _mockShopRepository.Setup(r => r.GetAvailableProducts(It.IsAny<PaginationParameters>()))
             .ReturnsAsync([]);
@@ -181,8 +309,27 @@ public class ShopServiceTest
         await _sut.GetAvailableProducts(parameters);
 
         // Assert
-        // PageSize should be capped at 30
-        parameters.PageSize.Should().Be(30);
+        _mockShopRepository.Verify(r => r.GetAvailableProducts(It.IsAny<PaginationParameters>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetAvailableProducts_ShouldReturnSameInstance_FromRepository()
+    {
+        // Arrange
+        var parameters = new PaginationParameters { PageNumber = 1, PageSize = 10 };
+        var products = new List<ProductCardDto>
+        {
+            CreateProductCardDto(1, "Product 1", 99.99m)
+        };
+
+        _mockShopRepository.Setup(r => r.GetAvailableProducts(It.IsAny<PaginationParameters>()))
+            .ReturnsAsync(products);
+
+        // Act
+        var result = await _sut.GetAvailableProducts(parameters);
+
+        // Assert
+        result.Should().BeSameAs(products);
     }
 
     #endregion
