@@ -4,8 +4,8 @@ using KeystoneCommerce.WebUI.ViewModels.Shop;
 
 namespace KeystoneCommerce.WebUI.ViewModels.ProductDetails;
 
-public class ProductDetailsViewModel
+public class ProductDetailsViewModel : ProductViewModel
 {
-    public ProductViewModel Product { get; set; } = null!;
-    public List<ProductCardViewModel>? NewArrivals { get; set; } 
+    public int TotalReviews { get; set; }
+    public List<ProductCardViewModel>? NewArrivals { get; set; }
 }

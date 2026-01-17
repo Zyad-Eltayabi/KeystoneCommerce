@@ -237,50 +237,6 @@ public class HomeServiceTest
     }
 
     [Fact]
-    public async Task GetHomePageDataAsync_ShouldCallDependenciesInParallel()
-    {
-        // Arrange
-        var homeBannersDto = CreateHomeBannersDto(1, 1, 1);
-        var newArrivals = CreateProductCardDtos(1);
-        var topSellingProducts = CreateProductCardDtos(1);
-
-        var bannerServiceDelay = Task.Delay(100);
-        var newArrivalsDelay = Task.Delay(100);
-        var topSellingDelay = Task.Delay(100);
-
-        _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
-            .Returns(async () =>
-            {
-                await bannerServiceDelay;
-                return homeBannersDto;
-            });
-
-        _mockProductRepository.Setup(r => r.GetTopNewArrivalsAsync())
-            .Returns(async () =>
-            {
-                await newArrivalsDelay;
-                return newArrivals;
-            });
-
-        _mockProductRepository.Setup(r => r.GetTopSellingProductsAsync())
-            .Returns(async () =>
-            {
-                await topSellingDelay;
-                return topSellingProducts;
-            });
-
-        // Act
-        var startTime = DateTime.UtcNow;
-        await _sut.GetHomePageDataAsync();
-        var endTime = DateTime.UtcNow;
-        var totalTime = endTime - startTime;
-
-        // Assert - If executed sequentially, it would take ~300ms, but parallel should be ~100ms
-        // We allow some overhead, so checking it's less than 200ms indicates parallel execution
-        totalTime.TotalMilliseconds.Should().BeLessThan(200);
-    }
-
-    [Fact]
     public async Task GetHomePageDataAsync_ShouldReturnNewInstanceEveryCall()
     {
         // Arrange

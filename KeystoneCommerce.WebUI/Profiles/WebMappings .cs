@@ -4,6 +4,7 @@ using KeystoneCommerce.Application.DTOs.Dashboard;
 using KeystoneCommerce.Application.DTOs.Order;
 using KeystoneCommerce.Application.DTOs.Payment;
 using KeystoneCommerce.Application.DTOs.Product;
+using KeystoneCommerce.Application.DTOs.ProductDetails;
 using KeystoneCommerce.Application.DTOs.ShippingDetails;
 using KeystoneCommerce.Application.DTOs.ShippingMethod;
 using KeystoneCommerce.Application.DTOs.Shop;
@@ -17,6 +18,7 @@ using KeystoneCommerce.WebUI.ViewModels.Home;
 using KeystoneCommerce.WebUI.ViewModels.OrderItem;
 using KeystoneCommerce.WebUI.ViewModels.Orders;
 using KeystoneCommerce.WebUI.ViewModels.Payment;
+using KeystoneCommerce.WebUI.ViewModels.ProductDetails;
 using KeystoneCommerce.WebUI.ViewModels.Products;
 using KeystoneCommerce.WebUI.ViewModels.ShippingAddress;
 using KeystoneCommerce.WebUI.ViewModels.ShippingMethod;
@@ -170,6 +172,9 @@ namespace KeystoneCommerce.WebUI.Profiles
 
             CreateMap<RecentActivityDto, RecentOrderViewModel>()
                 .ReverseMap();
+
+            CreateMap<ProductDetailsDto, ProductDetailsViewModel>();
+               
         }
     }
 }

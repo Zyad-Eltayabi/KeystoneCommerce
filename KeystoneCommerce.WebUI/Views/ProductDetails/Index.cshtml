@@ -27,15 +27,15 @@
         <div class="row">
             <div class="col-lg-6 col-md-6">
                 <div class="d-flex justify-content-center align-items-center">
-                    <img src="@FilePaths.WebProductPath/@Model.Product.ImageName" alt="Product"
+                    <img src="@FilePaths.WebProductPath/@Model.ImageName" alt="Product"
                          class="img-fluid rounded mb-3 product-image" id="mainImage">
                 </div>
                 <div class="d-flex justify-content-center flex-wrap">
-                    <img src="@FilePaths.WebProductPath/@Model.Product.ImageName"
+                    <img src="@FilePaths.WebProductPath/@Model.ImageName"
                          alt="Thumbnail 1" class="thumbnail rounded active">
-                    @if (Model.Product.GalleryImageNames is not null && Model.Product.GalleryImageNames.Any())
+                    @if (Model.GalleryImageNames is not null && Model.GalleryImageNames.Any())
                     {
-                        foreach (var photo in Model.Product.GalleryImageNames)
+                        foreach (var photo in Model.GalleryImageNames)
                         {
                             <img src="@FilePaths.WebProductPath/@photo"
                                  alt="Thumbnail" class="thumbnail rounded" />
@@ -46,36 +46,36 @@
             <div class="col-lg-6 col-md-6">
                 <div class="product_d_right">
                     <form action="#">
-                        <h1>@Model.Product.Title</h1>
+                        <h1>@Model.Title</h1>
                         <div class="product_ratting_review d-flex align-items-center">
-                            <div class=" product_ratting">
+                            <div class="product_ratting">
                                 <ul class="d-flex">
                                     <li><a href="#"><i class="ion-ios-star"></i></a></li>
                                     <li><a href="#"><i class="ion-ios-star"></i></a></li>
                                     <li><a href="#"><i class="ion-ios-star"></i></a></li>
                                     <li><a href="#"><i class="ion-ios-star"></i></a></li>
-                                    <li><a href="#"><i class="ion-ios-star"></i></a></li>
+                                    <li><a href="#"><i class="ion-ios-star" style="color:#f2b309"></i></a></li>
                                 </ul>
                             </div>
                             <div class="product_review">
                                 <ul class="d-flex">
-                                    <li>4 reviews</li>
-                                    <li>Write your review</li>
+                                    <li>@Model.TotalReviews.ToString() reviews</li>
+                                    <li>Write your review below</li>
                                 </ul>
                             </div>
                         </div>
                         <div class="price_box">
-                            <span class="current_price">@(Model.Product.Price - Model.Product.Discount)</span>
+                            <span class="current_price">@(Model.Price - Model.Discount)</span>
                         </div>
                         <div class="product_availalbe">
                             <ul class="d-flex">
                                 <li>
                                     <i class="icon-layers icons"></i> Only
-                                    <span>@Model.Product.QTY</span> left
+                                    <span>@Model.QTY</span> left
                                 </li>
                                 <li>
                                     Available:
-                                    @if (Model.Product.QTY > 0)
+                                    @if (Model.QTY > 0)
                                     {
                                         <span class="stock">In Stock</span>
                                     }
@@ -87,27 +87,27 @@
                             </ul>
                         </div>
                         <div class="product_desc">
-                            <p>@Model.Product.Summary</p>
+                            <p>@Model.Summary</p>
                         </div>
                         <div class="product_variant">
                             <div class="variant_quantity_btn d-flex">
-                                @if (Model.Product.QTY > 0)
+                                @if (Model.QTY > 0)
                                 {
                                     <div class="pro-qty border">
                                         <input min="1" max="100" type="text" value="1">
                                     </div>
-                                    <button onclick="updateCartItems(@Model.Product.Id)" class="button btn btn-primary" type="button">
+                                    <button onclick="updateCartItems(@Model.Id)" class="button btn btn-primary" type="button">
                                         <i class="ion-android-add"></i> Add To Cart
                                     </button>
                                 }
                             </div>
                         </div>
                         <div class="product_sku">
-                            <p><span>SKU: </span> PRI#@Model.Product.Id</p>
+                            <p><span>SKU: </span> PRI#@Model.Id</p>
                         </div>
-                        @if (!string.IsNullOrEmpty(Model.Product.Tags))
+                        @if (!string.IsNullOrEmpty(Model.Tags))
                         {
-                            var tags = Model.Product.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                            var tags = Model.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
                             <div class="product_tags d-flex">
                                 <span>tags: </span>
                                 <ul class="d-flex ">
@@ -164,7 +164,7 @@
                             </li>
                             <li>
                                 <a data-toggle="tab" href="#reviews" role="tab"
-                                   data-product-id="@Model.Product.Id"
+                                   data-product-id="@Model.Id"
                                    aria-controls="reviews" aria-selected="false">Reviews </a>
                             </li>
                             <li>
@@ -176,7 +176,7 @@
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="info" role="tabpanel">
                             <div class="product_info_content">
-                                <p>@Html.Raw(Model.Product.Description.Replace("\n", "<br>"))</p>
+                                <p>@Html.Raw(Model.Description.Replace("\n", "<br>"))</p>
                             </div>
                         </div>
 
@@ -185,7 +185,7 @@
                                 <div class="comment_title">
                                     <h2>Add a review </h2>
                                 </div>
-                                <div class="product_ratting mb-10">
+                                @* <div class="product_ratting mb-10">
                                     <h3>Your rating</h3>
                                     <ul class="d-flex">
                                         <li><a href="#"><i class="icon-star"></i></a></li>
@@ -194,7 +194,7 @@
                                         <li><a href="#"><i class="icon-star"></i></a></li>
                                         <li><a href="#"><i class="icon-star"></i></a></li>
                                     </ul>
-                                </div>
+                                </div> *@
                                 <div class="product_review_form">
                                     <form action="#">
                                         <div class="row">
@@ -208,8 +208,8 @@
                                 </div>
 
                                 <div class="reviews-box">
-                                    <h2 class="mt-3"><span class="reviews-count"></span> Reviews For @Model.Product.Title</h2>
-                                    <div class="review-item">
+                                    <h2 class="mt-3"><span class="reviews-count"></span> Reviews For @Model.Title</h2>
+                                   @*  <div class="review-item">
                                         <div class="reviews_comment_box">
                                             <div class="comment_thmb">
                                                 <img src="/assets/img/blog/comment2.jpg" alt="">
@@ -241,7 +241,7 @@
                                             </div>
 
                                         </div>
-                                    </div>
+                                    </div> *@
                                 </div>
 
                                 <div>
@@ -255,9 +255,9 @@
 
                         <div class="tab-pane fade" id="tags" role="tabpanel">
                             <div class="product_info_content">
-                                @if (!string.IsNullOrEmpty(Model.Product.Tags))
+                                @if (!string.IsNullOrEmpty(Model.Tags))
                                 {
-                                    var tags = Model.Product.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                                    var tags = Model.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
                                     <ul class="">
                                         @foreach (var tag in tags)
                                         {
@@ -323,6 +323,14 @@
                                                  src="@FilePaths.WebProductPath/@product.ImageName"
                                                  alt="product-image">
                                         </a>
+                                        @*product actions*@
+                                        @if (product.Discount is > 0)
+                                        {
+                                            var discountPercentage = (int)((product.Discount.Value / product.Price) * 100);
+                                            <div class="product_label">
+                                                <span>-@(discountPercentage)%</span>
+                                            </div>
+                                        }
                                     </div>
                                     <figcaption class="product_content text-center">
                                         <div class="product_ratting">
