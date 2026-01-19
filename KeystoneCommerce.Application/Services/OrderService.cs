@@ -17,6 +17,7 @@ public class OrderService : IOrderService
     private readonly IShippingAddressService _shippingAddressService;
     private readonly IShippingMethodService _shippingMethodService;
     private readonly IMappingService _mappingService;
+    private readonly ICacheService _cacheService;
 
     public OrderService(
         IOrderRepository orderRepository,
@@ -28,7 +29,8 @@ public class OrderService : IOrderService
         ICouponService couponService,
         IShippingAddressService shippingAddressService,
         IShippingMethodService shippingMethodService,
-        IMappingService mappingService)
+        IMappingService mappingService,
+        ICacheService cacheService)
     {
         _orderRepository = orderRepository;
         _logger = logger;
@@ -40,6 +42,7 @@ public class OrderService : IOrderService
         _shippingAddressService = shippingAddressService;
         _shippingMethodService = shippingMethodService;
         _mappingService = mappingService;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<OrderDto>> CreateNewOrder(CreateOrderDto order)
@@ -106,6 +109,9 @@ public class OrderService : IOrderService
 
         Order createNewOrder = await CreateAndSaveOrderAsync(order, couponResult, shippingMethod, productIds, createdShippingAddressId);
 
+        // Invalidate caches
+        InvalidateOrderCaches();
+
         OrderDto orderDto = CreateOrderDto(createNewOrder);
         return Result<OrderDto>.Success(orderDto);
     }
@@ -139,6 +145,11 @@ public class OrderService : IOrderService
             _logger.LogError("Failed to update payment status for order ID: {OrderId}", orderId);
             return Result<bool>.Failure("Failed to update order payment status.");
         }
+
+        // Invalidate caches
+        InvalidateOrderCaches();
+        InvalidateOrderDetailsCache(orderId);
+        InvalidateOrderPaymentCache();
 
         _logger.LogInformation("Payment status updated successfully for order ID: {OrderId}", orderId);
         return Result<bool>.Success();
@@ -178,6 +189,10 @@ public class OrderService : IOrderService
             return Result<string>.Failure("Failed to update order status.");
         }
 
+        // Invalidate caches
+        InvalidateOrderCaches();
+        InvalidateOrderDetailsCache(orderId);
+
         _logger.LogInformation("Order status updated to failed successfully for order ID: {OrderId}", orderId);
         return Result<string>.Success();
     }
@@ -215,6 +230,10 @@ public class OrderService : IOrderService
             return Result<string>.Failure("Failed to update order status.");
         }
 
+        // Invalidate caches
+        InvalidateOrderCaches();
+        InvalidateOrderDetailsCache(orderId);
+
         _logger.LogInformation("Order status updated to cancelled successfully for order ID: {OrderId}", orderId);
         return Result<string>.Success();
     }
@@ -237,7 +256,21 @@ public class OrderService : IOrderService
 
     public async Task<string> GetOrderNumberByPaymentId(int paymentId)
     {
-        return await _orderRepository.GetOrderNumberByPaymentId(paymentId);
+        string cacheKey = $"Order:GetByPayment:{paymentId}";
+        
+        var cachedOrderNumber = _cacheService.Get<string>(cacheKey);
+        if (cachedOrderNumber is not null)
+        {
+            _logger.LogInformation("Cache hit for order number with payment ID: {PaymentId}", paymentId);
+            return cachedOrderNumber;
+        }
+
+        _logger.LogInformation("Cache miss for order number with payment ID: {PaymentId}", paymentId);
+        var orderNumber = await _orderRepository.GetOrderNumberByPaymentId(paymentId);
+        
+        _cacheService.Set(cacheKey, orderNumber, TimeSpan.FromMinutes(30));
+        
+        return orderNumber;
     }
 
     public async Task<OrderPaginatedResult<OrderDto>> GetAllOrdersPaginatedAsync(OrderPaginationParameters parameters)
@@ -251,12 +284,22 @@ public class OrderService : IOrderService
             parameters.SortOrder = Sorting.Descending;
         }
 
+        string cacheKey = $"Order:GetAllPaginated:{parameters.PageNumber}:{parameters.PageSize}:{parameters.Status?.ToString() ?? "All"}:{parameters.SortBy}:{parameters.SortOrder}:{parameters.SearchBy ?? "None"}:{parameters.SearchValue ?? "None"}";
+        
+        var cachedResult = _cacheService.Get<OrderPaginatedResult<OrderDto>>(cacheKey);
+        if (cachedResult is not null)
+        {
+            _logger.LogInformation("Cache hit for paginated orders");
+            return cachedResult;
+        }
+
+        _logger.LogInformation("Cache miss for paginated orders");
         var orders = await _orderRepository.GetOrdersPagedAsync(parameters);
         var orderDtos = _mappingService.Map<List<OrderDto>>(orders);
 
         _logger.LogInformation("Retrieved {Count} orders successfully", orderDtos.Count);
 
-        return new OrderPaginatedResult<OrderDto>
+        var result = new OrderPaginatedResult<OrderDto>
         {
             Items = orderDtos,
             PageNumber = parameters.PageNumber,
@@ -268,12 +311,26 @@ public class OrderService : IOrderService
             SearchValue = parameters.SearchValue,
             Status = parameters.Status
         };
+
+        _cacheService.Set(cacheKey, result, TimeSpan.FromMinutes(2));
+        
+        return result;
     }
 
     public async Task<Result<OrderDetailsDto>> GetOrderDetailsByIdAsync(int orderId)
     {
         _logger.LogInformation("Fetching order details for order ID: {OrderId}", orderId);
 
+        string cacheKey = $"Order:GetDetails:{orderId}";
+        
+        var cachedOrderDetails = _cacheService.Get<OrderDetailsDto>(cacheKey);
+        if (cachedOrderDetails is not null)
+        {
+            _logger.LogInformation("Cache hit for order details with ID: {OrderId}", orderId);
+            return Result<OrderDetailsDto>.Success(cachedOrderDetails);
+        }
+
+        _logger.LogInformation("Cache miss for order details with ID: {OrderId}", orderId);
         var order = await _orderRepository.GetOrderDetailsByIdAsync(orderId);
         if (order is null)
         {
@@ -291,6 +348,8 @@ public class OrderService : IOrderService
         var orderDetailsDto = _mappingService.Map<OrderDetailsDto>(order);
         orderDetailsDto.User = userInfo;
 
+        _cacheService.Set(cacheKey, orderDetailsDto, TimeSpan.FromMinutes(5));
+
         _logger.LogInformation("Successfully retrieved order details for order ID: {OrderId}", orderId);
         return Result<OrderDetailsDto>.Success(orderDetailsDto);
     }
@@ -300,18 +359,32 @@ public class OrderService : IOrderService
         _logger.LogInformation("Fetching order dashboard data. PageNumber: {PageNumber}, PageSize: {PageSize}, Status: {Status}", 
             parameters.PageNumber, parameters.PageSize, parameters.Status);
 
+        string cacheKey = $"Order:Dashboard:{parameters.PageNumber}:{parameters.PageSize}:{parameters.Status?.ToString() ?? "All"}:{parameters.SortBy ?? "None"}:{parameters.SortOrder ?? "None"}:{parameters.SearchBy ?? "None"}:{parameters.SearchValue ?? "None"}";
+        
+        var cachedDashboard = _cacheService.Get<OrderDashboardDto>(cacheKey);
+        if (cachedDashboard is not null)
+        {
+            _logger.LogInformation("Cache hit for order dashboard data");
+            return cachedDashboard;
+        }
+
+        _logger.LogInformation("Cache miss for order dashboard data");
         var paginatedOrders = await GetAllOrdersPaginatedAsync(parameters);
         var monthlyAnalytics = await _orderRepository.GetMonthlyAnalyticsAsync();
         var todayAnalytics = await _orderRepository.GetTodayAnalyticsAsync();
 
         _logger.LogInformation("Successfully retrieved order dashboard data");
 
-        return new OrderDashboardDto
+        var dashboardDto = new OrderDashboardDto
         {
             PaginatedOrders = paginatedOrders,
             MonthlyAnalytics = monthlyAnalytics,
             TodayAnalytics = todayAnalytics
         };
+
+        _cacheService.Set(cacheKey, dashboardDto, TimeSpan.FromMinutes(3));
+
+        return dashboardDto;
     }
 
     #region private methods
@@ -472,6 +545,26 @@ public class OrderService : IOrderService
         }
         while (await _orderRepository.ExistsAsync(o => o.OrderNumber == orderNumber));
         return orderNumber;
+    }
+
+    private void InvalidateOrderCaches()
+    {
+        _logger.LogInformation("Invalidating all paginated order caches and dashboard caches");
+        _cacheService.RemoveByPrefix("Order:GetAllPaginated:");
+        _cacheService.RemoveByPrefix("Order:Dashboard:");
+    }
+
+    private void InvalidateOrderDetailsCache(int orderId)
+    {
+        string cacheKey = $"Order:GetDetails:{orderId}";
+        _logger.LogInformation("Invalidating order details cache for order ID: {OrderId}", orderId);
+        _cacheService.Remove(cacheKey);
+    }
+
+    private void InvalidateOrderPaymentCache()
+    {
+        _logger.LogInformation("Invalidating all order payment caches");
+        _cacheService.RemoveByPrefix("Order:GetByPayment:");
     }
 
     #endregion

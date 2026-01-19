@@ -21,6 +21,7 @@ public class OrderServiceTest
     private readonly Mock<IShippingAddressService> _mockShippingAddressService;
     private readonly Mock<IShippingMethodService> _mockShippingMethodService;
     private readonly IMappingService _mappingService;
+    private readonly Mock<ICacheService> _mockCacheService;
     private readonly OrderService _sut;
 
     public OrderServiceTest()
@@ -38,6 +39,7 @@ public class OrderServiceTest
         _mockShippingAddressService = new Mock<IShippingAddressService>();
         _mockShippingMethodService = new Mock<IShippingMethodService>();
         _mappingService = new MappingService(MapperHelper.CreateMapper());
+        _mockCacheService = new Mock<ICacheService>();
 
         _sut = new OrderService(
             _mockOrderRepository.Object,
@@ -49,7 +51,8 @@ public class OrderServiceTest
             _mockCouponService.Object,
             _mockShippingAddressService.Object,
             _mockShippingMethodService.Object,
-            _mappingService);
+            _mappingService,
+            _mockCacheService.Object);
     }
 
     #region CreateNewOrder Tests
@@ -905,6 +908,431 @@ public class OrderServiceTest
         _mockOrderRepository.Verify(r => r.AddAsync(It.IsAny<Order>()), Times.Once);
         _mockOrderRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
+
+    #endregion
+
+    #region Caching Tests
+
+    #region GetOrderNumberByPaymentId Caching Tests
+
+    [Fact]
+    public async Task GetOrderNumberByPaymentId_ShouldReturnFromCache_WhenCacheHit()
+    {
+        // Arrange
+        int paymentId = 123;
+        string expectedOrderNumber = "Ord-ABC123";
+        string cacheKey = $"Order:GetByPayment:{paymentId}";
+
+        _mockCacheService.Setup(c => c.Get<string>(cacheKey))
+            .Returns(expectedOrderNumber);
+
+        // Act
+        var result = await _sut.GetOrderNumberByPaymentId(paymentId);
+
+        // Assert
+        result.Should().Be(expectedOrderNumber);
+        _mockCacheService.Verify(c => c.Get<string>(cacheKey), Times.Once);
+        _mockOrderRepository.Verify(r => r.GetOrderNumberByPaymentId(It.IsAny<int>()), Times.Never);
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetOrderNumberByPaymentId_ShouldFetchAndCache_WhenCacheMiss()
+    {
+        // Arrange
+        int paymentId = 123;
+        string expectedOrderNumber = "Ord-XYZ789";
+        string cacheKey = $"Order:GetByPayment:{paymentId}";
+
+        _mockCacheService.Setup(c => c.Get<string>(cacheKey))
+            .Returns((string?)null);
+        
+        _mockOrderRepository.Setup(r => r.GetOrderNumberByPaymentId(paymentId))
+            .ReturnsAsync(expectedOrderNumber);
+
+        // Act
+        var result = await _sut.GetOrderNumberByPaymentId(paymentId);
+
+        // Assert
+        result.Should().Be(expectedOrderNumber);
+        _mockCacheService.Verify(c => c.Get<string>(cacheKey), Times.Once);
+        _mockOrderRepository.Verify(r => r.GetOrderNumberByPaymentId(paymentId), Times.Once);
+        _mockCacheService.Verify(c => c.Set(cacheKey, expectedOrderNumber, TimeSpan.FromMinutes(30)), Times.Once);
+    }
+
+    #endregion
+
+    #region GetAllOrdersPaginatedAsync Caching Tests
+
+    [Fact]
+    public async Task GetAllOrdersPaginatedAsync_ShouldReturnFromCache_WhenCacheHit()
+    {
+        // Arrange
+        var parameters = new OrderPaginationParameters
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            Status = 1,
+            SortBy = "CreatedAt",
+            SortOrder = "Desc"
+        };
+
+        var expectedResult = new OrderPaginatedResult<OrderDto>
+        {
+            Items = new List<OrderDto>(),
+            PageNumber = 1,
+            PageSize = 10,
+            TotalCount = 0
+        };
+
+        string cacheKey = $"Order:GetAllPaginated:{parameters.PageNumber}:{parameters.PageSize}:{parameters.Status}:{parameters.SortBy}:{parameters.SortOrder}:None:None";
+
+        _mockCacheService.Setup(c => c.Get<OrderPaginatedResult<OrderDto>>(cacheKey))
+            .Returns(expectedResult);
+
+        // Act
+        var result = await _sut.GetAllOrdersPaginatedAsync(parameters);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().Be(expectedResult);
+        _mockCacheService.Verify(c => c.Get<OrderPaginatedResult<OrderDto>>(cacheKey), Times.Once);
+        _mockOrderRepository.Verify(r => r.GetOrdersPagedAsync(It.IsAny<OrderPaginationParameters>()), Times.Never);
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), It.IsAny<OrderPaginatedResult<OrderDto>>(), It.IsAny<TimeSpan>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetAllOrdersPaginatedAsync_ShouldFetchAndCache_WhenCacheMiss()
+    {
+        // Arrange
+        var parameters = new OrderPaginationParameters
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            Status = 1,
+            SortBy = "CreatedAt",
+            SortOrder = "Desc"
+        };
+
+        string cacheKey = $"Order:GetAllPaginated:{parameters.PageNumber}:{parameters.PageSize}:{parameters.Status}:{parameters.SortBy}:{parameters.SortOrder}:None:None";
+
+        _mockCacheService.Setup(c => c.Get<OrderPaginatedResult<OrderDto>>(cacheKey))
+            .Returns((OrderPaginatedResult<OrderDto>?)null);
+
+        var orders = new List<Order>();
+        _mockOrderRepository.Setup(r => r.GetOrdersPagedAsync(parameters))
+            .ReturnsAsync(orders);
+
+        // Act
+        var result = await _sut.GetAllOrdersPaginatedAsync(parameters);
+
+        // Assert
+        result.Should().NotBeNull();
+        _mockCacheService.Verify(c => c.Get<OrderPaginatedResult<OrderDto>>(cacheKey), Times.Once);
+        _mockOrderRepository.Verify(r => r.GetOrdersPagedAsync(parameters), Times.Once);
+        _mockCacheService.Verify(c => c.Set(cacheKey, It.IsAny<OrderPaginatedResult<OrderDto>>(), TimeSpan.FromMinutes(2)), Times.Once);
+    }
+
+    #endregion
+
+    #region GetOrderDetailsByIdAsync Caching Tests
+
+    [Fact]
+    public async Task GetOrderDetailsByIdAsync_ShouldReturnFromCache_WhenCacheHit()
+    {
+        // Arrange
+        int orderId = 1;
+        var expectedOrderDetails = new OrderDetailsDto
+        {
+            Id = orderId,
+            OrderNumber = "Ord-ABC123",
+            User = new UserBasicInfoDto { Id = "user-123", Email = "test@example.com" }
+        };
+
+        string cacheKey = $"Order:GetDetails:{orderId}";
+
+        _mockCacheService.Setup(c => c.Get<OrderDetailsDto>(cacheKey))
+            .Returns(expectedOrderDetails);
+
+        // Act
+        var result = await _sut.GetOrderDetailsByIdAsync(orderId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Data.Should().Be(expectedOrderDetails);
+        _mockCacheService.Verify(c => c.Get<OrderDetailsDto>(cacheKey), Times.Once);
+        _mockOrderRepository.Verify(r => r.GetOrderDetailsByIdAsync(It.IsAny<int>()), Times.Never);
+        _mockIdentityService.Verify(s => s.GetUserBasicInfoByIdAsync(It.IsAny<string>()), Times.Never);
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), It.IsAny<OrderDetailsDto>(), It.IsAny<TimeSpan>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetOrderDetailsByIdAsync_ShouldFetchAndCache_WhenCacheMiss()
+    {
+        // Arrange
+        int orderId = 1;
+        string cacheKey = $"Order:GetDetails:{orderId}";
+
+        _mockCacheService.Setup(c => c.Get<OrderDetailsDto>(cacheKey))
+            .Returns((OrderDetailsDto?)null);
+
+        var order = new Order
+        {
+            Id = orderId,
+            OrderNumber = "Ord-ABC123",
+            UserId = "user-123",
+            SubTotal = 100m,
+            Total = 110m,
+            OrderItems = new List<OrderItem>()
+        };
+
+        var userInfo = new UserBasicInfoDto { Id = "user-123", Email = "test@example.com" };
+
+        _mockOrderRepository.Setup(r => r.GetOrderDetailsByIdAsync(orderId))
+            .ReturnsAsync(order);
+        
+        _mockIdentityService.Setup(s => s.GetUserBasicInfoByIdAsync(order.UserId))
+            .ReturnsAsync(userInfo);
+
+        // Act
+        var result = await _sut.GetOrderDetailsByIdAsync(orderId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Data.Should().NotBeNull();
+        _mockCacheService.Verify(c => c.Get<OrderDetailsDto>(cacheKey), Times.Once);
+        _mockOrderRepository.Verify(r => r.GetOrderDetailsByIdAsync(orderId), Times.Once);
+        _mockIdentityService.Verify(s => s.GetUserBasicInfoByIdAsync(order.UserId), Times.Once);
+        _mockCacheService.Verify(c => c.Set(cacheKey, It.IsAny<OrderDetailsDto>(), TimeSpan.FromMinutes(5)), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetOrderDetailsByIdAsync_ShouldNotCache_WhenOrderNotFound()
+    {
+        // Arrange
+        int orderId = 999;
+        string cacheKey = $"Order:GetDetails:{orderId}";
+
+        _mockCacheService.Setup(c => c.Get<OrderDetailsDto>(cacheKey))
+            .Returns((OrderDetailsDto?)null);
+
+        _mockOrderRepository.Setup(r => r.GetOrderDetailsByIdAsync(orderId))
+            .ReturnsAsync((Order?)null);
+
+        // Act
+        var result = await _sut.GetOrderDetailsByIdAsync(orderId);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Errors.Should().Contain("Order not found.");
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), It.IsAny<OrderDetailsDto>(), It.IsAny<TimeSpan>()), Times.Never);
+    }
+
+    #endregion
+
+    #region GetOrderDashboardDataAsync Caching Tests
+
+    [Fact]
+    public async Task GetOrderDashboardDataAsync_ShouldReturnFromCache_WhenCacheHit()
+    {
+        // Arrange
+        var parameters = new OrderPaginationParameters
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            Status = null,
+            SortBy = "CreatedAt",
+            SortOrder = "Desc"
+        };
+
+        var expectedDashboard = new OrderDashboardDto
+        {
+            PaginatedOrders = new OrderPaginatedResult<OrderDto>(),
+            MonthlyAnalytics = new OrderAnalyticsDto(),
+            TodayAnalytics = new OrderAnalyticsDto()
+        };
+
+        string cacheKey = $"Order:Dashboard:{parameters.PageNumber}:{parameters.PageSize}:All:{parameters.SortBy}:{parameters.SortOrder}:None:None";
+
+        _mockCacheService.Setup(c => c.Get<OrderDashboardDto>(cacheKey))
+            .Returns(expectedDashboard);
+
+        // Act
+        var result = await _sut.GetOrderDashboardDataAsync(parameters);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().Be(expectedDashboard);
+        _mockCacheService.Verify(c => c.Get<OrderDashboardDto>(cacheKey), Times.Once);
+        _mockOrderRepository.Verify(r => r.GetMonthlyAnalyticsAsync(), Times.Never);
+        _mockOrderRepository.Verify(r => r.GetTodayAnalyticsAsync(), Times.Never);
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), It.IsAny<OrderDashboardDto>(), It.IsAny<TimeSpan>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetOrderDashboardDataAsync_ShouldFetchAndCache_WhenCacheMiss()
+    {
+        // Arrange
+        var parameters = new OrderPaginationParameters
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            Status = null,
+            SortBy = "CreatedAt",
+            SortOrder = "Desc"
+        };
+
+        string dashboardCacheKey = $"Order:Dashboard:{parameters.PageNumber}:{parameters.PageSize}:All:{parameters.SortBy}:{parameters.SortOrder}:None:None";
+        string paginatedCacheKey = $"Order:GetAllPaginated:{parameters.PageNumber}:{parameters.PageSize}:All:{parameters.SortBy}:{parameters.SortOrder}:None:None";
+
+        _mockCacheService.Setup(c => c.Get<OrderDashboardDto>(dashboardCacheKey))
+            .Returns((OrderDashboardDto?)null);
+
+        _mockCacheService.Setup(c => c.Get<OrderPaginatedResult<OrderDto>>(paginatedCacheKey))
+            .Returns((OrderPaginatedResult<OrderDto>?)null);
+
+        var orders = new List<Order>();
+        _mockOrderRepository.Setup(r => r.GetOrdersPagedAsync(parameters))
+            .ReturnsAsync(orders);
+
+        var monthlyAnalytics = new OrderAnalyticsDto();
+        var todayAnalytics = new OrderAnalyticsDto();
+
+        _mockOrderRepository.Setup(r => r.GetMonthlyAnalyticsAsync())
+            .ReturnsAsync(monthlyAnalytics);
+
+        _mockOrderRepository.Setup(r => r.GetTodayAnalyticsAsync())
+            .ReturnsAsync(todayAnalytics);
+
+        // Act
+        var result = await _sut.GetOrderDashboardDataAsync(parameters);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.MonthlyAnalytics.Should().Be(monthlyAnalytics);
+        result.TodayAnalytics.Should().Be(todayAnalytics);
+        _mockCacheService.Verify(c => c.Get<OrderDashboardDto>(dashboardCacheKey), Times.Once);
+        _mockOrderRepository.Verify(r => r.GetMonthlyAnalyticsAsync(), Times.Once);
+        _mockOrderRepository.Verify(r => r.GetTodayAnalyticsAsync(), Times.Once);
+        _mockCacheService.Verify(c => c.Set(dashboardCacheKey, It.IsAny<OrderDashboardDto>(), TimeSpan.FromMinutes(3)), Times.Once);
+    }
+
+    #endregion
+
+    #region Cache Invalidation Tests
+
+    [Fact]
+    public async Task CreateNewOrder_ShouldInvalidateCaches_WhenOrderCreatedSuccessfully()
+    {
+        // Arrange
+        var createOrderDto = CreateValidOrderDto();
+        SetupSuccessfulOrderCreation(createOrderDto);
+
+        // Act
+        var result = await _sut.CreateNewOrder(createOrderDto);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Order:GetAllPaginated:"), Times.Once);
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Order:Dashboard:"), Times.Once);
+    }
+
+    [Fact]
+    public async Task MarkOrderAsPaid_ShouldInvalidateAllRelatedCaches_WhenSuccessful()
+    {
+        // Arrange
+        int orderId = 1;
+        var order = CreateUnpaidOrder(orderId);
+        
+        _mockOrderRepository.Setup(r => r.GetByIdAsync(orderId)).ReturnsAsync(order);
+        _mockOrderRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+
+        // Act
+        var result = await _sut.MarkOrderAsPaid(orderId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Order:GetAllPaginated:"), Times.Once);
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Order:Dashboard:"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove($"Order:GetDetails:{orderId}"), Times.Once);
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Order:GetByPayment:"), Times.Once);
+    }
+
+    [Fact]
+    public async Task MarkOrderAsPaid_ShouldNotInvalidateCaches_WhenOrderNotFound()
+    {
+        // Arrange
+        int orderId = 999;
+        _mockOrderRepository.Setup(r => r.GetByIdAsync(orderId)).ReturnsAsync((Order?)null);
+
+        // Act
+        var result = await _sut.MarkOrderAsPaid(orderId);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        _mockCacheService.Verify(c => c.RemoveByPrefix(It.IsAny<string>()), Times.Never);
+        _mockCacheService.Verify(c => c.Remove(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateOrderStatusToFailed_ShouldInvalidateCaches_WhenSuccessful()
+    {
+        // Arrange
+        int orderId = 1;
+        var order = CreateUnpaidOrder(orderId);
+        
+        _mockOrderRepository.Setup(r => r.GetByIdAsync(orderId)).ReturnsAsync(order);
+        _mockOrderRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+
+        // Act
+        var result = await _sut.UpdateOrderStatusToFailed(orderId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Order:GetAllPaginated:"), Times.Once);
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Order:Dashboard:"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove($"Order:GetDetails:{orderId}"), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateOrderStatusToCancelled_ShouldInvalidateCaches_WhenSuccessful()
+    {
+        // Arrange
+        int orderId = 1;
+        var order = CreateUnpaidOrder(orderId);
+        
+        _mockOrderRepository.Setup(r => r.GetByIdAsync(orderId)).ReturnsAsync(order);
+        _mockOrderRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+
+        // Act
+        var result = await _sut.UpdateOrderStatusToCancelled(orderId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Order:GetAllPaginated:"), Times.Once);
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Order:Dashboard:"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove($"Order:GetDetails:{orderId}"), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateOrderStatusToCancelled_ShouldNotInvalidateCaches_WhenOrderAlreadyCancelled()
+    {
+        // Arrange
+        int orderId = 1;
+        var order = CreateCancelledOrder(orderId);
+        
+        _mockOrderRepository.Setup(r => r.GetByIdAsync(orderId)).ReturnsAsync(order);
+
+        // Act
+        var result = await _sut.UpdateOrderStatusToCancelled(orderId);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        _mockCacheService.Verify(c => c.RemoveByPrefix(It.IsAny<string>()), Times.Never);
+        _mockCacheService.Verify(c => c.Remove(It.IsAny<string>()), Times.Never);
+    }
+
+    #endregion
 
     #endregion
 }
