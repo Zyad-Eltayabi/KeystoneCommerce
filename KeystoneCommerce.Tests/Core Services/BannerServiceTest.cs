@@ -1083,6 +1083,8 @@ public class BannerServiceTest
         _mockBannerRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
         _mockImageService.Verify(s => s.DeleteImageAsync(imageUrl, banner.ImageName), Times.Once);
         _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove("Banner:GetAll"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove($"Banner:GetById:{bannerId}"), Times.Once);
     }
 
     [Fact]
@@ -1309,6 +1311,640 @@ public class BannerServiceTest
         _mockBannerRepository.Verify(r => r.FindAllAsync(
             It.IsAny<Expression<Func<Banner, bool>>>()), Times.Exactly(3));
     }
+
+    #endregion
+
+    #region Caching Tests
+
+    #region GetBannerTypes Caching Tests
+
+    [Fact]
+    public void GetBannerTypes_ShouldReturnFromCache_WhenDataIsCached()
+    {
+        // Arrange
+        var cachedBannerTypes = new Dictionary<int, string>
+        {
+            { 1, "HomePage" },
+            { 2, "Featured" },
+            { 3, "TopProducts" }
+        };
+
+        _mockCacheService.Setup(c => c.Get<Dictionary<int, string>>("Banner:GetBannerTypes"))
+            .Returns(cachedBannerTypes);
+
+        // Act
+        var result = _sut.GetBannerTypes();
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().HaveCount(3);
+        result.Should().BeEquivalentTo(cachedBannerTypes);
+        _mockCacheService.Verify(c => c.Get<Dictionary<int, string>>("Banner:GetBannerTypes"), Times.Once);
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), It.IsAny<Dictionary<int, string>>(), It.IsAny<TimeSpan>()), Times.Never);
+    }
+
+    [Fact]
+    public void GetBannerTypes_ShouldCacheResult_WhenCacheMiss()
+    {
+        // Arrange
+        _mockCacheService.Setup(c => c.Get<Dictionary<int, string>>("Banner:GetBannerTypes"))
+            .Returns((Dictionary<int, string>?)null);
+
+        // Act
+        var result = _sut.GetBannerTypes();
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().HaveCount(3);
+        _mockCacheService.Verify(c => c.Get<Dictionary<int, string>>("Banner:GetBannerTypes"), Times.Once);
+        _mockCacheService.Verify(c => c.Set("Banner:GetBannerTypes", result, TimeSpan.FromMinutes(60)), Times.Once);
+    }
+
+    [Fact]
+    public void GetBannerTypes_ShouldCacheFor60Minutes()
+    {
+        // Arrange
+        _mockCacheService.Setup(c => c.Get<Dictionary<int, string>>("Banner:GetBannerTypes"))
+            .Returns((Dictionary<int, string>?)null);
+
+        // Act
+        _sut.GetBannerTypes();
+
+        // Assert
+        _mockCacheService.Verify(c => c.Set(
+            "Banner:GetBannerTypes",
+            It.IsAny<Dictionary<int, string>>(),
+            TimeSpan.FromMinutes(60)), Times.Once);
+    }
+
+    #endregion
+
+    #region GetBanners Caching Tests
+
+    [Fact]
+    public async Task GetBanners_ShouldReturnFromCache_WhenDataIsCached()
+    {
+        // Arrange
+        var cachedBanners = new List<BannerDto>
+        {
+            new BannerDto { Id = 1, Title = "Cached Banner 1", SubTitle = "Subtitle 1", ImageName = "banner1.jpg", Link = "/link1", Priority = 1, BannerType = "HomePage" },
+            new BannerDto { Id = 2, Title = "Cached Banner 2", SubTitle = "Subtitle 2", ImageName = "banner2.jpg", Link = "/link2", Priority = 2, BannerType = "Featured" }
+        };
+
+        _mockCacheService.Setup(c => c.Get<List<BannerDto>>("Banner:GetAll"))
+            .Returns(cachedBanners);
+
+        // Act
+        var result = await _sut.GetBanners();
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().HaveCount(2);
+        result.Should().BeEquivalentTo(cachedBanners);
+        _mockCacheService.Verify(c => c.Get<List<BannerDto>>("Banner:GetAll"), Times.Once);
+        _mockBannerRepository.Verify(r => r.GetAllAsync(), Times.Never);
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), It.IsAny<List<BannerDto>>(), It.IsAny<TimeSpan>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetBanners_ShouldQueryDatabase_WhenCacheMiss()
+    {
+        // Arrange
+        var banners = new List<Banner>
+        {
+            CreateBanner(1, "Banner 1"),
+            CreateBanner(2, "Banner 2")
+        };
+
+        _mockCacheService.Setup(c => c.Get<List<BannerDto>>("Banner:GetAll"))
+            .Returns((List<BannerDto>?)null);
+
+        _mockBannerRepository.Setup(r => r.GetAllAsync())
+            .ReturnsAsync(banners);
+
+        // Act
+        var result = await _sut.GetBanners();
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().HaveCount(2);
+        _mockBannerRepository.Verify(r => r.GetAllAsync(), Times.Once);
+        _mockCacheService.Verify(c => c.Get<List<BannerDto>>("Banner:GetAll"), Times.Once);
+        _mockCacheService.Verify(c => c.Set("Banner:GetAll", It.IsAny<List<BannerDto>>(), TimeSpan.FromMinutes(10)), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetBanners_ShouldCacheFor10Minutes()
+    {
+        // Arrange
+        _mockCacheService.Setup(c => c.Get<List<BannerDto>>("Banner:GetAll"))
+            .Returns((List<BannerDto>?)null);
+
+        _mockBannerRepository.Setup(r => r.GetAllAsync())
+            .ReturnsAsync(new List<Banner>());
+
+        // Act
+        await _sut.GetBanners();
+
+        // Assert
+        _mockCacheService.Verify(c => c.Set(
+            "Banner:GetAll",
+            It.IsAny<List<BannerDto>>(),
+            TimeSpan.FromMinutes(10)), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetBanners_ShouldReturnEmptyListFromCache_WhenCachedDataIsEmpty()
+    {
+        // Arrange
+        var cachedEmptyList = new List<BannerDto>();
+
+        _mockCacheService.Setup(c => c.Get<List<BannerDto>>("Banner:GetAll"))
+            .Returns(cachedEmptyList);
+
+        // Act
+        var result = await _sut.GetBanners();
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEmpty();
+        _mockBannerRepository.Verify(r => r.GetAllAsync(), Times.Never);
+    }
+
+    #endregion
+
+    #region GetById Caching Tests
+
+    [Fact]
+    public async Task GetById_ShouldReturnFromCache_WhenDataIsCached()
+    {
+        // Arrange
+        var bannerId = 5;
+        var cachedBanner = new BannerDto
+        {
+            Id = bannerId,
+            Title = "Cached Banner",
+            SubTitle = "Cached Subtitle",
+            ImageName = "cached.jpg",
+            Link = "/cached",
+            Priority = 1,
+            BannerType = "HomePage"
+        };
+
+        _mockCacheService.Setup(c => c.Get<BannerDto>($"Banner:GetById:{bannerId}"))
+            .Returns(cachedBanner);
+
+        // Act
+        var result = await _sut.GetById(bannerId);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(cachedBanner);
+        _mockCacheService.Verify(c => c.Get<BannerDto>($"Banner:GetById:{bannerId}"), Times.Once);
+        _mockBannerRepository.Verify(r => r.GetByIdAsync(It.IsAny<int>()), Times.Never);
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), It.IsAny<BannerDto>(), It.IsAny<TimeSpan>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetById_ShouldQueryDatabase_WhenCacheMiss()
+    {
+        // Arrange
+        var bannerId = 7;
+        var banner = CreateBanner(bannerId, "Test Banner");
+
+        _mockCacheService.Setup(c => c.Get<BannerDto>($"Banner:GetById:{bannerId}"))
+            .Returns((BannerDto?)null);
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(bannerId))
+            .ReturnsAsync(banner);
+
+        // Act
+        var result = await _sut.GetById(bannerId);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Id.Should().Be(bannerId);
+        _mockBannerRepository.Verify(r => r.GetByIdAsync(bannerId), Times.Once);
+        _mockCacheService.Verify(c => c.Set($"Banner:GetById:{bannerId}", It.IsAny<BannerDto>(), TimeSpan.FromMinutes(10)), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetById_ShouldCacheFor10Minutes()
+    {
+        // Arrange
+        var bannerId = 3;
+        var banner = CreateBanner(bannerId, "Test");
+
+        _mockCacheService.Setup(c => c.Get<BannerDto>($"Banner:GetById:{bannerId}"))
+            .Returns((BannerDto?)null);
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(bannerId))
+            .ReturnsAsync(banner);
+
+        // Act
+        await _sut.GetById(bannerId);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Set(
+            $"Banner:GetById:{bannerId}",
+            It.IsAny<BannerDto>(),
+            TimeSpan.FromMinutes(10)), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetById_ShouldNotCache_WhenBannerNotFound()
+    {
+        // Arrange
+        var bannerId = 999;
+
+        _mockCacheService.Setup(c => c.Get<BannerDto>($"Banner:GetById:{bannerId}"))
+            .Returns((BannerDto?)null);
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(bannerId))
+            .ReturnsAsync((Banner?)null);
+
+        // Act
+        var result = await _sut.GetById(bannerId);
+
+        // Assert
+        result.Should().BeNull();
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), It.IsAny<BannerDto>(), It.IsAny<TimeSpan>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(42)]
+    [InlineData(999)]
+    public async Task GetById_ShouldUseDifferentCacheKeys_ForDifferentIds(int bannerId)
+    {
+        // Arrange
+        var expectedCacheKey = $"Banner:GetById:{bannerId}";
+        var banner = CreateBanner(bannerId, $"Banner {bannerId}");
+
+        _mockCacheService.Setup(c => c.Get<BannerDto>(expectedCacheKey))
+            .Returns((BannerDto?)null);
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(bannerId))
+            .ReturnsAsync(banner);
+
+        // Act
+        await _sut.GetById(bannerId);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Get<BannerDto>(expectedCacheKey), Times.Once);
+        _mockCacheService.Verify(c => c.Set(expectedCacheKey, It.IsAny<BannerDto>(), It.IsAny<TimeSpan>()), Times.Once);
+    }
+
+    #endregion
+
+    #region Cache Invalidation Tests
+
+    [Fact]
+    public async Task Create_ShouldInvalidateGetAllCache()
+    {
+        // Arrange
+        var createDto = CreateValidCreateBannerDto();
+
+        _mockImageService.Setup(s => s.SaveImageAsync(
+                It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync("banner.jpg");
+
+        _mockBannerRepository.Setup(r => r.AddAsync(It.IsAny<Banner>()))
+            .Returns(Task.CompletedTask);
+
+        _mockBannerRepository.Setup(r => r.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        await _sut.Create(createDto);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove("Banner:GetAll"), Times.Once);
+    }
+
+    [Fact]
+    public async Task Create_ShouldInvalidateHomePageCache()
+    {
+        // Arrange
+        var createDto = CreateValidCreateBannerDto();
+
+        _mockImageService.Setup(s => s.SaveImageAsync(
+                It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync("banner.jpg");
+
+        _mockBannerRepository.Setup(r => r.AddAsync(It.IsAny<Banner>()))
+            .Returns(Task.CompletedTask);
+
+        _mockBannerRepository.Setup(r => r.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        await _sut.Create(createDto);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateBannerAsync_ShouldInvalidateSpecificBannerCache()
+    {
+        // Arrange
+        var updateDto = CreateValidUpdateBannerDto();
+        var existingBanner = CreateBanner(updateDto.Id, "Old Title");
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(updateDto.Id))
+            .ReturnsAsync(existingBanner);
+
+        _mockBannerRepository.Setup(r => r.Update(It.IsAny<Banner>()));
+
+        _mockBannerRepository.Setup(r => r.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        await _sut.UpdateBannerAsync(updateDto);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove($"Banner:GetById:{updateDto.Id}"), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateBannerAsync_ShouldInvalidateGetAllCache()
+    {
+        // Arrange
+        var updateDto = CreateValidUpdateBannerDto();
+        var existingBanner = CreateBanner(updateDto.Id, "Old Title");
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(updateDto.Id))
+            .ReturnsAsync(existingBanner);
+
+        _mockBannerRepository.Setup(r => r.Update(It.IsAny<Banner>()));
+
+        _mockBannerRepository.Setup(r => r.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        await _sut.UpdateBannerAsync(updateDto);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove("Banner:GetAll"), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateBannerAsync_ShouldInvalidateHomePageCache()
+    {
+        // Arrange
+        var updateDto = CreateValidUpdateBannerDto();
+        var existingBanner = CreateBanner(updateDto.Id, "Old Title");
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(updateDto.Id))
+            .ReturnsAsync(existingBanner);
+
+        _mockBannerRepository.Setup(r => r.Update(It.IsAny<Banner>()));
+
+        _mockBannerRepository.Setup(r => r.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        await _sut.UpdateBannerAsync(updateDto);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateBannerAsync_ShouldNotInvalidateCache_WhenBannerNotFound()
+    {
+        // Arrange
+        var updateDto = CreateValidUpdateBannerDto();
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(updateDto.Id))
+            .ReturnsAsync((Banner?)null);
+
+        // Act
+        await _sut.UpdateBannerAsync(updateDto);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateBannerAsync_ShouldNotInvalidateCache_WhenValidationFails()
+    {
+        // Arrange
+        var updateDto = CreateValidUpdateBannerDto();
+        updateDto.Title = ""; // Invalid
+
+        // Act
+        await _sut.UpdateBannerAsync(updateDto);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteBannerAsync_ShouldInvalidateSpecificBannerCache()
+    {
+        // Arrange
+        var bannerId = 10;
+        var imageUrl = "/banners";
+        var banner = CreateBanner(bannerId, "Test");
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(bannerId))
+            .ReturnsAsync(banner);
+
+        _mockBannerRepository.Setup(r => r.Delete(It.IsAny<Banner>()));
+
+        _mockBannerRepository.Setup(r => r.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        _mockImageService.Setup(s => s.DeleteImageAsync(
+                It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _sut.DeleteBannerAsync(bannerId, imageUrl);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove($"Banner:GetById:{bannerId}"), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteBannerAsync_ShouldInvalidateGetAllCache()
+    {
+        // Arrange
+        var bannerId = 5;
+        var imageUrl = "/banners";
+        var banner = CreateBanner(bannerId, "Test");
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(bannerId))
+            .ReturnsAsync(banner);
+
+        _mockBannerRepository.Setup(r => r.Delete(It.IsAny<Banner>()));
+
+        _mockBannerRepository.Setup(r => r.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        _mockImageService.Setup(s => s.DeleteImageAsync(
+                It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _sut.DeleteBannerAsync(bannerId, imageUrl);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove("Banner:GetAll"), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteBannerAsync_ShouldInvalidateHomePageCache()
+    {
+        // Arrange
+        var bannerId = 8;
+        var imageUrl = "/banners";
+        var banner = CreateBanner(bannerId, "Test");
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(bannerId))
+            .ReturnsAsync(banner);
+
+        _mockBannerRepository.Setup(r => r.Delete(It.IsAny<Banner>()));
+
+        _mockBannerRepository.Setup(r => r.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        _mockImageService.Setup(s => s.DeleteImageAsync(
+                It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _sut.DeleteBannerAsync(bannerId, imageUrl);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteBannerAsync_ShouldNotInvalidateCache_WhenBannerNotFound()
+    {
+        // Arrange
+        var bannerId = 999;
+        var imageUrl = "/banners";
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(bannerId))
+            .ReturnsAsync((Banner?)null);
+
+        // Act
+        await _sut.DeleteBannerAsync(bannerId, imageUrl);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteBannerAsync_ShouldNotInvalidateCache_WhenSaveChangesFails()
+    {
+        // Arrange
+        var bannerId = 3;
+        var imageUrl = "/banners";
+        var banner = CreateBanner(bannerId, "Test");
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(bannerId))
+            .ReturnsAsync(banner);
+
+        _mockBannerRepository.Setup(r => r.Delete(It.IsAny<Banner>()));
+
+        _mockBannerRepository.Setup(r => r.SaveChangesAsync())
+            .ReturnsAsync(0); // Failed to save
+
+        // Act
+        await _sut.DeleteBannerAsync(bannerId, imageUrl);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove(It.IsAny<string>()), Times.Never);
+    }
+
+    #endregion
+
+    #region Cache Integration Tests
+
+    [Fact]
+    public async Task GetBanners_AfterCreate_ShouldQueryDatabase()
+    {
+        // Arrange - Create a banner first
+        var createDto = CreateValidCreateBannerDto();
+
+        _mockImageService.Setup(s => s.SaveImageAsync(
+                It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync("banner.jpg");
+
+        _mockBannerRepository.Setup(r => r.AddAsync(It.IsAny<Banner>()))
+            .Returns(Task.CompletedTask);
+
+        _mockBannerRepository.Setup(r => r.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        await _sut.Create(createDto);
+
+        // Verify cache was invalidated
+        _mockCacheService.Verify(c => c.Remove("Banner:GetAll"), Times.Once);
+
+        // Arrange - Setup for GetBanners call
+        var banners = new List<Banner> { CreateBanner(1, "Banner 1") };
+
+        _mockCacheService.Setup(c => c.Get<List<BannerDto>>("Banner:GetAll"))
+            .Returns((List<BannerDto>?)null);
+
+        _mockBannerRepository.Setup(r => r.GetAllAsync())
+            .ReturnsAsync(banners);
+
+        // Act - Get banners after create
+        var result = await _sut.GetBanners();
+
+        // Assert - Should query database since cache was invalidated
+        _mockBannerRepository.Verify(r => r.GetAllAsync(), Times.Once);
+        result.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public async Task GetById_AfterUpdate_ShouldQueryDatabase()
+    {
+        // Arrange - Update a banner first
+        var bannerId = 5;
+        var updateDto = CreateValidUpdateBannerDto();
+        updateDto.Id = bannerId;
+        var existingBanner = CreateBanner(bannerId, "Old Title");
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(bannerId))
+            .ReturnsAsync(existingBanner);
+
+        _mockBannerRepository.Setup(r => r.Update(It.IsAny<Banner>()));
+
+        _mockBannerRepository.Setup(r => r.SaveChangesAsync())
+            .ReturnsAsync(1);
+
+        await _sut.UpdateBannerAsync(updateDto);
+
+        // Verify cache was invalidated
+        _mockCacheService.Verify(c => c.Remove($"Banner:GetById:{bannerId}"), Times.Once);
+
+        // Arrange - Setup for GetById call
+        var updatedBanner = CreateBanner(bannerId, "Updated Title");
+
+        _mockCacheService.Setup(c => c.Get<BannerDto>($"Banner:GetById:{bannerId}"))
+            .Returns((BannerDto?)null);
+
+        _mockBannerRepository.Setup(r => r.GetByIdAsync(bannerId))
+            .ReturnsAsync(updatedBanner);
+
+        // Act - Get banner by ID after update
+        var result = await _sut.GetById(bannerId);
+
+        // Assert - Should query database since cache was invalidated
+        _mockBannerRepository.Verify(r => r.GetByIdAsync(bannerId), Times.Exactly(2)); // Once for update, once for get
+        result.Should().NotBeNull();
+        result!.Title.Should().Be("Updated Title");
+    }
+
+    #endregion
 
     #endregion
 

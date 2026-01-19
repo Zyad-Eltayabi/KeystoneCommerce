@@ -58,15 +58,24 @@ public class BannerService : IBannerService
             banner.Priority,
             banner.ImageName);
 
-        // Invalidate home page cache as new banner may appear on home page
-        InvalidateHomePageCache();
+        // Invalidate all banner-related caches
+        InvalidateBannerCaches();
 
         return Result<bool>.Success();
     }
 
     public Dictionary<int, string> GetBannerTypes()
     {
-        _logger.LogInformation("Retrieving banner types enumeration");
+        const string cacheKey = "Banner:GetBannerTypes";
+
+        var cachedBannerTypes = _cacheService.Get<Dictionary<int, string>>(cacheKey);
+        if (cachedBannerTypes is not null)
+        {
+            _logger.LogInformation("Banner types retrieved from cache. TotalTypes: {TotalTypes}", cachedBannerTypes.Count);
+            return cachedBannerTypes;
+        }
+
+        _logger.LogInformation("Retrieving banner types enumeration from source");
 
         Dictionary<int, string> result = [];
         var bannerEnumValues = Enum.GetValues(typeof(BannerType));
@@ -77,12 +86,24 @@ public class BannerService : IBannerService
             "Banner types retrieved successfully. TotalTypes: {TotalTypes}",
             result.Count);
 
+        _cacheService.Set(cacheKey, result, TimeSpan.FromMinutes(20),TimeSpan.FromMinutes(5));
+        _logger.LogInformation("Banner types cached successfully with 20 minute absolute and 5 minute sliding expiration");
+
         return result;
     }
 
     public async Task<List<BannerDto>> GetBanners()
     {
-        _logger.LogInformation("Retrieving all banners");
+        const string cacheKey = "Banner:GetAll";
+
+        var cachedBanners = _cacheService.Get<List<BannerDto>>(cacheKey);
+        if (cachedBanners is not null)
+        {
+            _logger.LogInformation("All banners retrieved from cache. TotalBanners: {TotalBanners}", cachedBanners.Count);
+            return cachedBanners;
+        }
+
+        _logger.LogInformation("Retrieving all banners from database");
 
         var banners = await _bannerRepository.GetAllAsync();
         var result = _mappingService.Map<List<BannerDto>>(banners);
@@ -91,13 +112,29 @@ public class BannerService : IBannerService
             "All banners retrieved successfully. TotalBanners: {TotalBanners}",
             result.Count);
 
+        _cacheService.Set(cacheKey, result, TimeSpan.FromMinutes(10));
+        _logger.LogInformation("All banners cached successfully with 10 minute expiration");
+
         return result;
     }
 
     public async Task<BannerDto?> GetById(int id)
     {
+        var cacheKey = $"Banner:GetById:{id}";
+
+        var cachedBanner = _cacheService.Get<BannerDto>(cacheKey);
+        if (cachedBanner is not null)
+        {
+            _logger.LogInformation(
+                "Banner retrieved from cache. BannerId: {BannerId}, BannerType: {BannerType}, Priority: {Priority}",
+                id,
+                cachedBanner.BannerType,
+                cachedBanner.Priority);
+            return cachedBanner;
+        }
+
         _logger.LogInformation(
-            "Retrieving banner by ID. BannerId: {BannerId}",
+            "Retrieving banner by ID from database. BannerId: {BannerId}",
             id);
 
         var banner = await _bannerRepository.GetByIdAsync(id);
@@ -117,6 +154,9 @@ public class BannerService : IBannerService
             id,
             result.BannerType,
             result.Priority);
+
+        _cacheService.Set(cacheKey, result, TimeSpan.FromMinutes(10));
+        _logger.LogInformation("Banner cached successfully with 10 minute expiration. BannerId: {BannerId}", id);
 
         return result;
     }
@@ -191,8 +231,8 @@ public class BannerService : IBannerService
             updateBannerDto.Priority,
             oldImageName != banner.ImageName);
 
-        // Invalidate home page cache as banner content/order may have changed
-        InvalidateHomePageCache();
+        // Invalidate all banner-related caches
+        InvalidateBannerCaches(updateBannerDto.Id);
 
         return Result<bool>.Success();
     }
@@ -242,8 +282,8 @@ public class BannerService : IBannerService
             id,
             bannerImageName);
 
-        // Invalidate home page cache as banner has been removed
-        InvalidateHomePageCache();
+        // Invalidate all banner-related caches
+        InvalidateBannerCaches(id);
 
         return Result<bool>.Success();
     }
@@ -305,5 +345,22 @@ public class BannerService : IBannerService
         const string homePageCacheKey = "HomePage:Data";
         _cacheService.Remove(homePageCacheKey);
         _logger.LogInformation("Home page cache invalidated due to banner modification");
+    }
+
+    private void InvalidateBannerCaches(int? bannerId = null)
+    {
+        const string allBannersCacheKey = "Banner:GetAll";
+
+        _cacheService.Remove(allBannersCacheKey);
+        _logger.LogInformation("All banners cache invalidated");
+
+        if (bannerId.HasValue)
+        {
+            var bannerByIdCacheKey = $"Banner:GetById:{bannerId.Value}";
+            _cacheService.Remove(bannerByIdCacheKey);
+            _logger.LogInformation("Banner cache invalidated for BannerId: {BannerId}", bannerId.Value);
+        }
+
+        InvalidateHomePageCache();
     }
 }
