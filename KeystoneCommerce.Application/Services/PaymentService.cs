@@ -12,6 +12,7 @@ namespace KeystoneCommerce.Application.Services
         private readonly IMappingService _mappingService;
         private readonly ILogger<PaymentService> _logger;
         private readonly IIdentityService _identityService;
+        private readonly ICacheService _cacheService;
 
         public PaymentService(
             IApplicationValidator<CreatePaymentDto> validator,
@@ -19,7 +20,8 @@ namespace KeystoneCommerce.Application.Services
             IOrderRepository orderRepository,
             IMappingService mappingService,
             ILogger<PaymentService> logger,
-            IIdentityService identityService)
+            IIdentityService identityService,
+            ICacheService cacheService)
         {
             _validator = validator;
             _paymentRepository = paymentRepository;
@@ -27,6 +29,7 @@ namespace KeystoneCommerce.Application.Services
             _mappingService = mappingService;
             _logger = logger;
             _identityService = identityService;
+            _cacheService = cacheService;
         }
 
         public async Task<Result<int>> CreatePaymentAsync(CreatePaymentDto createPaymentDto)
@@ -58,6 +61,9 @@ namespace KeystoneCommerce.Application.Services
             _logger.LogInformation(
                 "Payment created successfully: Payment ID {PaymentId}, Order ID: {OrderId}, Status: {Status}",
                 payment.Id, createPaymentDto.OrderId, createPaymentDto.Status);
+
+            // Invalidate cache: new payment affects dashboard and paginated lists
+            await InvalidatePaymentCachesAsync();
 
             return Result<int>.Success(payment.Id);
         }
@@ -103,6 +109,9 @@ namespace KeystoneCommerce.Application.Services
                 confirmPaymentDto.PaymentId, payment.OrderId, confirmPaymentDto.ProviderTransactionId, 
                 PaymentStatus.Successful, OrderStatus.Paid);
 
+            // Invalidate cache: payment status changed
+            await InvalidatePaymentCachesAsync(confirmPaymentDto.PaymentId);
+
             return Result<bool>.Success();
         }
 
@@ -146,6 +155,9 @@ namespace KeystoneCommerce.Application.Services
             _logger.LogInformation("Payment marked as failed successfully. Payment ID: {PaymentId}, Order ID: {OrderId}, Provider Transaction ID: {ProviderTransactionId}",
                 paymentId, payment.OrderId, providerTransactionId);
 
+            // Invalidate cache: payment status changed
+            await InvalidatePaymentCachesAsync(paymentId);
+
             return Result<int>.Success(payment.OrderId);
         }
 
@@ -188,6 +200,9 @@ namespace KeystoneCommerce.Application.Services
             _logger.LogInformation("Payment marked as cancelled successfully. Payment ID: {PaymentId}, Order ID: {OrderId}, Provider Transaction ID: {ProviderTransactionId}",
                 paymentId, payment.OrderId, providerTransactionId);
 
+            // Invalidate cache: payment status changed
+            await InvalidatePaymentCachesAsync(paymentId);
+
             return Result<int>.Success(payment.OrderId);
         }
 
@@ -202,12 +217,22 @@ namespace KeystoneCommerce.Application.Services
                 parameters.SortOrder = Sorting.Descending;
             }
 
+            // Cache key includes all pagination parameters to prevent collisions
+            var cacheKey = $"Payment:Paginated:Page{parameters.PageNumber}:Size{parameters.PageSize}:Sort{parameters.SortBy}:{parameters.SortOrder}:Search{parameters.SearchBy}:{parameters.SearchValue}:Status{parameters.Status}:Provider{parameters.Provider}";
+
+            var cachedResult = _cacheService.Get<PaymentPaginatedResult<PaymentDto>>(cacheKey);
+            if (cachedResult is not null)
+            {
+                _logger.LogInformation("Retrieved {Count} payments from cache", cachedResult.Items.Count);
+                return cachedResult;
+            }
+
             var payments = await _paymentRepository.GetPaymentsPagedAsync(parameters);
             var paymentDtos = _mappingService.Map<List<PaymentDto>>(payments);
 
-            _logger.LogInformation("Retrieved {Count} payments successfully", paymentDtos.Count);
+            _logger.LogInformation("Retrieved {Count} payments successfully from database", paymentDtos.Count);
 
-            return new PaymentPaginatedResult<PaymentDto>
+            var result = new PaymentPaginatedResult<PaymentDto>
             {
                 Items = paymentDtos,
                 PageNumber = parameters.PageNumber,
@@ -220,11 +245,25 @@ namespace KeystoneCommerce.Application.Services
                 Status = parameters.Status,
                 Provider = parameters.Provider
             };
+
+            // Cache for 5 minutes - semi-dynamic data with moderate volatility
+            _cacheService.Set(cacheKey, result, TimeSpan.FromMinutes(5));
+
+            return result;
         }
 
         public async Task<Result<PaymentDetailsDto>> GetPaymentDetailsByIdAsync(int paymentId)
         {
             _logger.LogInformation("Fetching payment details for payment ID: {PaymentId}", paymentId);
+
+            var cacheKey = $"Payment:Details:{paymentId}";
+
+            var cachedPaymentDetails = _cacheService.Get<PaymentDetailsDto>(cacheKey);
+            if (cachedPaymentDetails is not null)
+            {
+                _logger.LogInformation("Successfully retrieved payment details for payment ID: {PaymentId} from cache", paymentId);
+                return Result<PaymentDetailsDto>.Success(cachedPaymentDetails);
+            }
 
             var payment = await _paymentRepository.GetPaymentDetailsByIdAsync(paymentId);
             if (payment is null)
@@ -243,7 +282,10 @@ namespace KeystoneCommerce.Application.Services
             var paymentDetailsDto = _mappingService.Map<PaymentDetailsDto>(payment);
             paymentDetailsDto.User = userInfo;
 
-            _logger.LogInformation("Successfully retrieved payment details for payment ID: {PaymentId}", paymentId);
+            // Cache for 10 minutes with sliding expiration - payment details stabilize after fulfillment
+            _cacheService.Set(cacheKey, paymentDetailsDto, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(5));
+
+            _logger.LogInformation("Successfully retrieved payment details for payment ID: {PaymentId} from database", paymentId);
             return Result<PaymentDetailsDto>.Success(paymentDetailsDto);
         }
 
@@ -252,20 +294,55 @@ namespace KeystoneCommerce.Application.Services
             _logger.LogInformation("Fetching payment dashboard data. PageNumber: {PageNumber}, PageSize: {PageSize}, Status: {Status}, Provider: {Provider}", 
                 parameters.PageNumber, parameters.PageSize, parameters.Status, parameters.Provider);
 
+            // Cache key includes all parameters to prevent collisions
+            var cacheKey = $"Payment:Dashboard:Page{parameters.PageNumber}:Size{parameters.PageSize}:Sort{parameters.SortBy}:{parameters.SortOrder}:Search{parameters.SearchBy}:{parameters.SearchValue}:Status{parameters.Status}:Provider{parameters.Provider}";
+
+            var cachedDashboard = _cacheService.Get<PaymentDashboardDto>(cacheKey);
+            if (cachedDashboard is not null)
+            {
+                _logger.LogInformation("Successfully retrieved payment dashboard data from cache");
+                return cachedDashboard;
+            }
+
             var paginatedPayments = await GetAllPaymentsPaginatedAsync(parameters);
             var todayAnalytics = await _paymentRepository.GetTodayAnalyticsAsync();
             var last7DaysAnalytics = await _paymentRepository.GetLast7DaysAnalyticsAsync();
             var last30DaysAnalytics = await _paymentRepository.GetLast30DaysAnalyticsAsync();
 
-            _logger.LogInformation("Successfully retrieved payment dashboard data");
-
-            return new PaymentDashboardDto
+            var dashboardData = new PaymentDashboardDto
             {
                 PaginatedPayments = paginatedPayments,
                 TodayAnalytics = todayAnalytics,
                 Last7DaysAnalytics = last7DaysAnalytics,
                 Last30DaysAnalytics = last30DaysAnalytics
             };
+
+            // Cache for 3 minutes - includes real-time analytics requiring fresher data
+            _cacheService.Set(cacheKey, dashboardData, TimeSpan.FromMinutes(3));
+
+            _logger.LogInformation("Successfully retrieved payment dashboard data from database");
+
+            return dashboardData;
+        }
+
+        // Helper method to invalidate all payment-related caches
+        private Task InvalidatePaymentCachesAsync(int? paymentId = null)
+        {
+            // Invalidate specific payment details cache if paymentId provided
+            if (paymentId.HasValue)
+            {
+                var detailsCacheKey = $"Payment:Details:{paymentId.Value}";
+                _cacheService.Remove(detailsCacheKey);
+                _logger.LogInformation("Invalidated cache for payment ID: {PaymentId}", paymentId.Value);
+            }
+
+            // Invalidate all paginated and dashboard caches using pattern matching
+            _cacheService.RemoveByPrefix("Payment:Paginated:");
+            _cacheService.RemoveByPrefix("Payment:Dashboard:");
+
+            _logger.LogInformation("Invalidated all payment paginated and dashboard caches");
+
+            return Task.CompletedTask;
         }
     }
 }
