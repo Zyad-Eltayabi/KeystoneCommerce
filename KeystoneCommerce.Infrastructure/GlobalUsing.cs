@@ -6,3 +6,6 @@ global using Microsoft.EntityFrameworkCore;
 global using System.Linq.Expressions;
 global using KeystoneCommerce.Domain.Enums;
 global using KeystoneCommerce.Infrastructure.Helpers;
+global using KeystoneCommerce.Infrastructure.Repositories;
+global using KeystoneCommerce.Infrastructure.Services;
+global using KeystoneCommerce.Infrastructure.Validation;
