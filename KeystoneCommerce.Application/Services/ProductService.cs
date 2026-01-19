@@ -70,7 +70,8 @@ namespace KeystoneCommerce.Application.Services
                     "Product created successfully: {ProductTitle} with {GalleryCount} gallery images",
                     createProductDto.Title, createProductDto.Gallaries.Count);
 
-                // Invalidate home page cache as new product may appear in "New Arrivals"
+                // Invalidate relevant caches
+                InvalidatePaginatedProductsCache();
                 InvalidateHomePageCache();
 
                 return Result<bool>.Success();
@@ -117,7 +118,17 @@ namespace KeystoneCommerce.Application.Services
 
         public async Task<ProductDto?> GetProductByIdAsync(int productId)
         {
-            _logger.LogInformation("Fetching product with ID: {ProductId}", productId);
+            var cacheKey = $"Products:GetById:{productId}";
+            
+            // Try to get from cache
+            var cachedProduct = _cacheService.Get<ProductDto>(cacheKey);
+            if (cachedProduct != null)
+            {
+                _logger.LogInformation("Returning cached product. ID: {ProductId}", productId);
+                return cachedProduct;
+            }
+
+            _logger.LogInformation("Cache miss - Fetching product with ID: {ProductId}", productId);
             var product = await _productRepository.GetProductByIdAsync(productId);
             if (product is null)
             {
@@ -125,7 +136,13 @@ namespace KeystoneCommerce.Application.Services
                 return null;
             }
 
-            return _mappingService.Map<ProductDto>(product);
+            var productDto = _mappingService.Map<ProductDto>(product);
+            
+            // Cache for 15 minutes (absolute expiration)
+            _cacheService.Set(cacheKey, productDto, TimeSpan.FromMinutes(15));
+            _logger.LogInformation("Cached product. ID: {ProductId}, TTL: 15 minutes", productId);
+
+            return productDto;
         }
 
         #region Update Product
@@ -198,7 +215,9 @@ namespace KeystoneCommerce.Application.Services
                 productDto.Id, productDto.Title, productDto.DeletedImages?.Count ?? 0,
                 productDto.NewGalleries?.Count ?? 0);
 
-            // Invalidate caches as product data has changed
+            // Invalidate all related caches
+            InvalidatePaginatedProductsCache();
+            InvalidateProductByIdCache(productDto.Id);
             InvalidateHomePageCache();
             InvalidateProductDetailsCache(productDto.Id);
 
@@ -343,7 +362,9 @@ namespace KeystoneCommerce.Application.Services
                 "Product deleted successfully: ID {ProductId}, Title: {ProductTitle}, Gallery Images Count: {GalleryCount}",
                 id, product.Title, product.Galleries?.Count ?? 0);
 
-            // Invalidate caches as product has been removed from listings
+            // Invalidate all related caches
+            InvalidatePaginatedProductsCache();
+            InvalidateProductByIdCache(id);
             InvalidateHomePageCache();
             InvalidateProductDetailsCache(id);
 
@@ -353,13 +374,53 @@ namespace KeystoneCommerce.Application.Services
         public async Task<PaginatedResult<ProductDto>> GetAllProductsPaginatedAsync(
             PaginationParameters parameters)
         {
-            var products = await _productRepository.GetPagedAsync(parameters);
-
-            var productDto = _mappingService.Map<List<ProductDto>>(products);
-
-            return new PaginatedResult<ProductDto>
+            // Skip caching for search queries - they are too dynamic and user-specific
+            if (!string.IsNullOrWhiteSpace(parameters.SearchValue))
             {
-                Items = productDto,
+                _logger.LogInformation(
+                    "Skipping cache for search query. SearchBy: {SearchBy}, SearchValue: {SearchValue}",
+                    parameters.SearchBy, parameters.SearchValue);
+                
+                var products = await _productRepository.GetPagedAsync(parameters);
+                var productDto = _mappingService.Map<List<ProductDto>>(products);
+
+                return new PaginatedResult<ProductDto>
+                {
+                    Items = productDto,
+                    PageNumber = parameters.PageNumber,
+                    PageSize = parameters.PageSize,
+                    TotalCount = parameters.TotalCount,
+                    SortBy = parameters.SortBy,
+                    SortOrder = parameters.SortOrder,
+                    SearchBy = parameters.SearchBy,
+                    SearchValue = parameters.SearchValue
+                };
+            }
+
+            // Build cache key from pagination parameters (excluding search)
+            var cacheKey = BuildPaginatedCacheKey(parameters);
+            
+            // Try to get from cache
+            var cachedResult = _cacheService.Get<PaginatedResult<ProductDto>>(cacheKey);
+            if (cachedResult != null)
+            {
+                _logger.LogInformation(
+                    "Returning cached paginated products. Page: {PageNumber}, Size: {PageSize}, Total: {TotalCount}",
+                    cachedResult.PageNumber, cachedResult.PageSize, cachedResult.TotalCount);
+                return cachedResult;
+            }
+
+            _logger.LogInformation(
+                "Cache miss - Fetching paginated products. Page: {PageNumber}, Size: {PageSize}, Sort: {SortBy} {SortOrder}",
+                parameters.PageNumber, parameters.PageSize, parameters.SortBy, parameters.SortOrder);
+
+            var productsFromDb = await _productRepository.GetPagedAsync(parameters);
+
+            var productDtoFromDb = _mappingService.Map<List<ProductDto>>(productsFromDb);
+
+            var result = new PaginatedResult<ProductDto>
+            {
+                Items = productDtoFromDb,
                 PageNumber = parameters.PageNumber,
                 PageSize = parameters.PageSize,
                 TotalCount = parameters.TotalCount,
@@ -368,6 +429,24 @@ namespace KeystoneCommerce.Application.Services
                 SearchBy = parameters.SearchBy,
                 SearchValue = parameters.SearchValue
             };
+
+            // Cache with 3 minutes sliding expiration - keeps frequently accessed pages fresh
+            _cacheService.Set(cacheKey, result, TimeSpan.FromMinutes(3), TimeSpan.FromMinutes(3));
+            _logger.LogInformation(
+                "Cached paginated products with sliding expiration. Page: {PageNumber}, Size: {PageSize}, TTL: 3 minutes",
+                parameters.PageNumber, parameters.PageSize);
+
+            return result;
+        }
+
+        private string BuildPaginatedCacheKey(PaginationParameters parameters)
+        {
+            // Cache key excludes search parameters (too dynamic) - only pagination and sorting
+            var sortBy = string.IsNullOrWhiteSpace(parameters.SortBy) 
+                ? "default" 
+                : parameters.SortBy;
+
+            return $"Products:Paginated:{parameters.PageNumber}:{parameters.PageSize}:{sortBy}:{parameters.SortOrder}";
         }
 
         public async Task<List<ProductCardDto>> GetAllProducts(Expression<Func<Product, bool>> filter)
@@ -413,6 +492,20 @@ namespace KeystoneCommerce.Application.Services
             var productDetailsCacheKey = $"ProductDetails:GetById:{productId}";
             _cacheService.Remove(productDetailsCacheKey);
             _logger.LogInformation("Product details cache invalidated for ProductId: {ProductId}", productId);
+        }
+
+        private void InvalidateProductByIdCache(int productId)
+        {
+            var cacheKey = $"Products:GetById:{productId}";
+            _cacheService.Remove(cacheKey);
+            _logger.LogInformation("Product by ID cache invalidated for ProductId: {ProductId}", productId);
+        }
+
+        private void InvalidatePaginatedProductsCache()
+        {
+            // Pattern-based invalidation for all "Products:Paginated:*" keys
+            _cacheService.RemoveByPrefix("Products:Paginated:");
+            _logger.LogInformation("Paginated products cache invalidated (pattern-based)");
         }
     }
 }

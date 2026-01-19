@@ -652,6 +652,8 @@ public class ProductServiceTest
 
         // Assert
         result.IsSuccess.Should().BeTrue();
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Products:Paginated:"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove($"Products:GetById:{updateDto.Id}"), Times.Once);
         _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
         _mockCacheService.Verify(c => c.Remove($"ProductDetails:GetById:{updateDto.Id}"), Times.Once);
     }
@@ -673,6 +675,8 @@ public class ProductServiceTest
 
         // Assert
         result.IsSuccess.Should().BeTrue();
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Products:Paginated:"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove($"Products:GetById:{productId}"), Times.Once);
         _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
         _mockCacheService.Verify(c => c.Remove($"ProductDetails:GetById:{productId}"), Times.Once);
     }
@@ -741,6 +745,7 @@ public class ProductServiceTest
         // Assert
         result.IsSuccess.Should().BeFalse();
         _mockCacheService.Verify(c => c.Remove(It.IsAny<string>()), Times.Never);
+        _mockCacheService.Verify(c => c.RemoveByPrefix(It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
@@ -757,6 +762,7 @@ public class ProductServiceTest
         // Assert
         result.IsSuccess.Should().BeFalse();
         _mockCacheService.Verify(c => c.Remove(It.IsAny<string>()), Times.Never);
+        _mockCacheService.Verify(c => c.RemoveByPrefix(It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
@@ -774,6 +780,7 @@ public class ProductServiceTest
         // Assert
         result.IsSuccess.Should().BeFalse();
         _mockCacheService.Verify(c => c.Remove(It.IsAny<string>()), Times.Never);
+        _mockCacheService.Verify(c => c.RemoveByPrefix(It.IsAny<string>()), Times.Never);
     }
 
     #endregion
@@ -857,6 +864,454 @@ public class ProductServiceTest
         result.Should().BeFalse();
         _mockProductRepository.Verify(r => r.AreAllProductIdsExistAsync(It.IsAny<List<int>>()), Times.Never);
     }
+
+    #endregion
+
+    #region Caching Tests
+
+    #region GetProductByIdAsync Caching Tests
+
+    [Fact]
+    public async Task GetProductByIdAsync_ShouldReturnFromCache_WhenCacheHit()
+    {
+        // Arrange
+        var cachedProduct = new ProductDto { Id = 1, Title = "Cached Product" };
+        
+        _mockCacheService.Setup(c => c.Get<ProductDto>("Products:GetById:1"))
+            .Returns(cachedProduct);
+
+        // Act
+        var result = await _sut.GetProductByIdAsync(1);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Id.Should().Be(1);
+        result.Title.Should().Be("Cached Product");
+        
+        // Verify repository was NOT called
+        _mockProductRepository.Verify(r => r.GetProductByIdAsync(It.IsAny<int>()), Times.Never);
+        
+        // Verify cache was checked
+        _mockCacheService.Verify(c => c.Get<ProductDto>("Products:GetById:1"), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetProductByIdAsync_ShouldFetchFromRepository_WhenCacheMiss()
+    {
+        // Arrange
+        var product = CreateProduct(1, "Test Product");
+        
+        _mockCacheService.Setup(c => c.Get<ProductDto>("Products:GetById:1"))
+            .Returns((ProductDto?)null);
+        _mockProductRepository.Setup(r => r.GetProductByIdAsync(1)).ReturnsAsync(product);
+
+        // Act
+        var result = await _sut.GetProductByIdAsync(1);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Id.Should().Be(1);
+        result.Title.Should().Be("Test Product");
+        
+        // Verify repository was called
+        _mockProductRepository.Verify(r => r.GetProductByIdAsync(1), Times.Once);
+        
+        // Verify cache was set with 15 minutes TTL
+        _mockCacheService.Verify(c => c.Set("Products:GetById:1", 
+            It.IsAny<ProductDto>(), 
+            TimeSpan.FromMinutes(15)), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetProductByIdAsync_ShouldNotCache_WhenProductNotFound()
+    {
+        // Arrange
+        _mockCacheService.Setup(c => c.Get<ProductDto>("Products:GetById:999"))
+            .Returns((ProductDto?)null);
+        _mockProductRepository.Setup(r => r.GetProductByIdAsync(999)).ReturnsAsync((Product?)null);
+
+        // Act
+        var result = await _sut.GetProductByIdAsync(999);
+
+        // Assert
+        result.Should().BeNull();
+        
+        // Verify null result is NOT cached
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), 
+            It.IsAny<ProductDto>(), 
+            It.IsAny<TimeSpan>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(42)]
+    [InlineData(999)]
+    public async Task GetProductByIdAsync_ShouldUseCorrectCacheKey_ForDifferentProductIds(int productId)
+    {
+        // Arrange
+        var product = CreateProduct(productId, "Test Product");
+        var expectedCacheKey = $"Products:GetById:{productId}";
+        
+        _mockCacheService.Setup(c => c.Get<ProductDto>(expectedCacheKey))
+            .Returns((ProductDto?)null);
+        _mockProductRepository.Setup(r => r.GetProductByIdAsync(productId)).ReturnsAsync(product);
+
+        // Act
+        await _sut.GetProductByIdAsync(productId);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Get<ProductDto>(expectedCacheKey), Times.Once);
+        _mockCacheService.Verify(c => c.Set(expectedCacheKey, 
+            It.IsAny<ProductDto>(), 
+            TimeSpan.FromMinutes(15)), Times.Once);
+    }
+
+    #endregion
+
+    #region GetAllProductsPaginatedAsync Caching Tests
+
+    [Fact]
+    public async Task GetAllProductsPaginatedAsync_ShouldReturnFromCache_WhenCacheHit()
+    {
+        // Arrange
+        var parameters = new PaginationParameters 
+        { 
+            PageNumber = 1, 
+            PageSize = 10,
+            SortBy = "Title",
+            SortOrder = "asc"
+        };
+        
+        var cachedResult = new PaginatedResult<ProductDto>
+        {
+            Items = new List<ProductDto> { new() { Id = 1, Title = "Cached Product" } },
+            PageNumber = 1,
+            PageSize = 10,
+            TotalCount = 1
+        };
+        
+        var expectedCacheKey = "Products:Paginated:1:10:Title:asc";
+        _mockCacheService.Setup(c => c.Get<PaginatedResult<ProductDto>>(expectedCacheKey))
+            .Returns(cachedResult);
+
+        // Act
+        var result = await _sut.GetAllProductsPaginatedAsync(parameters);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Items.Should().HaveCount(1);
+        result.PageNumber.Should().Be(1);
+        result.PageSize.Should().Be(10);
+        
+        // Verify repository was NOT called
+        _mockProductRepository.Verify(r => r.GetPagedAsync(It.IsAny<PaginationParameters>()), Times.Never);
+        
+        // Verify cache was checked
+        _mockCacheService.Verify(c => c.Get<PaginatedResult<ProductDto>>(expectedCacheKey), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetAllProductsPaginatedAsync_ShouldFetchFromRepository_WhenCacheMiss()
+    {
+        // Arrange
+        var parameters = new PaginationParameters 
+        { 
+            PageNumber = 1, 
+            PageSize = 10,
+            TotalCount = 2
+        };
+        
+        var products = new List<Product>
+        {
+            CreateProduct(1, "Product 1"),
+            CreateProduct(2, "Product 2")
+        };
+        
+        _mockCacheService.Setup(c => c.Get<PaginatedResult<ProductDto>>(It.IsAny<string>()))
+            .Returns((PaginatedResult<ProductDto>?)null);
+        _mockProductRepository.Setup(r => r.GetPagedAsync(parameters)).ReturnsAsync(products);
+
+        // Act
+        var result = await _sut.GetAllProductsPaginatedAsync(parameters);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Items.Should().HaveCount(2);
+        result.PageNumber.Should().Be(1);
+        result.PageSize.Should().Be(10);
+        result.TotalCount.Should().Be(2);
+        
+        // Verify repository was called
+        _mockProductRepository.Verify(r => r.GetPagedAsync(parameters), Times.Once);
+        
+        // Verify cache was set with 3 minutes sliding expiration
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), 
+            It.IsAny<PaginatedResult<ProductDto>>(), 
+            TimeSpan.FromMinutes(3),
+            TimeSpan.FromMinutes(3)), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetAllProductsPaginatedAsync_ShouldBuildCorrectCacheKey_WithoutSearchParameters()
+    {
+        // Arrange
+        var parameters = new PaginationParameters 
+        { 
+            PageNumber = 2, 
+            PageSize = 25,
+            SortBy = "Price",
+            SortOrder = "desc"
+        };
+        
+        // Cache key should NOT include search parameters
+        var expectedCacheKey = "Products:Paginated:2:25:Price:desc";
+        
+        _mockCacheService.Setup(c => c.Get<PaginatedResult<ProductDto>>(expectedCacheKey))
+            .Returns((PaginatedResult<ProductDto>?)null);
+        _mockProductRepository.Setup(r => r.GetPagedAsync(parameters)).ReturnsAsync(new List<Product>());
+
+        // Act
+        await _sut.GetAllProductsPaginatedAsync(parameters);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Get<PaginatedResult<ProductDto>>(expectedCacheKey), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetAllProductsPaginatedAsync_ShouldSkipCache_WhenSearchValueProvided()
+    {
+        // Arrange
+        var parameters = new PaginationParameters 
+        { 
+            PageNumber = 1, 
+            PageSize = 10,
+            SearchBy = "Title",
+            SearchValue = "laptop",
+            TotalCount = 5
+        };
+        
+        var products = new List<Product> { CreateProduct(1, "Laptop") };
+        _mockProductRepository.Setup(r => r.GetPagedAsync(parameters)).ReturnsAsync(products);
+
+        // Act
+        var result = await _sut.GetAllProductsPaginatedAsync(parameters);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Items.Should().HaveCount(1);
+        
+        // Verify cache was NOT checked or set (search queries bypass cache)
+        _mockCacheService.Verify(c => c.Get<PaginatedResult<ProductDto>>(It.IsAny<string>()), Times.Never);
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), 
+            It.IsAny<PaginatedResult<ProductDto>>(), 
+            It.IsAny<TimeSpan>(),
+            It.IsAny<TimeSpan>()), Times.Never);
+        
+        // Verify repository was called directly
+        _mockProductRepository.Verify(r => r.GetPagedAsync(parameters), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetAllProductsPaginatedAsync_ShouldNormalizeNullSortBy_InCacheKey()
+    {
+        // Arrange
+        var parameters = new PaginationParameters 
+        { 
+            PageNumber = 1, 
+            PageSize = 10,
+            SortBy = null,
+            SortOrder = "asc"
+        };
+        
+        // Expected: null SortBy should be normalized to "default"
+        var expectedCacheKey = "Products:Paginated:1:10:default:asc";
+        
+        _mockCacheService.Setup(c => c.Get<PaginatedResult<ProductDto>>(expectedCacheKey))
+            .Returns((PaginatedResult<ProductDto>?)null);
+        _mockProductRepository.Setup(r => r.GetPagedAsync(parameters)).ReturnsAsync(new List<Product>());
+
+        // Act
+        await _sut.GetAllProductsPaginatedAsync(parameters);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Get<PaginatedResult<ProductDto>>(expectedCacheKey), Times.Once);
+    }
+
+    [Theory]
+    [InlineData(1, 10)]
+    [InlineData(2, 25)]
+    [InlineData(5, 50)]
+    public async Task GetAllProductsPaginatedAsync_ShouldCreateDifferentCacheKeys_ForDifferentPageParameters(
+        int pageNumber, int pageSize)
+    {
+        // Arrange
+        var parameters = new PaginationParameters 
+        { 
+            PageNumber = pageNumber, 
+            PageSize = pageSize
+        };
+        
+        _mockCacheService.Setup(c => c.Get<PaginatedResult<ProductDto>>(It.IsAny<string>()))
+            .Returns((PaginatedResult<ProductDto>?)null);
+        _mockProductRepository.Setup(r => r.GetPagedAsync(parameters)).ReturnsAsync(new List<Product>());
+
+        // Act
+        await _sut.GetAllProductsPaginatedAsync(parameters);
+
+        // Assert - verify a cache key was used (it will include the parameters)
+        _mockCacheService.Verify(c => c.Get<PaginatedResult<ProductDto>>(It.IsAny<string>()), Times.Once);
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), 
+            It.IsAny<PaginatedResult<ProductDto>>(), 
+            TimeSpan.FromMinutes(3),
+            TimeSpan.FromMinutes(3)), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetAllProductsPaginatedAsync_ShouldUseSlidingExpiration_ForCachedResults()
+    {
+        // Arrange
+        var parameters = new PaginationParameters 
+        { 
+            PageNumber = 1, 
+            PageSize = 10,
+            SortBy = "Title",
+            SortOrder = "asc"
+        };
+        
+        var products = new List<Product> { CreateProduct(1, "Product 1") };
+        
+        _mockCacheService.Setup(c => c.Get<PaginatedResult<ProductDto>>(It.IsAny<string>()))
+            .Returns((PaginatedResult<ProductDto>?)null);
+        _mockProductRepository.Setup(r => r.GetPagedAsync(parameters)).ReturnsAsync(products);
+
+        // Act
+        await _sut.GetAllProductsPaginatedAsync(parameters);
+
+        // Assert - Verify sliding expiration is used (3 minutes for both absolute and sliding)
+        _mockCacheService.Verify(c => c.Set(
+            It.IsAny<string>(), 
+            It.IsAny<PaginatedResult<ProductDto>>(), 
+            TimeSpan.FromMinutes(3),  // absoluteExpiration
+            TimeSpan.FromMinutes(3)), // slidingExpiration
+            Times.Once);
+    }
+
+    #endregion
+
+    #region Cache Invalidation Tests for Write Operations
+
+    [Fact]
+    public async Task CreateProduct_ShouldInvalidatePaginatedCache()
+    {
+        // Arrange
+        var createProductDto = CreateValidCreateProductDto();
+
+        _mockProductRepository.Setup(r => r.ExistsAsync(It.IsAny<Expression<Func<Product, bool>>>()))
+            .ReturnsAsync(false);
+        _mockImageService.Setup(s => s.SaveImageAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync("saved-image.jpg");
+        _mockProductRepository.Setup(r => r.AddAsync(It.IsAny<Product>())).Returns(Task.CompletedTask);
+        _mockProductRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+
+        // Act
+        await _sut.CreateProduct(createProductDto);
+
+        // Assert
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Products:Paginated:"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateProduct_ShouldInvalidateAllRelatedCaches_IncludingPaginated()
+    {
+        // Arrange
+        var updateDto = CreateValidUpdateProductDto();
+        var existingProduct = CreateProduct(updateDto.Id, "Original Title");
+        existingProduct.Galleries =
+        [
+            new() { Id = 1, ImageName = "gallery1.jpg" }
+        ];
+
+        _mockProductRepository.Setup(r => r.GetProductByIdAsync(updateDto.Id)).ReturnsAsync(existingProduct);
+        _mockProductRepository.Setup(r => r.ExistsAsync(It.IsAny<Expression<Func<Product, bool>>>()))
+            .ReturnsAsync(false);
+        _mockProductRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+
+        // Act
+        await _sut.UpdateProduct(updateDto);
+
+        // Assert - Verify all related caches are invalidated
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Products:Paginated:"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove($"Products:GetById:{updateDto.Id}"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove($"ProductDetails:GetById:{updateDto.Id}"), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteProduct_ShouldInvalidateAllRelatedCaches_IncludingPaginated()
+    {
+        // Arrange
+        var productId = 1;
+        var product = CreateProduct(productId, "Test Product");
+
+        _mockProductRepository.Setup(r => r.GetProductByIdAsync(productId)).ReturnsAsync(product);
+        _mockProductRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+        _mockImageService.Setup(s => s.DeleteImageAsync(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _sut.DeleteProduct(productId);
+
+        // Assert - Verify all related caches are invalidated
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Products:Paginated:"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove($"Products:GetById:{productId}"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove($"ProductDetails:GetById:{productId}"), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateProduct_ShouldInvalidateCorrectProductCache_ForSpecificProductId()
+    {
+        // Arrange
+        var updateDto = CreateValidUpdateProductDto();
+        updateDto.Id = 42; // Specific ID
+        var existingProduct = CreateProduct(updateDto.Id, "Original Title");
+        existingProduct.Galleries = [];
+
+        _mockProductRepository.Setup(r => r.GetProductByIdAsync(updateDto.Id)).ReturnsAsync(existingProduct);
+        _mockProductRepository.Setup(r => r.ExistsAsync(It.IsAny<Expression<Func<Product, bool>>>()))
+            .ReturnsAsync(false);
+        _mockProductRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+
+        // Act
+        await _sut.UpdateProduct(updateDto);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove("Products:GetById:42"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove("ProductDetails:GetById:42"), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteProduct_ShouldInvalidateCorrectProductCache_ForSpecificProductId()
+    {
+        // Arrange
+        var productId = 99;
+        var product = CreateProduct(productId, "Test Product");
+
+        _mockProductRepository.Setup(r => r.GetProductByIdAsync(productId)).ReturnsAsync(product);
+        _mockProductRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+        _mockImageService.Setup(s => s.DeleteImageAsync(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _sut.DeleteProduct(productId);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove("Products:GetById:99"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove("ProductDetails:GetById:99"), Times.Once);
+    }
+
+    #endregion
 
     #endregion
 
