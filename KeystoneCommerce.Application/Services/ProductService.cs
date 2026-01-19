@@ -16,11 +16,13 @@ namespace KeystoneCommerce.Application.Services
         private readonly IImageService _imageService;
         private readonly IMappingService _mappingService;
         private readonly ILogger<ProductService> _logger;
+        private readonly ICacheService _cacheService;
 
         public ProductService(IApplicationValidator<CreateProductDto> validationService,
             IProductRepository productRepository, IImageService imageService,
             IMappingService mappingService, ILogger<ProductService> logger,
-            IApplicationValidator<UpdateProductDto> updateValidationService)
+            IApplicationValidator<UpdateProductDto> updateValidationService,
+            ICacheService cacheService)
         {
             _createValidationService = validationService;
             _productRepository = productRepository;
@@ -28,6 +30,7 @@ namespace KeystoneCommerce.Application.Services
             _mappingService = mappingService;
             _logger = logger;
             _updateValidationService = updateValidationService;
+            _cacheService = cacheService;
         }
 
         #region Create New Product
@@ -66,6 +69,10 @@ namespace KeystoneCommerce.Application.Services
                 _logger.LogInformation(
                     "Product created successfully: {ProductTitle} with {GalleryCount} gallery images",
                     createProductDto.Title, createProductDto.Gallaries.Count);
+
+                // Invalidate home page cache as new product may appear in "New Arrivals"
+                InvalidateHomePageCache();
+
                 return Result<bool>.Success();
             }
 
@@ -190,6 +197,9 @@ namespace KeystoneCommerce.Application.Services
                 "Product updated successfully: ID {ProductId}, Title: {ProductTitle}, Deleted Images: {DeletedCount}, New Images: {NewCount}",
                 productDto.Id, productDto.Title, productDto.DeletedImages?.Count ?? 0,
                 productDto.NewGalleries?.Count ?? 0);
+
+            // Invalidate home page cache as product price/discount/availability may have changed
+            InvalidateHomePageCache();
 
             return Result<UpdateProductDto>.Success(productDto);
         }
@@ -332,6 +342,9 @@ namespace KeystoneCommerce.Application.Services
                 "Product deleted successfully: ID {ProductId}, Title: {ProductTitle}, Gallery Images Count: {GalleryCount}",
                 id, product.Title, product.Galleries?.Count ?? 0);
 
+            // Invalidate home page cache as product has been removed from listings
+            InvalidateHomePageCache();
+
             return Result<bool>.Success();
         }
 
@@ -384,6 +397,13 @@ namespace KeystoneCommerce.Application.Services
             }
 
             return allExist;
+        }
+
+        private void InvalidateHomePageCache()
+        {
+            const string homePageCacheKey = "HomePage:Data";
+            _cacheService.Remove(homePageCacheKey);
+            _logger.LogInformation("Home page cache invalidated due to product modification");
         }
     }
 }

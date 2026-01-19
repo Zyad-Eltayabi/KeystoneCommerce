@@ -1,4 +1,5 @@
 ﻿using KeystoneCommerce.Application.DTOs.Banner;
+using KeystoneCommerce.Application.DTOs.Home;
 using KeystoneCommerce.Application.DTOs.Shop;
 
 namespace KeystoneCommerce.Tests.Core_Services;
@@ -9,6 +10,7 @@ public class HomeServiceTest
     private readonly Mock<IBannerService> _mockBannerService;
     private readonly Mock<ILogger<HomeService>> _mockLogger;
     private readonly Mock<IProductRepository> _mockProductRepository;
+    private readonly Mock<ICacheService> _mockCacheService;
     private readonly HomeService _sut;
 
     public HomeServiceTest()
@@ -16,11 +18,13 @@ public class HomeServiceTest
         _mockBannerService = new Mock<IBannerService>();
         _mockLogger = new Mock<ILogger<HomeService>>();
         _mockProductRepository = new Mock<IProductRepository>();
+        _mockCacheService = new Mock<ICacheService>();
 
         _sut = new HomeService(
             _mockBannerService.Object,
             _mockLogger.Object,
-            _mockProductRepository.Object);
+            _mockProductRepository.Object,
+            _mockCacheService.Object);
     }
 
     #region GetHomePageDataAsync Tests
@@ -34,6 +38,9 @@ public class HomeServiceTest
         var homeBannersDto = CreateHomeBannersDto(2, 2, 2);
         var newArrivals = CreateProductCardDtos(5);
         var topSellingProducts = CreateProductCardDtos(5);
+
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
 
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
@@ -57,6 +64,8 @@ public class HomeServiceTest
         result.TopSellingProducts.Should().NotBeNull();
         result.TopSellingProducts.Should().HaveCount(5);
         result.TopSellingProducts.Should().BeEquivalentTo(topSellingProducts);
+
+        _mockCacheService.Verify(c => c.Set("HomePage:Data", It.IsAny<HomePageDto>(), TimeSpan.FromMinutes(10)), Times.Once);
     }
 
     [Fact]
@@ -66,6 +75,9 @@ public class HomeServiceTest
         var homeBannersDto = CreateHomeBannersDto(0, 0, 0);
         var newArrivals = CreateProductCardDtos(3);
         var topSellingProducts = CreateProductCardDtos(3);
+
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
 
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
@@ -96,6 +108,9 @@ public class HomeServiceTest
         var emptyNewArrivals = new List<ProductCardDto>();
         var emptyTopSellingProducts = new List<ProductCardDto>();
 
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
 
@@ -123,6 +138,9 @@ public class HomeServiceTest
         var homeBannersDto = CreateHomeBannersDto(0, 0, 0);
         var emptyNewArrivals = new List<ProductCardDto>();
         var emptyTopSellingProducts = new List<ProductCardDto>();
+
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
 
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
@@ -157,6 +175,9 @@ public class HomeServiceTest
         var newArrivals = CreateProductCardDtos(newArrivalsCount);
         var topSellingProducts = CreateProductCardDtos(topSellingCount);
 
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
 
@@ -184,6 +205,9 @@ public class HomeServiceTest
         var homeBannersDto = CreateHomeBannersDto(100, 100, 100);
         var newArrivals = CreateProductCardDtos(100);
         var topSellingProducts = CreateProductCardDtos(100);
+
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
 
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
@@ -218,6 +242,9 @@ public class HomeServiceTest
         var newArrivals = CreateProductCardDtos(1);
         var topSellingProducts = CreateProductCardDtos(1);
 
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
 
@@ -243,6 +270,9 @@ public class HomeServiceTest
         var homeBannersDto = CreateHomeBannersDto(1, 1, 1);
         var newArrivals = CreateProductCardDtos(1);
         var topSellingProducts = CreateProductCardDtos(1);
+
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
 
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
@@ -289,6 +319,9 @@ public class HomeServiceTest
         var newArrivals = CreateProductCardDtos(1);
         var topSellingProducts = CreateProductCardDtos(1);
 
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
 
@@ -328,6 +361,9 @@ public class HomeServiceTest
         {
             CreateProductCardDto(3, "Top Seller", "Top Description", 299.99m, 20.0m, null)
         };
+
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
 
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
@@ -374,6 +410,9 @@ public class HomeServiceTest
         };
         var topSellingProducts = CreateProductCardDtos(1);
 
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
 
@@ -401,6 +440,9 @@ public class HomeServiceTest
             CreateProductCardDto(1, "Product", "Desc", 99.999m, 15.555m, "image.jpg")
         };
         var topSellingProducts = CreateProductCardDtos(1);
+
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
 
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
@@ -434,6 +476,9 @@ public class HomeServiceTest
         };
         var topSellingProducts = CreateProductCardDtos(1);
 
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
 
@@ -460,6 +505,9 @@ public class HomeServiceTest
             CreateProductCardDto(1, "产品 المنتج Продукт", "説明 الوصف Описание", 100.00m, null, "image.jpg")
         };
         var topSellingProducts = CreateProductCardDtos(1);
+
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
 
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
@@ -491,6 +539,9 @@ public class HomeServiceTest
         };
         var topSellingProducts = CreateProductCardDtos(1);
 
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
 
@@ -518,6 +569,9 @@ public class HomeServiceTest
             CreateProductCardDto(1, "Free Product", "Description", 0.00m, 0.00m, "image.jpg")
         };
         var topSellingProducts = CreateProductCardDtos(1);
+
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
 
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
@@ -547,6 +601,9 @@ public class HomeServiceTest
         };
         var topSellingProducts = CreateProductCardDtos(1);
 
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
 
@@ -575,6 +632,9 @@ public class HomeServiceTest
         };
         var topSellingProducts = CreateProductCardDtos(1);
 
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
 
@@ -602,6 +662,9 @@ public class HomeServiceTest
             CreateProductCardDto(1, "", "", 50.00m, null, "")
         };
         var topSellingProducts = CreateProductCardDtos(1);
+
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
 
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
@@ -748,6 +811,9 @@ public class HomeServiceTest
         var originalFeaturedCount = homeBannersDto.Featured.Count;
         var originalTopProductsCount = homeBannersDto.TopProducts.Count;
 
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
 
@@ -776,6 +842,9 @@ public class HomeServiceTest
         var originalNewArrivalsCount = newArrivals.Count;
         var originalTopSellingCount = topSellingProducts.Count;
 
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
 
@@ -801,6 +870,9 @@ public class HomeServiceTest
         var newArrivals = CreateProductCardDtos(2);
         var topSellingProducts = CreateProductCardDtos(2);
 
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
         _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
             .ReturnsAsync(homeBannersDto);
 
@@ -817,6 +889,168 @@ public class HomeServiceTest
         result.bannersDto.Should().BeSameAs(homeBannersDto);
         result.NewArrivals.Should().BeSameAs(newArrivals);
         result.TopSellingProducts.Should().BeSameAs(topSellingProducts);
+    }
+
+    #endregion
+
+    #region Cache-Specific Scenarios
+
+    [Fact]
+    public async Task GetHomePageDataAsync_ShouldReturnCachedData_WhenCacheHit()
+    {
+        // Arrange
+        var cachedData = new HomePageDto
+        {
+            bannersDto = CreateHomeBannersDto(2, 2, 2),
+            NewArrivals = CreateProductCardDtos(5),
+            TopSellingProducts = CreateProductCardDtos(5)
+        };
+
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns(cachedData);
+
+        // Act
+        var result = await _sut.GetHomePageDataAsync();
+
+        // Assert
+        result.Should().BeSameAs(cachedData);
+        _mockBannerService.Verify(s => s.PrepareBannersForHomePage(), Times.Never);
+        _mockProductRepository.Verify(r => r.GetTopNewArrivalsAsync(), Times.Never);
+        _mockProductRepository.Verify(r => r.GetTopSellingProductsAsync(), Times.Never);
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), It.IsAny<HomePageDto>(), It.IsAny<TimeSpan>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetHomePageDataAsync_ShouldCacheData_WhenCacheMiss()
+    {
+        // Arrange
+        var homeBannersDto = CreateHomeBannersDto(2, 2, 2);
+        var newArrivals = CreateProductCardDtos(5);
+        var topSellingProducts = CreateProductCardDtos(5);
+
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
+        _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
+            .ReturnsAsync(homeBannersDto);
+
+        _mockProductRepository.Setup(r => r.GetTopNewArrivalsAsync())
+            .ReturnsAsync(newArrivals);
+
+        _mockProductRepository.Setup(r => r.GetTopSellingProductsAsync())
+            .ReturnsAsync(topSellingProducts);
+
+        // Act
+        var result = await _sut.GetHomePageDataAsync();
+
+        // Assert
+        result.Should().NotBeNull();
+        _mockBannerService.Verify(s => s.PrepareBannersForHomePage(), Times.Once);
+        _mockProductRepository.Verify(r => r.GetTopNewArrivalsAsync(), Times.Once);
+        _mockProductRepository.Verify(r => r.GetTopSellingProductsAsync(), Times.Once);
+        _mockCacheService.Verify(c => c.Set("HomePage:Data", It.Is<HomePageDto>(dto => 
+            dto.bannersDto == homeBannersDto && 
+            dto.NewArrivals == newArrivals && 
+            dto.TopSellingProducts == topSellingProducts), 
+            TimeSpan.FromMinutes(10)), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetHomePageDataAsync_ShouldUseTenMinuteExpiration()
+    {
+        // Arrange
+        var homeBannersDto = CreateHomeBannersDto(1, 1, 1);
+        var newArrivals = CreateProductCardDtos(1);
+        var topSellingProducts = CreateProductCardDtos(1);
+
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
+        _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
+            .ReturnsAsync(homeBannersDto);
+
+        _mockProductRepository.Setup(r => r.GetTopNewArrivalsAsync())
+            .ReturnsAsync(newArrivals);
+
+        _mockProductRepository.Setup(r => r.GetTopSellingProductsAsync())
+            .ReturnsAsync(topSellingProducts);
+
+        // Act
+        await _sut.GetHomePageDataAsync();
+
+        // Assert
+        _mockCacheService.Verify(c => c.Set(
+            "HomePage:Data", 
+            It.IsAny<HomePageDto>(), 
+            TimeSpan.FromMinutes(10)), 
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task GetHomePageDataAsync_ShouldUseCorrectCacheKey()
+    {
+        // Arrange
+        var homeBannersDto = CreateHomeBannersDto(1, 1, 1);
+        var newArrivals = CreateProductCardDtos(1);
+        var topSellingProducts = CreateProductCardDtos(1);
+
+        _mockCacheService.Setup(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null);
+
+        _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
+            .ReturnsAsync(homeBannersDto);
+
+        _mockProductRepository.Setup(r => r.GetTopNewArrivalsAsync())
+            .ReturnsAsync(newArrivals);
+
+        _mockProductRepository.Setup(r => r.GetTopSellingProductsAsync())
+            .ReturnsAsync(topSellingProducts);
+
+        // Act
+        await _sut.GetHomePageDataAsync();
+
+        // Assert
+        _mockCacheService.Verify(c => c.Get<HomePageDto>("HomePage:Data"), Times.Once);
+        _mockCacheService.Verify(c => c.Set("HomePage:Data", It.IsAny<HomePageDto>(), It.IsAny<TimeSpan>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetHomePageDataAsync_ShouldHitDatabaseOnlyOnce_WhenCalledMultipleTimes()
+    {
+        // Arrange
+        var homeBannersDto = CreateHomeBannersDto(1, 1, 1);
+        var newArrivals = CreateProductCardDtos(1);
+        var topSellingProducts = CreateProductCardDtos(1);
+        var cachedData = new HomePageDto
+        {
+            bannersDto = homeBannersDto,
+            NewArrivals = newArrivals,
+            TopSellingProducts = topSellingProducts
+        };
+
+        // First call - cache miss
+        _mockCacheService.SetupSequence(c => c.Get<HomePageDto>("HomePage:Data"))
+            .Returns((HomePageDto?)null)
+            .Returns(cachedData);
+
+        _mockBannerService.Setup(s => s.PrepareBannersForHomePage())
+            .ReturnsAsync(homeBannersDto);
+
+        _mockProductRepository.Setup(r => r.GetTopNewArrivalsAsync())
+            .ReturnsAsync(newArrivals);
+
+        _mockProductRepository.Setup(r => r.GetTopSellingProductsAsync())
+            .ReturnsAsync(topSellingProducts);
+
+        // Act
+        var result1 = await _sut.GetHomePageDataAsync();
+        var result2 = await _sut.GetHomePageDataAsync();
+
+        // Assert
+        _mockBannerService.Verify(s => s.PrepareBannersForHomePage(), Times.Once);
+        _mockProductRepository.Verify(r => r.GetTopNewArrivalsAsync(), Times.Once);
+        _mockProductRepository.Verify(r => r.GetTopSellingProductsAsync(), Times.Once);
+        _mockCacheService.Verify(c => c.Get<HomePageDto>("HomePage:Data"), Times.Exactly(2));
     }
 
     #endregion

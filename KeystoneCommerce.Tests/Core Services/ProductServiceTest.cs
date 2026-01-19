@@ -11,6 +11,7 @@ public class ProductServiceTest
     private readonly Mock<IProductRepository> _mockProductRepository;
     private readonly Mock<IImageService> _mockImageService;
     private readonly Mock<ILogger<ProductService>> _mockLogger;
+    private readonly Mock<ICacheService> _mockCacheService;
     private readonly IApplicationValidator<CreateProductDto> _createValidator;
     private readonly IApplicationValidator<UpdateProductDto> _updateValidator;
     private readonly IMappingService _mappingService;
@@ -21,6 +22,7 @@ public class ProductServiceTest
         _mockProductRepository = new Mock<IProductRepository>();
         _mockImageService = new Mock<IImageService>();
         _mockLogger = new Mock<ILogger<ProductService>>();
+        _mockCacheService = new Mock<ICacheService>();
 
         var createFluentValidator = new CreateProductValidator();
         _createValidator = new FluentValidationAdapter<CreateProductDto>(createFluentValidator);
@@ -36,7 +38,8 @@ public class ProductServiceTest
             _mockImageService.Object,
             _mappingService,
             _mockLogger.Object,
-            _updateValidator);
+            _updateValidator,
+            _mockCacheService.Object);
     }
 
     #region CreateProduct Tests
@@ -66,6 +69,7 @@ public class ProductServiceTest
 
         _mockProductRepository.Verify(r => r.AddAsync(It.IsAny<Product>()), Times.Once);
         _mockProductRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
     }
 
     [Fact]
@@ -435,6 +439,7 @@ public class ProductServiceTest
         // Assert
         result.IsSuccess.Should().BeTrue();
         _mockProductRepository.Verify(r => r.Update(It.IsAny<Product>()), Times.Once);
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
     }
 
     #endregion
@@ -567,6 +572,7 @@ public class ProductServiceTest
         // Assert
         result.IsSuccess.Should().BeTrue();
         _mockProductRepository.Verify(r => r.Delete(product), Times.Once);
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
     }
 
     [Fact]

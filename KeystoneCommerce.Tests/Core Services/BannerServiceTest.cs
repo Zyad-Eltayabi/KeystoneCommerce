@@ -16,6 +16,7 @@ public class BannerServiceTest
     private readonly IApplicationValidator<CreateBannerDto> _createValidator;
     private readonly IApplicationValidator<UpdateBannerDto> _updateValidator;
     private readonly Mock<ILogger<BannerService>> _mockLogger;
+    private readonly Mock<ICacheService> _mockCacheService;
     private readonly BannerService _sut;
 
     public BannerServiceTest()
@@ -26,6 +27,7 @@ public class BannerServiceTest
         _createValidator = new FluentValidationAdapter<CreateBannerDto>(new CreateBannerDtoValidator());
         _updateValidator = new FluentValidationAdapter<UpdateBannerDto>(new UpdateBannerDtoValidator());
         _mockLogger = new Mock<ILogger<BannerService>>();
+        _mockCacheService = new Mock<ICacheService>();
 
         _sut = new BannerService(
             _mockImageService.Object,
@@ -33,7 +35,8 @@ public class BannerServiceTest
             _mappingService,
             _createValidator,
             _updateValidator,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockCacheService.Object);
     }
 
     #region Create Tests
@@ -68,6 +71,7 @@ public class BannerServiceTest
             createDto.Image, createDto.ImageType, createDto.ImageUrl), Times.Once);
         _mockBannerRepository.Verify(r => r.AddAsync(It.IsAny<Banner>()), Times.Once);
         _mockBannerRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
     }
 
     [Theory]
@@ -806,6 +810,7 @@ public class BannerServiceTest
         _mockImageService.Verify(s => s.DeleteImageAsync(
             It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         _mockBannerRepository.Verify(r => r.Update(It.IsAny<Banner>()), Times.Once);
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
     }
 
     [Fact]
@@ -842,6 +847,7 @@ public class BannerServiceTest
             updateDto.Image, updateDto.ImageType, updateDto.ImageUrl), Times.Once);
         _mockImageService.Verify(s => s.DeleteImageAsync(
             updateDto.ImageUrl, oldImageName), Times.Once);
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
     }
 
     [Fact]
@@ -1076,6 +1082,7 @@ public class BannerServiceTest
         _mockBannerRepository.Verify(r => r.Delete(banner), Times.Once);
         _mockBannerRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
         _mockImageService.Verify(s => s.DeleteImageAsync(imageUrl, banner.ImageName), Times.Once);
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
     }
 
     [Fact]

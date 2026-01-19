@@ -10,13 +10,15 @@ public class BannerService : IBannerService
     private readonly IApplicationValidator<CreateBannerDto> _createValidator;
     private readonly IApplicationValidator<UpdateBannerDto> _updateValidator;
     private readonly ILogger<BannerService> _logger;
+    private readonly ICacheService _cacheService;
 
 
     public BannerService(IImageService imageService, IBannerRepository bannerRepository,
         IMappingService mappingService,
         IApplicationValidator<CreateBannerDto> createValidator,
         IApplicationValidator<UpdateBannerDto> updateValidator,
-        ILogger<BannerService> logger)
+        ILogger<BannerService> logger,
+        ICacheService cacheService)
     {
         _imageService = imageService;
         _bannerRepository = bannerRepository;
@@ -24,6 +26,7 @@ public class BannerService : IBannerService
         _createValidator = createValidator;
         _updateValidator = updateValidator;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<bool>> Create(CreateBannerDto createBannerDto)
@@ -54,6 +57,9 @@ public class BannerService : IBannerService
             banner.BannerType,
             banner.Priority,
             banner.ImageName);
+
+        // Invalidate home page cache as new banner may appear on home page
+        InvalidateHomePageCache();
 
         return Result<bool>.Success();
     }
@@ -185,6 +191,9 @@ public class BannerService : IBannerService
             updateBannerDto.Priority,
             oldImageName != banner.ImageName);
 
+        // Invalidate home page cache as banner content/order may have changed
+        InvalidateHomePageCache();
+
         return Result<bool>.Success();
     }
 
@@ -232,6 +241,9 @@ public class BannerService : IBannerService
             "Banner and associated image deleted successfully. BannerId: {BannerId}, ImageName: {ImageName}",
             id,
             bannerImageName);
+
+        // Invalidate home page cache as banner has been removed
+        InvalidateHomePageCache();
 
         return Result<bool>.Success();
     }
@@ -286,5 +298,12 @@ public class BannerService : IBannerService
             createBannerDto.BannerType);
 
         return banner;
+    }
+
+    private void InvalidateHomePageCache()
+    {
+        const string homePageCacheKey = "HomePage:Data";
+        _cacheService.Remove(homePageCacheKey);
+        _logger.LogInformation("Home page cache invalidated due to banner modification");
     }
 }
