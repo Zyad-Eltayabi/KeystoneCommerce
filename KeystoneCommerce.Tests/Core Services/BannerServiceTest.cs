@@ -1221,17 +1221,17 @@ public class BannerServiceTest
         };
 
         _mockBannerRepository.Setup(r => r.FindAllAsync(
-                It.Is<Expression<Func<Banner, bool>>>(expr => 
+                It.Is<Expression<Func<Banner, bool>>>(expr =>
                     TestBannerTypeExpression(expr, BannerType.HomePage))))
             .ReturnsAsync(homePageBanners);
 
         _mockBannerRepository.Setup(r => r.FindAllAsync(
-                It.Is<Expression<Func<Banner, bool>>>(expr => 
+                It.Is<Expression<Func<Banner, bool>>>(expr =>
                     TestBannerTypeExpression(expr, BannerType.Featured))))
             .ReturnsAsync(featuredBanners);
 
         _mockBannerRepository.Setup(r => r.FindAllAsync(
-                It.Is<Expression<Func<Banner, bool>>>(expr => 
+                It.Is<Expression<Func<Banner, bool>>>(expr =>
                     TestBannerTypeExpression(expr, BannerType.TopProducts))))
             .ReturnsAsync(topProductsBanners);
 
@@ -1257,17 +1257,17 @@ public class BannerServiceTest
         };
 
         _mockBannerRepository.Setup(r => r.FindAllAsync(
-                It.Is<Expression<Func<Banner, bool>>>(expr => 
+                It.Is<Expression<Func<Banner, bool>>>(expr =>
                     TestBannerTypeExpression(expr, BannerType.HomePage))))
             .ReturnsAsync(homePageBanners);
 
         _mockBannerRepository.Setup(r => r.FindAllAsync(
-                It.Is<Expression<Func<Banner, bool>>>(expr => 
+                It.Is<Expression<Func<Banner, bool>>>(expr =>
                     TestBannerTypeExpression(expr, BannerType.Featured))))
             .ReturnsAsync(new List<Banner>());
 
         _mockBannerRepository.Setup(r => r.FindAllAsync(
-                It.Is<Expression<Func<Banner, bool>>>(expr => 
+                It.Is<Expression<Func<Banner, bool>>>(expr =>
                     TestBannerTypeExpression(expr, BannerType.TopProducts))))
             .ReturnsAsync(new List<Banner>());
 
@@ -1357,11 +1357,11 @@ public class BannerServiceTest
         result.Should().NotBeNull();
         result.Should().HaveCount(3);
         _mockCacheService.Verify(c => c.Get<Dictionary<int, string>>("Banner:GetBannerTypes"), Times.Once);
-        _mockCacheService.Verify(c => c.Set("Banner:GetBannerTypes", result, TimeSpan.FromMinutes(60)), Times.Once);
+        _mockCacheService.Verify(c => c.Set("Banner:GetBannerTypes", result, TimeSpan.FromMinutes(20),TimeSpan.FromMinutes(5)), Times.Once);
     }
 
     [Fact]
-    public void GetBannerTypes_ShouldCacheFor60Minutes()
+    public void GetBannerTypes_ShouldSetCacheWith20MinuteExpiration()
     {
         // Arrange
         _mockCacheService.Setup(c => c.Get<Dictionary<int, string>>("Banner:GetBannerTypes"))
@@ -1372,9 +1372,9 @@ public class BannerServiceTest
 
         // Assert
         _mockCacheService.Verify(c => c.Set(
-            "Banner:GetBannerTypes",
-            It.IsAny<Dictionary<int, string>>(),
-            TimeSpan.FromMinutes(60)), Times.Once);
+                    "Banner:GetBannerTypes",
+                    It.IsAny<Dictionary<int, string>>(),
+                    TimeSpan.FromMinutes(20), TimeSpan.FromMinutes(5)), Times.Once);
     }
 
     #endregion

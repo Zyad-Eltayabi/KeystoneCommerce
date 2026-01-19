@@ -985,7 +985,7 @@ public class OrderServiceTest
             TotalCount = 0
         };
 
-        string cacheKey = $"Order:GetAllPaginated:{parameters.PageNumber}:{parameters.PageSize}:{parameters.Status}:{parameters.SortBy}:{parameters.SortOrder}:None:None";
+        string cacheKey = $"Order:GetAllPaginated:{parameters.PageNumber}:{parameters.PageSize}:{parameters.Status}:{parameters.SortBy}:{parameters.SortOrder}::";
 
         _mockCacheService.Setup(c => c.Get<OrderPaginatedResult<OrderDto>>(cacheKey))
             .Returns(expectedResult);
@@ -1014,7 +1014,7 @@ public class OrderServiceTest
             SortOrder = "Desc"
         };
 
-        string cacheKey = $"Order:GetAllPaginated:{parameters.PageNumber}:{parameters.PageSize}:{parameters.Status}:{parameters.SortBy}:{parameters.SortOrder}:None:None";
+        string cacheKey = $"Order:GetAllPaginated:{parameters.PageNumber}:{parameters.PageSize}:{parameters.Status}:{parameters.SortBy}:{parameters.SortOrder}::";
 
         _mockCacheService.Setup(c => c.Get<OrderPaginatedResult<OrderDto>>(cacheKey))
             .Returns((OrderPaginatedResult<OrderDto>?)null);
@@ -1152,7 +1152,7 @@ public class OrderServiceTest
             TodayAnalytics = new OrderAnalyticsDto()
         };
 
-        string cacheKey = $"Order:Dashboard:{parameters.PageNumber}:{parameters.PageSize}:All:{parameters.SortBy}:{parameters.SortOrder}:None:None";
+        string cacheKey = $"Order:Dashboard:{parameters.PageNumber}:{parameters.PageSize}:All:{parameters.SortBy}:{parameters.SortOrder}::";
 
         _mockCacheService.Setup(c => c.Get<OrderDashboardDto>(cacheKey))
             .Returns(expectedDashboard);
@@ -1182,8 +1182,8 @@ public class OrderServiceTest
             SortOrder = "Desc"
         };
 
-        string dashboardCacheKey = $"Order:Dashboard:{parameters.PageNumber}:{parameters.PageSize}:All:{parameters.SortBy}:{parameters.SortOrder}:None:None";
-        string paginatedCacheKey = $"Order:GetAllPaginated:{parameters.PageNumber}:{parameters.PageSize}:All:{parameters.SortBy}:{parameters.SortOrder}:None:None";
+        string dashboardCacheKey = $"Order:Dashboard:{parameters.PageNumber}:{parameters.PageSize}:All:{parameters.SortBy}:{parameters.SortOrder}::";
+        string paginatedCacheKey = $"Order:GetAllPaginated:{parameters.PageNumber}:{parameters.PageSize}:All:{parameters.SortBy}:{parameters.SortOrder}::";
 
         _mockCacheService.Setup(c => c.Get<OrderDashboardDto>(dashboardCacheKey))
             .Returns((OrderDashboardDto?)null);
