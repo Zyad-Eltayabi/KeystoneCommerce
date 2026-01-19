@@ -198,8 +198,9 @@ namespace KeystoneCommerce.Application.Services
                 productDto.Id, productDto.Title, productDto.DeletedImages?.Count ?? 0,
                 productDto.NewGalleries?.Count ?? 0);
 
-            // Invalidate home page cache as product price/discount/availability may have changed
+            // Invalidate caches as product data has changed
             InvalidateHomePageCache();
+            InvalidateProductDetailsCache(productDto.Id);
 
             return Result<UpdateProductDto>.Success(productDto);
         }
@@ -342,8 +343,9 @@ namespace KeystoneCommerce.Application.Services
                 "Product deleted successfully: ID {ProductId}, Title: {ProductTitle}, Gallery Images Count: {GalleryCount}",
                 id, product.Title, product.Galleries?.Count ?? 0);
 
-            // Invalidate home page cache as product has been removed from listings
+            // Invalidate caches as product has been removed from listings
             InvalidateHomePageCache();
+            InvalidateProductDetailsCache(id);
 
             return Result<bool>.Success();
         }
@@ -404,6 +406,13 @@ namespace KeystoneCommerce.Application.Services
             const string homePageCacheKey = "HomePage:Data";
             _cacheService.Remove(homePageCacheKey);
             _logger.LogInformation("Home page cache invalidated due to product modification");
+        }
+
+        private void InvalidateProductDetailsCache(int productId)
+        {
+            var productDetailsCacheKey = $"ProductDetails:GetById:{productId}";
+            _cacheService.Remove(productDetailsCacheKey);
+            _logger.LogInformation("Product details cache invalidated for ProductId: {ProductId}", productId);
         }
     }
 }

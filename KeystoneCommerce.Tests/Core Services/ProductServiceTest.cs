@@ -631,6 +631,153 @@ public class ProductServiceTest
 
     #endregion
 
+    #region Cache Invalidation Tests
+
+    [Fact]
+    public async Task UpdateProduct_ShouldInvalidateProductDetailsCache_WhenUpdateSucceeds()
+    {
+        // Arrange
+        var updateDto = CreateValidUpdateProductDto();
+        updateDto.Id = 5;
+        var existingProduct = CreateProduct(updateDto.Id, "Original Title");
+        existingProduct.Galleries = [];
+
+        _mockProductRepository.Setup(r => r.GetProductByIdAsync(updateDto.Id)).ReturnsAsync(existingProduct);
+        _mockProductRepository.Setup(r => r.ExistsAsync(It.IsAny<Expression<Func<Product, bool>>>()))
+            .ReturnsAsync(false);
+        _mockProductRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+
+        // Act
+        var result = await _sut.UpdateProduct(updateDto);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove($"ProductDetails:GetById:{updateDto.Id}"), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteProduct_ShouldInvalidateProductDetailsCache_WhenDeleteSucceeds()
+    {
+        // Arrange
+        int productId = 10;
+        var product = CreateProduct(productId, "Test Product");
+
+        _mockProductRepository.Setup(r => r.GetProductByIdAsync(productId)).ReturnsAsync(product);
+        _mockProductRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+        _mockImageService.Setup(s => s.DeleteImageAsync(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _sut.DeleteProduct(productId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
+        _mockCacheService.Verify(c => c.Remove($"ProductDetails:GetById:{productId}"), Times.Once);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(100)]
+    [InlineData(9999)]
+    public async Task UpdateProduct_ShouldInvalidateCorrectProductDetailsCache_ForDifferentProductIds(int productId)
+    {
+        // Arrange
+        var updateDto = CreateValidUpdateProductDto();
+        updateDto.Id = productId;
+        var existingProduct = CreateProduct(updateDto.Id, "Original Title");
+        existingProduct.Galleries = [];
+
+        _mockProductRepository.Setup(r => r.GetProductByIdAsync(productId)).ReturnsAsync(existingProduct);
+        _mockProductRepository.Setup(r => r.ExistsAsync(It.IsAny<Expression<Func<Product, bool>>>()))
+            .ReturnsAsync(false);
+        _mockProductRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+
+        // Act
+        await _sut.UpdateProduct(updateDto);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove($"ProductDetails:GetById:{productId}"), Times.Once);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(50)]
+    [InlineData(999)]
+    public async Task DeleteProduct_ShouldInvalidateCorrectProductDetailsCache_ForDifferentProductIds(int productId)
+    {
+        // Arrange
+        var product = CreateProduct(productId, "Test Product");
+
+        _mockProductRepository.Setup(r => r.GetProductByIdAsync(productId)).ReturnsAsync(product);
+        _mockProductRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+        _mockImageService.Setup(s => s.DeleteImageAsync(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _sut.DeleteProduct(productId);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Remove($"ProductDetails:GetById:{productId}"), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateProduct_ShouldNotInvalidateProductDetailsCache_WhenUpdateFails()
+    {
+        // Arrange
+        var updateDto = CreateValidUpdateProductDto();
+        var existingProduct = CreateProduct(updateDto.Id, "Original Title");
+        existingProduct.Galleries = [];
+
+        _mockProductRepository.Setup(r => r.GetProductByIdAsync(updateDto.Id)).ReturnsAsync(existingProduct);
+        _mockProductRepository.Setup(r => r.ExistsAsync(It.IsAny<Expression<Func<Product, bool>>>()))
+            .ReturnsAsync(false);
+        _mockProductRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(0); // Fail
+
+        // Act
+        var result = await _sut.UpdateProduct(updateDto);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        _mockCacheService.Verify(c => c.Remove(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteProduct_ShouldNotInvalidateCache_WhenProductNotFound()
+    {
+        // Arrange
+        int productId = 999;
+
+        _mockProductRepository.Setup(r => r.GetProductByIdAsync(productId)).ReturnsAsync((Product?)null);
+
+        // Act
+        var result = await _sut.DeleteProduct(productId);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        _mockCacheService.Verify(c => c.Remove(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteProduct_ShouldNotInvalidateCache_WhenSaveChangesFails()
+    {
+        // Arrange
+        var product = CreateProduct(1, "Test Product");
+
+        _mockProductRepository.Setup(r => r.GetProductByIdAsync(1)).ReturnsAsync(product);
+        _mockProductRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(0); // Fail
+
+        // Act
+        var result = await _sut.DeleteProduct(1);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        _mockCacheService.Verify(c => c.Remove(It.IsAny<string>()), Times.Never);
+    }
+
+    #endregion
+
     #region GetAllProductsPaginatedAsync Tests
 
     [Fact]

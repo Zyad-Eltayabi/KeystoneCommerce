@@ -8,16 +8,19 @@ public class ProductDetailsServiceTest
 {
     private readonly Mock<IProductDetailsRepository> _mockProductDetailsRepository;
     private readonly Mock<ILogger<ProductDetailsService>> _mockLogger;
+    private readonly Mock<ICacheService> _mockCacheService;
     private readonly ProductDetailsService _sut;
 
     public ProductDetailsServiceTest()
     {
         _mockProductDetailsRepository = new Mock<IProductDetailsRepository>();
         _mockLogger = new Mock<ILogger<ProductDetailsService>>();
+        _mockCacheService = new Mock<ICacheService>();
 
         _sut = new ProductDetailsService(
             _mockProductDetailsRepository.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockCacheService.Object);
     }
 
     #region GetProductDetails Tests
@@ -30,6 +33,12 @@ public class ProductDetailsServiceTest
         // Arrange
         int productId = 1;
         var productDetails = CreateSampleProductDetailsDto(productId);
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -44,6 +53,11 @@ public class ProductDetailsServiceTest
         result.Title.Should().Be($"Product {productId}");
 
         _mockProductDetailsRepository.Verify(r => r.GetProductDetailsByIdAsync(productId), Times.Once);
+        _mockCacheService.Verify(c => c.Set(
+            $"ProductDetails:GetById:{productId}",
+            productDetails,
+            TimeSpan.FromMinutes(10),
+            TimeSpan.FromMinutes(3)), Times.Once);
     }
 
     [Fact]
@@ -52,6 +66,12 @@ public class ProductDetailsServiceTest
         // Arrange
         int productId = 5;
         var productDetails = CreateSampleProductDetailsDto(productId);
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -84,6 +104,12 @@ public class ProductDetailsServiceTest
         // Arrange
         var productDetails = CreateSampleProductDetailsDto(productId);
 
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
+
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
 
@@ -103,6 +129,12 @@ public class ProductDetailsServiceTest
         int productId = 1;
         var productDetails = CreateSampleProductDetailsDto(productId);
         productDetails.NewArrivals = CreateSampleNewArrivals(3);
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -124,6 +156,12 @@ public class ProductDetailsServiceTest
         var productDetails = CreateSampleProductDetailsDto(productId);
         productDetails.NewArrivals = new List<ProductCardDto>();
 
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
+
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
 
@@ -144,6 +182,12 @@ public class ProductDetailsServiceTest
         var productDetails = CreateSampleProductDetailsDto(productId);
         productDetails.NewArrivals = null;
 
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
+
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
 
@@ -162,6 +206,12 @@ public class ProductDetailsServiceTest
         int productId = 1;
         var productDetails = CreateSampleProductDetailsDto(productId);
         productDetails.GalleryImageNames = null;
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -182,6 +232,12 @@ public class ProductDetailsServiceTest
         var productDetails = CreateSampleProductDetailsDto(productId);
         productDetails.GalleryImageNames = new List<string>();
 
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
+
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
 
@@ -196,6 +252,233 @@ public class ProductDetailsServiceTest
 
     #endregion
 
+    #region Caching Behavior Tests
+
+    [Fact]
+    public async Task GetProductDetails_ShouldReturnCachedData_WhenCacheHit()
+    {
+        // Arrange
+        int productId = 1;
+        var cachedProductDetails = CreateSampleProductDetailsDto(productId);
+        var cacheKey = $"ProductDetails:GetById:{productId}";
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(cacheKey))
+            .Returns(cachedProductDetails);
+
+        // Act
+        var result = await _sut.GetProductDetails(productId);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeSameAs(cachedProductDetails);
+        result!.Id.Should().Be(productId);
+
+        _mockCacheService.Verify(c => c.Get<ProductDetailsDto>(cacheKey), Times.Once);
+        _mockProductDetailsRepository.Verify(r => r.GetProductDetailsByIdAsync(It.IsAny<int>()), Times.Never);
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), It.IsAny<ProductDetailsDto>(), It.IsAny<TimeSpan>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetProductDetails_ShouldFetchFromRepository_WhenCacheMiss()
+    {
+        // Arrange
+        int productId = 1;
+        var productDetails = CreateSampleProductDetailsDto(productId);
+        var cacheKey = $"ProductDetails:GetById:{productId}";
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(cacheKey))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
+
+        _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
+            .ReturnsAsync(productDetails);
+
+        // Act
+        var result = await _sut.GetProductDetails(productId);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeSameAs(productDetails);
+
+        _mockCacheService.Verify(c => c.Get<ProductDetailsDto>(cacheKey), Times.Once);
+        _mockProductDetailsRepository.Verify(r => r.GetProductDetailsByIdAsync(productId), Times.Once);
+        _mockCacheService.Verify(c => c.Set(cacheKey, productDetails, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(3)), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetProductDetails_ShouldCacheData_WithCorrectExpiration()
+    {
+        // Arrange
+        int productId = 1;
+        var productDetails = CreateSampleProductDetailsDto(productId);
+        TimeSpan? capturedAbsoluteExpiration = null;
+        TimeSpan? capturedSlidingExpiration = null;
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
+
+        _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
+            .ReturnsAsync(productDetails);
+
+        _mockCacheService.Setup(c => c.Set(It.IsAny<string>(), It.IsAny<ProductDetailsDto>(), It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>()))
+            .Callback<string, ProductDetailsDto, TimeSpan, TimeSpan>((key, value, absolute, sliding) =>
+            {
+                capturedAbsoluteExpiration = absolute;
+                capturedSlidingExpiration = sliding;
+            });
+
+        // Act
+        await _sut.GetProductDetails(productId);
+
+        // Assert
+        capturedAbsoluteExpiration.Should().NotBeNull();
+        capturedAbsoluteExpiration.Should().Be(TimeSpan.FromMinutes(10));
+        capturedSlidingExpiration.Should().NotBeNull();
+        capturedSlidingExpiration.Should().Be(TimeSpan.FromMinutes(3));
+    }
+
+    [Fact]
+    public async Task GetProductDetails_ShouldUseCorrectCacheKey_ForDifferentProductIds()
+    {
+        // Arrange
+        int productId1 = 1;
+        int productId2 = 2;
+        var productDetails1 = CreateSampleProductDetailsDto(productId1);
+        var productDetails2 = CreateSampleProductDetailsDto(productId2);
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>($"ProductDetails:GetById:{productId1}"))
+            .Returns(productDetails1);
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>($"ProductDetails:GetById:{productId2}"))
+            .Returns(productDetails2);
+
+        // Act
+        var result1 = await _sut.GetProductDetails(productId1);
+        var result2 = await _sut.GetProductDetails(productId2);
+
+        // Assert
+        result1.Should().BeSameAs(productDetails1);
+        result2.Should().BeSameAs(productDetails2);
+        result1!.Id.Should().Be(productId1);
+        result2!.Id.Should().Be(productId2);
+
+        _mockCacheService.Verify(c => c.Get<ProductDetailsDto>($"ProductDetails:GetById:{productId1}"), Times.Once);
+        _mockCacheService.Verify(c => c.Get<ProductDetailsDto>($"ProductDetails:GetById:{productId2}"), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetProductDetails_ShouldNotCache_WhenProductNotFound()
+    {
+        // Arrange
+        int productId = 999;
+        var cacheKey = $"ProductDetails:GetById:{productId}";
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(cacheKey))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
+
+        _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
+            .ReturnsAsync((ProductDetailsDto?)null);
+
+        // Act
+        var result = await _sut.GetProductDetails(productId);
+
+        // Assert
+        result.Should().BeNull();
+
+        _mockCacheService.Verify(c => c.Get<ProductDetailsDto>(cacheKey), Times.Once);
+        _mockProductDetailsRepository.Verify(r => r.GetProductDetailsByIdAsync(productId), Times.Once);
+        _mockCacheService.Verify(c => c.Set(It.IsAny<string>(), It.IsAny<ProductDetailsDto>(), It.IsAny<TimeSpan>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetProductDetails_ShouldCheckCacheFirst_BeforeRepository()
+    {
+        // Arrange
+        int productId = 1;
+        var cachedProductDetails = CreateSampleProductDetailsDto(productId);
+        var executionOrder = new List<string>();
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Callback(() => executionOrder.Add("Cache"))
+            .Returns(cachedProductDetails);
+
+        _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(It.IsAny<int>()))
+            .Callback(() => executionOrder.Add("Repository"))
+            .ReturnsAsync(CreateSampleProductDetailsDto(productId));
+
+        // Act
+        await _sut.GetProductDetails(productId);
+
+        // Assert
+        executionOrder.Should().Equal("Cache");
+        _mockProductDetailsRepository.Verify(r => r.GetProductDetailsByIdAsync(It.IsAny<int>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(100)]
+    [InlineData(999)]
+    public async Task GetProductDetails_ShouldCacheCorrectly_ForMultipleProductIds(int productId)
+    {
+        // Arrange
+        var productDetails = CreateSampleProductDetailsDto(productId);
+        var cacheKey = $"ProductDetails:GetById:{productId}";
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(cacheKey))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
+
+        _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
+            .ReturnsAsync(productDetails);
+
+        // Act
+        await _sut.GetProductDetails(productId);
+
+        // Assert
+        _mockCacheService.Verify(c => c.Set(cacheKey, productDetails, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(3)), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetProductDetails_ShouldHandleMultipleCalls_ForSameProduct()
+    {
+        // Arrange
+        int productId = 1;
+        var productDetails = CreateSampleProductDetailsDto(productId);
+        var cacheKey = $"ProductDetails:GetById:{productId}";
+
+        // First call: cache miss, second call: cache hit
+        _mockCacheService.SetupSequence(c => c.Get<ProductDetailsDto>(cacheKey))
+            .Returns((ProductDetailsDto?)null)
+            .Returns(productDetails);
+
+        _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
+            .ReturnsAsync(productDetails);
+
+        // Act
+        var result1 = await _sut.GetProductDetails(productId);
+        var result2 = await _sut.GetProductDetails(productId);
+
+        // Assert
+        result1.Should().NotBeNull();
+        result2.Should().NotBeNull();
+
+        _mockCacheService.Verify(c => c.Get<ProductDetailsDto>(cacheKey), Times.Exactly(2));
+        _mockProductDetailsRepository.Verify(r => r.GetProductDetailsByIdAsync(productId), Times.Once);
+        _mockCacheService.Verify(c => c.Set(cacheKey, productDetails, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(3)), Times.Once);
+    }
+
+    #endregion
+
     #region Null and Not Found Scenarios
 
     [Fact]
@@ -203,6 +486,12 @@ public class ProductDetailsServiceTest
     {
         // Arrange
         int productId = 999;
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync((ProductDetailsDto?)null);
@@ -223,6 +512,12 @@ public class ProductDetailsServiceTest
     public async Task GetProductDetails_ShouldReturnNull_WhenProductIdIsInvalid(int productId)
     {
         // Arrange
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
+
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync((ProductDetailsDto?)null);
 
@@ -244,6 +539,12 @@ public class ProductDetailsServiceTest
         // Arrange
         int productId = 1;
         var originalProductDetails = CreateSampleProductDetailsDto(productId);
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(originalProductDetails);
@@ -276,6 +577,12 @@ public class ProductDetailsServiceTest
             TotalReviews = 42,
             NewArrivals = CreateSampleNewArrivals(2)
         };
+
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -320,6 +627,9 @@ public class ProductDetailsServiceTest
             TotalReviews = 0,
             NewArrivals = null
         };
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -358,6 +668,9 @@ public class ProductDetailsServiceTest
             TotalReviews = int.MaxValue,
             NewArrivals = CreateSampleNewArrivals(50)
         };
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -381,6 +694,9 @@ public class ProductDetailsServiceTest
         productDetails.Title = "<script>alert('xss')</script>";
         productDetails.Description = "Test with ' \" \\ / special chars";
         productDetails.Tags = "tag1,tag<2>,tag\"3\"";
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -404,6 +720,9 @@ public class ProductDetailsServiceTest
         productDetails.Title = "?? Product ???? ??";
         productDetails.Description = "?? Description ??? ??";
         productDetails.Tags = "??,tag,?????,??";
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -427,6 +746,9 @@ public class ProductDetailsServiceTest
         productDetails.Title = "  Product with spaces  ";
         productDetails.Description = "\t\nDescription with whitespace\t\n";
         productDetails.Tags = " tag1 , tag2 , tag3 ";
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -449,6 +771,9 @@ public class ProductDetailsServiceTest
         var productDetails = CreateSampleProductDetailsDto(productId);
         productDetails.Price = 0m;
         productDetails.Discount = 0m;
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -469,6 +794,9 @@ public class ProductDetailsServiceTest
         int productId = 1;
         var productDetails = CreateSampleProductDetailsDto(productId);
         productDetails.QTY = -5;
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -491,6 +819,9 @@ public class ProductDetailsServiceTest
         // Arrange
         int productId = 1;
         var productDetails = CreateSampleProductDetailsDto(productId);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -523,6 +854,9 @@ public class ProductDetailsServiceTest
         foreach (var id in productIds)
         {
             var productDetails = CreateSampleProductDetailsDto(id);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
             _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(id))
                 .ReturnsAsync(productDetails);
         }
@@ -550,6 +884,9 @@ public class ProductDetailsServiceTest
         // Arrange
         int productId = 1;
         var productDetails = CreateSampleProductDetailsDto(productId);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -588,6 +925,9 @@ public class ProductDetailsServiceTest
         // Arrange
         int productId = 1;
         var productDetails = CreateSampleProductDetailsDto(productId);
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -604,6 +944,9 @@ public class ProductDetailsServiceTest
     {
         // Arrange
         int productId = 999;
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync((ProductDetailsDto?)null);
@@ -632,6 +975,9 @@ public class ProductDetailsServiceTest
         int productId = 1;
         var productDetails = CreateSampleProductDetailsDto(productId);
         productDetails.Price = price;
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -651,6 +997,9 @@ public class ProductDetailsServiceTest
         int productId = 1;
         var productDetails = CreateSampleProductDetailsDto(productId);
         productDetails.Discount = null;
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -670,6 +1019,9 @@ public class ProductDetailsServiceTest
         int productId = 1;
         var productDetails = CreateSampleProductDetailsDto(productId);
         productDetails.Discount = 0.01m;
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -689,6 +1041,9 @@ public class ProductDetailsServiceTest
         int productId = 1;
         var productDetails = CreateSampleProductDetailsDto(productId);
         productDetails.Discount = 99.99m;
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -712,6 +1067,9 @@ public class ProductDetailsServiceTest
         int productId = 1;
         var productDetails = CreateSampleProductDetailsDto(productId);
         productDetails.QTY = quantity;
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -735,6 +1093,9 @@ public class ProductDetailsServiceTest
         int productId = 1;
         var productDetails = CreateSampleProductDetailsDto(productId);
         productDetails.TotalReviews = totalReviews;
+        _mockCacheService.Setup(c => c.Get<ProductDetailsDto>(It.IsAny<string>()))
+            .Returns((ProductDetailsDto?)null);
+
 
         _mockProductDetailsRepository.Setup(r => r.GetProductDetailsByIdAsync(productId))
             .ReturnsAsync(productDetails);
@@ -796,3 +1157,4 @@ public class ProductDetailsServiceTest
 
     #endregion
 }
+
