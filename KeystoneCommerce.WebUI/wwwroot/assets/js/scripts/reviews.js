@@ -1,4 +1,4 @@
-﻿const baseUrl = "https://localhost:7204/api";
+﻿const baseUrl = "/api";
 
 const reviewsNav = document.querySelector(
     ".product_info_button ul li a[href='#reviews']"
