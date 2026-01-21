@@ -58,7 +58,6 @@ nunit-*.xml
 /.vs/KeystoneCommerce
 .vs/
 Notes/
-KeystoneCommerce.WebUI/wwwroot/assets/img/
 /KeystoneCommerce.WebUI/Properties/PublishProfiles/site51372-WebDeploy.pubxml.user
 /KeystoneCommerce.WebUI/appsettings.Production.json
 /KeystoneCommerce.WebUI/Properties/PublishProfiles/site51372-WebDeploy.pubxml
