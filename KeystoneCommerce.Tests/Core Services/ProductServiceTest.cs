@@ -69,7 +69,11 @@ public class ProductServiceTest
 
         _mockProductRepository.Verify(r => r.AddAsync(It.IsAny<Product>()), Times.Once);
         _mockProductRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
+        
+        // Verify cache invalidation
         _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Products:Paginated:"), Times.Once);
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Shop:GetAvailableProducts:"), Times.Once);
     }
 
     [Fact]
@@ -439,7 +443,11 @@ public class ProductServiceTest
         // Assert
         result.IsSuccess.Should().BeTrue();
         _mockProductRepository.Verify(r => r.Update(It.IsAny<Product>()), Times.Once);
+        
+        // Verify cache invalidation
         _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Products:Paginated:"), Times.Once);
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Shop:GetAvailableProducts:"), Times.Once);
     }
 
     #endregion
@@ -572,7 +580,11 @@ public class ProductServiceTest
         // Assert
         result.IsSuccess.Should().BeTrue();
         _mockProductRepository.Verify(r => r.Delete(product), Times.Once);
+        
+        // Verify cache invalidation
         _mockCacheService.Verify(c => c.Remove("HomePage:Data"), Times.Once);
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Products:Paginated:"), Times.Once);
+        _mockCacheService.Verify(c => c.RemoveByPrefix("Shop:GetAvailableProducts:"), Times.Once);
     }
 
     [Fact]

@@ -73,6 +73,7 @@ namespace KeystoneCommerce.Application.Services
                 // Invalidate relevant caches
                 InvalidatePaginatedProductsCache();
                 InvalidateHomePageCache();
+                InvalidateShopCache();
 
                 return Result<bool>.Success();
             }
@@ -220,6 +221,7 @@ namespace KeystoneCommerce.Application.Services
             InvalidateProductByIdCache(productDto.Id);
             InvalidateHomePageCache();
             InvalidateProductDetailsCache(productDto.Id);
+            InvalidateShopCache();
 
             return Result<UpdateProductDto>.Success(productDto);
         }
@@ -367,6 +369,7 @@ namespace KeystoneCommerce.Application.Services
             InvalidateProductByIdCache(id);
             InvalidateHomePageCache();
             InvalidateProductDetailsCache(id);
+            InvalidateShopCache();
 
             return Result<bool>.Success();
         }
@@ -506,6 +509,13 @@ namespace KeystoneCommerce.Application.Services
             // Pattern-based invalidation for all "Products:Paginated:*" keys
             _cacheService.RemoveByPrefix("Products:Paginated:");
             _logger.LogInformation("Paginated products cache invalidated (pattern-based)");
+        }
+
+        private void InvalidateShopCache()
+        {
+            // Pattern-based invalidation for all "Shop:GetAvailableProducts:*" keys
+            _cacheService.RemoveByPrefix("Shop:GetAvailableProducts:");
+            _logger.LogInformation("Shop available products cache invalidated (pattern-based)");
         }
     }
 }
