@@ -17,7 +17,7 @@ namespace KeystoneCommerce.Application.Services
                 return null;
             var trimmedName = name.Trim();
             var shippingMethod = await repository.FindAsync(sm =>
-                sm.Name.Equals(trimmedName, StringComparison.OrdinalIgnoreCase));
+                            sm.Name == trimmedName);
             return shippingMethod is not null ? mapping.Map<ShippingMethodDto>(shippingMethod) : null;
         }
     }
